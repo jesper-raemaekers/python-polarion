@@ -7,6 +7,7 @@ import re
 from urllib.parse import urljoin
 
 from .workitem import Workitem
+from .testrun import Testrun
 
 class Project(object):
 
@@ -30,6 +31,9 @@ class Project(object):
 
     def getWorkitem(self, id:str):
         return Workitem(self.polarion, self, id)
+
+    def getTestRun(self, id:str):
+        return Testrun(self.polarion, self, id)
 
     def __repr__(self):
         if self.polarion_data:
