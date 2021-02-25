@@ -14,7 +14,7 @@ setuptools.setup(
     url="https://github.com/jesper-raemaekers/python-polarion",
     project_urls={
         "Bug Tracker": "https://github.com/jesper-raemaekers/python-polarion/issues",
-    }
+    },
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
