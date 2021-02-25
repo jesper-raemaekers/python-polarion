@@ -1,34 +1,102 @@
 from .workitem import Workitem
+from enum import Enum
+
 
 class Record(object):
 
+    class ResultType(Enum):
+        No = None
+        PASSED = 'passed'
+        FAILED = 'failed'
+        BLOCKED = 'blocked'
+
     def __init__(self, polarion, project, test_run, polarion_record):
-        self.polarion = polarion
-        self.project = project
-        self.test_run = test_run
-        self.polarion_record = polarion_record
+        self._polarion = polarion
+        self._project = project
+        self._test_run = test_run
+        self._polarion_record = polarion_record
 
-        self.testcase = self.polarion_record.testCaseURI
-        self.defect = self.polarion_record.defectURI
+        # parse all polarion attributes to this class
+        for attr, value in polarion_record.__dict__.items():
+            for key in value:
+                setattr(self, key, value[key])
 
-        self.result = self.polarion_record.result.id
-        self.testStepResults = self.polarion_record.testStepResults
+        # for key in polarion:
+        #
+
+        self._testcase = self._polarion_record.testCaseURI
+        self._defect = self._polarion_record.defectURI
+
+        # if self.polarion_record.result:
+        #     self.result = self.polarion_record.result.id
+        # else:
+        #     self.result = None
+        # self.testStepResults = self.polarion_record.testStepResults
 
         try:
-            self.workitem = Workitem(self.polarion, self.project, '', self.testcase)
+            self._workitem = Workitem(
+                self.polarion, self.project, '', self.testcase)
         except:
-            self.workitem = None
+            self._workitem = None
 
-    def getTestcase(self):
-        return self.workitem
+    def getResult(self):
+        if self.result != None:
+            return self.ResultType(self.result.id)
+        return self.ResultType.No
 
-    def getDefect(self):
-        if self.defect:
-            return Workitem(self.polarion, self.project, '', self.defect)
+    def getComment(self):
+        """
+        Get a comment if available. The comment may contain HTML if edited in Polarion!
+        """
+        if self.comment != None:
+            return self.comment.content
+        return None
 
-    def __repr__(self):
-        return f'Record of {self.workitem.id} in run {self.test_run.id} {self.result}'
+    def setComment(self, comment):
+        self.comment = {
+            'type': 'text/html',
+            'content': comment,
+            'contentLossy': False
+        }
 
-    def __str__(self):
-        return f'Record of {self.workitem.id} in run {self.test_run.id} {self.result}'
+    def setResult(self, result: ResultType = ResultType.FAILED, comment=None):
+        if comment != None:
+            self.setComment(comment)
 
+        self.result = {}
+        self.result['id'] = result.value
+        self.save()
+
+    def save(self):
+        new_item = {}
+        for attr, value in self.__dict__.items():
+            if attr.startswith('_') != True:
+                # only add if public value
+                new_item[attr] = value
+        service = self._polarion.getService('TestManagement')
+        service.executeTest(
+            self._test_run.uri, new_item)
+
+    # def getTestcase(self):
+    #     return self.workitem
+
+    # def getDefect(self):
+    #     if self.defect:
+    #         return Workitem(self.polarion, self.project, '', self.defect)
+
+    # def setResult(self, result):
+    #     if self.result != None:
+    #         service = self.polarion.getService('TestManagement')
+    #         resulkt = service.executeTest(
+    #             self.test_run.uri, self.polarion_record)
+    #         pass
+
+    #     else:
+    #         raise Exception(
+    #             f'Cannot set result as result already has a value: {self.result}')
+
+    # def __repr__(self):
+    #     return f'Record of {self.workitem.id} in run {self.test_run.id} {self.result}'
+
+    # def __str__(self):
+    #     return f'Record of {self.workitem.id} in run {self.test_run.id} {self.result}'

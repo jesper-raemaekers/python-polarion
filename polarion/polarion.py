@@ -11,6 +11,14 @@ _baseServiceUrl = 'ws/services'
 
 
 class Polarion(object):
+    """
+    Create a Polarion client which communicates to the Polarion server.
+
+    :param polarion_url: The base URL for the polarion instance. For example http://example/com/polarion
+    :param user: The user name to login
+    :param password: The password for that user
+
+    """
 
     def __init__(self, polarion_url, user, password):
         self.user = user
@@ -23,7 +31,6 @@ class Polarion(object):
             self.url += '/'
         self.url = urljoin(self.url, _baseServiceUrl)
 
-
         self._getServices()
         self._createSession()
 
@@ -34,23 +41,29 @@ class Polarion(object):
             services = re.findall("(\w+)WebService", service_overview.text)
             for service in services:
                 if service not in self.services:
-                    self.services[service] = { 'url': urljoin(service_base_url, service + 'WebService')}
+                    self.services[service] = {'url': urljoin(
+                        service_base_url, service + 'WebService')}
 
     def _createSession(self):
         if 'Session' in self.services:
             self.history = HistoryPlugin()
-            self.services['Session']['client'] = Client(self.services['Session']['url'] + '?wsdl', plugins=[self.history])
+            self.services['Session']['client'] = Client(
+                self.services['Session']['url'] + '?wsdl', plugins=[self.history])
             try:
                 self.sessionHeaderElement = None
-                self.services['Session']['client'].service.logIn(self.user, self.password)
+                self.services['Session']['client'].service.logIn(
+                    self.user, self.password)
                 tree = self.history.last_received['envelope'].getroottree()
-                self.sessionHeaderElement = tree.find('.//{http://ws.polarion.com/session}sessionID')
+                self.sessionHeaderElement = tree.find(
+                    './/{http://ws.polarion.com/session}sessionID')
             except:
-                raise Exception(f'Could not log in to Polarion for user {self.user}')
+                raise Exception(
+                    f'Could not log in to Polarion for user {self.user}')
             if self.sessionHeaderElement is not None:
                 self._updateServices()
         else:
-            raise Exception('Cannot login because WSDL has no SessionWebService')
+            raise Exception(
+                'Cannot login because WSDL has no SessionWebService')
 
     def _updateServices(self):
         if self.sessionHeaderElement == None:
@@ -58,29 +71,32 @@ class Polarion(object):
         for service in self.services:
             if service != 'Session':
                 if 'client' not in service:
-                    self.services[service]['client'] = Client(self.services[service]['url'] + '?wsdl')
-                self.services[service]['client'].set_default_soapheaders([self.sessionHeaderElement])
+                    self.services[service]['client'] = Client(
+                        self.services[service]['url'] + '?wsdl')
+                self.services[service]['client'].set_default_soapheaders(
+                    [self.sessionHeaderElement])
 
-
-    def hasService(self, name:str):
+    def hasService(self, name: str):
         if name in self.services:
             return True
         return False
 
-    def getService(self, name:str):
+    def getService(self, name: str):
         if name in self.services:
             return self.services[name]['client'].service
         else:
             raise Exception('Service does not exsist')
 
     def getProject(self, project_id):
+        """Get a Polarion project
+
+        :param project_id: The ID of the project.
+
+        """
         return Project(self, project_id)
 
     def __repr__(self):
-        return f'Polarion client for {self.url} with used {self.user}'
+        return f'Polarion client for {self.url} with user {self.user}'
 
     def __str__(self):
-        return f'Polarion client for {self.url} with used {self.user}'
-
-
-
+        return f'Polarion client for {self.url} with user {self.user}'

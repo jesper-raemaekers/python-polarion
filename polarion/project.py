@@ -9,13 +9,14 @@ from urllib.parse import urljoin
 from .workitem import Workitem
 from .testrun import Testrun
 
+
 class Project(object):
 
     def __init__(self, polarion, project_id):
         self.polarion = polarion
         self.id = project_id
 
-        #get detaisl from polarion on this project
+        # get detaisl from polarion on this project
         service = self.polarion.getService('Project')
         try:
             self.polarion_data = service.getProject(self.id)
@@ -29,11 +30,20 @@ class Project(object):
         else:
             raise Exception(f'Could not find project {project_id}')
 
-    def getWorkitem(self, id:str):
+    def getWorkitem(self, id: str):
         return Workitem(self.polarion, self, id)
 
-    def getTestRun(self, id:str):
+    def getTestRun(self, id: str):
         return Testrun(self.polarion, self, id)
+
+    def searchTestRuns(self, query='', order='Created', limit=-1):
+        return_list = []
+        service = self.polarion.getService('TestManagement')
+        test_runs = service.searchTestRunsLimited(query, order, limit)
+        for test_run in test_runs:
+            return_list.append(
+                Testrun(self.polarion, self.id, test_run.id, test_run))
+        return return_list
 
     def __repr__(self):
         if self.polarion_data:
