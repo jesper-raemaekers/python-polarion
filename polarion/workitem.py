@@ -65,7 +65,40 @@ class Workitem(object):
                                         ] = row.values.Text[col_id].content
                         self._parsed_test_steps.append(current_row)
 
-    def getVailableStatus(self):
+    def getStatusEnum(self):
+        """
+        tries to get the status enum of this workitem type
+        When it fails to get it, the list will be empty
+        """
+        try:
+            enum = self._project.getEnum(f'{self.type.id}-status')
+            return enum
+        except:
+            return []
+
+    def getResolutionEnum(self):
+        """
+        tries to get the resolution enum of this workitem type
+        When it fails to get it, the list will be empty
+        """
+        try:
+            enum = self._project.getEnum(f'{self.type.id}-resolution')
+            return enum
+        except:
+            return []
+
+    def getSeverityEnum(self):
+        """
+        tries to get the severity enum of this workitem type
+        When it fails to get it, the list will be empty
+        """
+        try:
+            enum = self._project.getEnum(f'{self.type.id}-severity')
+            return enum
+        except:
+            return []
+
+    def getAvailableStatus(self):
         available_status = []
         service = self._polarion.getService('Tracker')
         av_status = service.getAvailableEnumOptionIdsForId(self.uri, 'status')
@@ -73,7 +106,44 @@ class Workitem(object):
             available_status.append(status.id)
         return available_status
 
+    def getAvailableActionsDetails(self):
+        available_actions = []
+        service = self._polarion.getService('Tracker')
+        av_actions = service.getAvailableActions(self.uri)
+        for action in av_actions:
+            available_actions.append(action)
+        return available_actions
+
+    def getAvailableActions(self):
+        available_actions = []
+        service = self._polarion.getService('Tracker')
+        av_actions = service.getAvailableActions(self.uri)
+        for action in av_actions:
+            available_actions.append(action.nativeActionId)
+        return available_actions
+
+    def preformAction(self, action_name):
+        """
+        Preform selected action. An exception will be thorn if some prerequisit is not set.
+        """
+        # get id from action name
+        service = self._polarion.getService('Tracker')
+        av_actions = service.getAvailableActions(self.uri)
+        for action in av_actions:
+            if action.nativeActionId == action_name or action.actionName == action_name:
+                service.performWorkflowAction(self.uri, action.actionId)
+
+    def preformActionId(self, actionId: int):
+        """
+        Preform selected action. An exception will be thorn if some prerequisit is not set.
+        """
+        service = self._polarion.getService('Tracker')
+        service.performWorkflowAction(self.uri, action)
+
     def setStatus(self, status):
+        """
+        Sets the status opf the workitem, not respecting any project configured limits or requirements.
+        """
         if status in self.getVailableStatus():
             self.status.id = status
             self.save()
@@ -119,7 +189,6 @@ class Workitem(object):
 
     def save(self):
         updated_item = {}
-        # orig_work_item = self._polarion_item
 
         for attr, value in self._polarion_item.__dict__.items():
             for key in value:

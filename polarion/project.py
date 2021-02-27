@@ -30,19 +30,11 @@ class Project(object):
         else:
             raise Exception(f'Could not find project {project_id}')
 
-        # service = self.polarion.getService('Tracker')
-        # res = service.getAllEnumOptionsForId(self.id, 'workitem-type')
-        # res2 = service.getAllEnumOptionsForId(self.id, 'status')
-        # res3 = service.getAllEnumOptionsForId(self.id, 'hyperlinks')
-        # res4 = service.getAllEnumOptionsForId(self.id, 'category')
-
-        pass
-
     def getWorkitem(self, id: str):
         return Workitem(self.polarion, self, id)
 
     def getTestRun(self, id: str):
-        return Testrun(self.polarion, self, id)
+        return Testrun(self.polarion, f'subterra:data-service:objects:/default/{self.id}${{TestRun}}{id}')
 
     def searchTestRuns(self, query='', order='Created', limit=-1):
         return_list = []
@@ -52,6 +44,14 @@ class Project(object):
             return_list.append(
                 Testrun(self.polarion, polarion_test_run=test_run))
         return return_list
+
+    def getEnum(self, enum_name):
+        available = []
+        service = self.polarion.getService('Tracker')
+        av = service.getAllEnumOptionsForId(self.id, enum_name)
+        for a in av:
+            available.append(a.id)
+        return available
 
     def __repr__(self):
         if self.polarion_data:
