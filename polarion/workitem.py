@@ -2,6 +2,7 @@ from zeep import Client
 from zeep.plugins import HistoryPlugin
 from lxml.etree import Element
 from lxml import etree
+import copy
 import requests
 import re
 from urllib.parse import urljoin
@@ -38,6 +39,7 @@ class Workitem(object):
                     f'Cannot find workitem {self._id} in project {self._project.id}')
 
         if self._polarion_item != None:
+            self._original_polarion = copy.deepcopy(self._polarion_item)
             for attr, value in self._polarion_item.__dict__.items():
                 for key in value:
                     setattr(self, key, value[key])
@@ -63,6 +65,19 @@ class Workitem(object):
                                         ] = row.values.Text[col_id].content
                         self._parsed_test_steps.append(current_row)
 
+    def getVailableStatus(self):
+        available_status = []
+        service = self._polarion.getService('Tracker')
+        av_status = service.getAvailableEnumOptionIdsForId(self.uri, 'status')
+        for status in av_status:
+            available_status.append(status.id)
+        return available_status
+
+    def setStatus(self, status):
+        if status in self.getVailableStatus():
+            self.status.id = status
+            self.save()
+
     def getDescription(self):
         """
         Get a comment if available. The comment may contain HTML if edited in Polarion!
@@ -77,6 +92,7 @@ class Workitem(object):
             'content': description,
             'contentLossy': False
         }
+        self.save()
 
     def hasTestSteps(self):
         if self._parsed_test_steps != None:
@@ -103,17 +119,19 @@ class Workitem(object):
 
     def save(self):
         updated_item = {}
-        orig_work_item = self._polarion_item.__dict__.items()
+        # orig_work_item = self._polarion_item
 
         for attr, value in self._polarion_item.__dict__.items():
             for key in value:
                 current_value = getattr(self, key)
-                if current_value != value[key]:
+                prev_value = getattr(self._original_polarion, key)
+                if current_value != prev_value:
                     updated_item[key] = current_value
         if len(updated_item) > 0:
             updated_item['uri'] = self.uri
             service = self._polarion.getService('Tracker')
             service.updateWorkItem(updated_item)
+            self._original_polarion = copy.deepcopy(self._polarion_item)
 
     def __repr__(self):
         return f'Workitem ({self.type.id}) {self._id} ({self.title})'
