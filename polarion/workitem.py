@@ -5,9 +5,13 @@ from lxml import etree
 import requests
 import re
 from urllib.parse import urljoin
+from enum import Enum
 
 
-class NewWorkitem(object):
+class Workitem(object):
+    class HyperlinkRoles(Enum):
+        INTERNAL_REF = 'internal reference'
+        EXTERNAL_REF = 'external reference'
 
     def __init__(self, polarion, project, id, uri=None):
         self._polarion = polarion
@@ -78,6 +82,24 @@ class NewWorkitem(object):
         if self._parsed_test_steps != None:
             return len(self._parsed_test_steps) > 0
         return False
+
+    def addComment(self, title, comment, parent=None):
+        service = self._polarion.getService('Tracker')
+        if parent == None:
+            parent = self.uri
+        else:
+            # force title to be empty, not allowed for reply comments
+            title = None
+        content = {
+            'type': 'text/html',
+            'content': comment,
+            'contentLossy': False
+        }
+        service.addComment(parent, title, content)
+
+    def addHyperlink(self, url, hyperlink_type: HyperlinkRoles):
+        service = self._polarion.getService('Tracker')
+        service.addHyperlink(self.uri, url, {'id': hyperlink_type.value})
 
     def save(self):
         updated_item = {}

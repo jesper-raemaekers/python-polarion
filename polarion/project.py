@@ -30,6 +30,14 @@ class Project(object):
         else:
             raise Exception(f'Could not find project {project_id}')
 
+        # service = self.polarion.getService('Tracker')
+        # res = service.getAllEnumOptionsForId(self.id, 'workitem-type')
+        # res2 = service.getAllEnumOptionsForId(self.id, 'status')
+        # res3 = service.getAllEnumOptionsForId(self.id, 'hyperlinks')
+        # res4 = service.getAllEnumOptionsForId(self.id, 'category')
+
+        pass
+
     def getWorkitem(self, id: str):
         return Workitem(self.polarion, self, id)
 
@@ -42,7 +50,7 @@ class Project(object):
         test_runs = service.searchTestRunsLimited(query, order, limit)
         for test_run in test_runs:
             return_list.append(
-                Testrun(self.polarion, self.id, test_run.id, test_run))
+                Testrun(self.polarion, polarion_test_run=test_run))
         return return_list
 
     def __repr__(self):

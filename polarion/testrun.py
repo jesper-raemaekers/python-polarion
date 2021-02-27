@@ -10,36 +10,34 @@ from .record import Record
 
 class Testrun(object):
 
-    def __init__(self, polarion, project, id, polarion_test_run=None):
-        self.polarion = polarion
-        self.project = project
-        self.id = id
+    def __init__(self, polarion, uri=None, polarion_test_run=None):
+        self._polarion = polarion
 
-        service = self.polarion.getService('TestManagement')
-
-        if polarion_test_run != None:
-            self.polarion_test_run = polarion_test_run
-        else:
+        if uri != None:
+            service = self._polarion.getService('TestManagement')
             try:
-                self.polarion_test_run = service.getTestRunById(
-                    self.project.id, self.id)
+                self._polarion_test_run = service.getTestRunByUri(uri)
             except:
-                raise Exception(
-                    f'Cannot find test run {self.id} in project {self.project.id}')
+                raise Exception(f'Cannot find test run {uri}')
 
-        if self.polarion_test_run:
-            self.title = self.polarion_test_run.title
-            self.status = self.polarion_test_run.status.id
-            self.created = self.polarion_test_run.created
-            self.updated = self.polarion_test_run.updated
-            self.updated = self.polarion_test_run.finishedOn
-            self.uri = self.polarion_test_run.uri
-            self.records = []
-            if self.polarion_test_run.records:
-                for r in self.polarion_test_run.records.TestRecord:
-                    self.records.append(
-                        Record(self.polarion, self.project, self, r))
-            # TODO: parse test records
+        elif polarion_test_run != None:
+            self._polarion_test_run = polarion_test_run
+        else:
+            raise Exception(f'Provide either an uri or polarion_test_run ')
+
+        if self._polarion_test_run != None:
+            for attr, value in self._polarion_test_run.__dict__.items():
+                for key in value:
+                    if key == 'records':
+                        setattr(self, '_'+key, value[key])
+                    else:
+                        setattr(self, key, value[key])
+
+        self.records = []
+        if self._records != None:
+            for r in self._records.TestRecord:
+                self.records.append(
+                    Record(self._polarion, self, r))
 
     def __repr__(self):
         return f'Testrun {self.id} ({self.title}) created {self.created}'

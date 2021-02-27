@@ -1,5 +1,5 @@
-from .workitem import Workitem
 from enum import Enum
+# from .factory import createObjectFromUri
 
 
 class Record(object):
@@ -10,9 +10,8 @@ class Record(object):
         FAILED = 'failed'
         BLOCKED = 'blocked'
 
-    def __init__(self, polarion, project, test_run, polarion_record):
+    def __init__(self, polarion, test_run, polarion_record):
         self._polarion = polarion
-        self._project = project
         self._test_run = test_run
         self._polarion_record = polarion_record
 
@@ -21,23 +20,8 @@ class Record(object):
             for key in value:
                 setattr(self, key, value[key])
 
-        # for key in polarion:
-        #
-
         self._testcase = self._polarion_record.testCaseURI
         self._defect = self._polarion_record.defectURI
-
-        # if self.polarion_record.result:
-        #     self.result = self.polarion_record.result.id
-        # else:
-        #     self.result = None
-        # self.testStepResults = self.polarion_record.testStepResults
-
-        try:
-            self._workitem = Workitem(
-                self.polarion, self.project, '', self.testcase)
-        except:
-            self._workitem = None
 
     def getResult(self):
         if self.result != None:
@@ -76,24 +60,6 @@ class Record(object):
         service = self._polarion.getService('TestManagement')
         service.executeTest(
             self._test_run.uri, new_item)
-
-    # def getTestcase(self):
-    #     return self.workitem
-
-    # def getDefect(self):
-    #     if self.defect:
-    #         return Workitem(self.polarion, self.project, '', self.defect)
-
-    # def setResult(self, result):
-    #     if self.result != None:
-    #         service = self.polarion.getService('TestManagement')
-    #         resulkt = service.executeTest(
-    #             self.test_run.uri, self.polarion_record)
-    #         pass
-
-    #     else:
-    #         raise Exception(
-    #             f'Cannot set result as result already has a value: {self.result}')
 
     # def __repr__(self):
     #     return f'Record of {self.workitem.id} in run {self.test_run.id} {self.result}'
