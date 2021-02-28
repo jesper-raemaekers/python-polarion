@@ -5,10 +5,10 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="polarion",  # Replace with your own username
-    version="0.0.1",
+    version="0.1.0",
     author="Jesper Raemaekers",
     author_email="j.raemaekers@relek.nl",
-    description="Polarion test publication",
+    description="Polarion client for Python",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/jesper-raemaekers/python-polarion",
