@@ -35,6 +35,9 @@ class Polarion(object):
         self._createSession()
 
     def _getServices(self):
+        """
+        Parse the list of services available in the overview
+        """
         service_overview = requests.get(self.url)
         service_base_url = self.url + '/'
         if service_overview.ok:
@@ -45,6 +48,9 @@ class Polarion(object):
                         service_base_url, service + 'WebService')}
 
     def _createSession(self):
+        """
+        Starts a session with the specified user/password
+        """
         if 'Session' in self.services:
             self.history = HistoryPlugin()
             self.services['Session']['client'] = Client(
@@ -66,6 +72,9 @@ class Polarion(object):
                 'Cannot login because WSDL has no SessionWebService')
 
     def _updateServices(self):
+        """
+        Updates all services with the correct session ID
+        """
         if self.sessionHeaderElement == None:
             raise Exception('Cannot update services when not logged in')
         for service in self.services:
@@ -81,11 +90,18 @@ class Polarion(object):
                     'addComment').input.body.type._element[1].nillable = True
 
     def hasService(self, name: str):
+        """
+        Checks if a WSDL service is available
+        """
         if name in self.services:
             return True
         return False
 
     def getService(self, name: str):
+        """
+        Get a WSDL service client. The name can be 'Trakcer' or 'Session'
+        TODO: When a service is requested, check if the user's sessions is still valid.
+        """
         if name in self.services:
             return self.services[name]['client'].service
         else:
