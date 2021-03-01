@@ -111,7 +111,8 @@ class Polarion(object):
         """Get a Polarion project
 
         :param project_id: The ID of the project.
-
+        :return: The request project
+        :rtype: Project
         """
         return Project(self, project_id)
 
