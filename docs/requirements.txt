@@ -1,21 +1,17 @@
-Package           Version  
------------------ ---------
-appdirs           1.4.4    
-attrs             20.3.0   
-cached-property   1.5.2    
-certifi           2020.12.5
-chardet           4.0.0    
-defusedxml        0.6.0    
-idna              2.10     
-isodate           0.6.0    
-lxml              4.6.2    
-pip               19.2.3   
-polarion          0.1.0    
-pytz              2021.1   
-requests          2.25.1   
-requests-file     1.5.1    
-requests-toolbelt 0.9.1    
-setuptools        41.2.0   
-six               1.15.0   
-urllib3           1.26.3   
-zeep              4.0.0    
+appdirs==1.4.4
+attrs==20.3.0
+cached-property==1.5.2
+certifi==2020.12.5
+chardet==4.0.0
+defusedxml==0.6.0
+idna==2.10
+isodate==0.6.0
+lxml==4.6.2
+polarion==0.1.0
+pytz==2021.1
+requests==2.25.1
+requests-file==1.5.1
+requests-toolbelt==0.9.1
+six==1.15.0
+urllib3==1.26.3
+zeep==4.0.0
