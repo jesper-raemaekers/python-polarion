@@ -68,6 +68,41 @@ The rules set in Polarion apply to these actions. Failing to meet the rules will
     Exception has occurred: Fault
     com.polarion.core.util.exceptions.UserFriendlyRuntimeException: 'Mark Done' failed for Work Item 'PYTH-510': The required field 'assignee' of Work Item 'PYTH-510' is empty
 
+If a status requires other properties to be set, for example the resolution, then you can query options like so:
+
+.. code:: python
+
+    workitem = project.getWorkitem('PYTH-510')
+    print(f'Status: {workitem.status.id}')
+    actions = workitem.getAvailableActions()
+    print(f' Actions: {actions}')
+    resolutions = workitem.getResolutionEnum()
+    project_resolutions = project.getEnum('resolution')
+    print(f'Workitem resolutions: {resolutions}')
+    print(f'Project resolutions: {project_resolutions}')
+
+    workitem.setResolution(project_resolutions[11])
+    workitem.preformAction(actions[1])
+
+    reload_workitem = project.getWorkitem('PYTH-510')
+    print(f'Status: {reload_workitem.status.id}')
+
+Print:
+
+.. code:: python
+
+    Status: open
+    Actions: ['start_progress', 'mark_done', 'mark_verified', 'reject']
+    Workitem resolutions: []
+    Project resolutions: ['done', 'valid', 'unsupported', 'wontdo', 'invalid', 'obsolete', 'duplicate', 'inactive', 'incomplete', 'other', 'cannotreproduce', 'later']
+    Status: done
+
+In this case not workitem specific resolutions are available (Polarion project setting) so only the project resolutions can be used.
+
+.. warning::
+    Currently there is no option available to check which resolutions are correct for the workflow defined in Polarion. You can set any resolution.
+
+
 Workitem class
 --------------
 

@@ -219,6 +219,15 @@ class Workitem(object):
         }
         self.save()
 
+    def setResolution(self, resolution):
+        """
+        Sets the resolution and saves the workitem
+
+        :param resolution: the resolution
+        """
+        self.resolution = {'id': resolution}
+        self.save()
+
     def hasTestSteps(self):
         """
         Checks if the workitem has test steps

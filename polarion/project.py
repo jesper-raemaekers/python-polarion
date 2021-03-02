@@ -105,7 +105,8 @@ class Project(object):
         service = self.polarion.getService('Tracker')
         av = service.getAllEnumOptionsForId(self.id, enum_name)
         for a in av:
-            available.append(a.id)
+            if a.id not in available:
+                available.append(a.id)
         return available
 
     def __repr__(self):
