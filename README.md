@@ -1,4 +1,6 @@
 # python-polarion
+[![Documentation Status](https://readthedocs.org/projects/python-polarion/badge/?version=latest)](https://python-polarion.readthedocs.io/en/latest/?badge=latest)
+
 
 This package allows access to a Polarion server.
 Note that this is the first release and that updates will change the interface in the near future.
