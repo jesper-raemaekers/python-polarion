@@ -20,6 +20,9 @@ class Workitem(object):
 
     """
     class HyperlinkRoles(Enum):
+        """
+        Hyperlink reference type enum
+        """
         INTERNAL_REF = 'internal reference'
         EXTERNAL_REF = 'external reference'
 

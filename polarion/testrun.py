@@ -9,6 +9,15 @@ from .record import Record
 
 
 class Testrun(object):
+    """
+    Create a Polarion testrun object from uri or directly with Polarion content
+
+    :param polarion: Polarion client object
+    :param uri: Polarion uri
+    :param polarion_test_run: The data from Polarion of this testrun
+
+    :ivar records: An array of :class:`.Record`
+    """
 
     def __init__(self, polarion, uri=None, polarion_test_run=None):
         self._polarion = polarion

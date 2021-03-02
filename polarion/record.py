@@ -3,8 +3,18 @@ from enum import Enum
 
 
 class Record(object):
+    """
+    Create a Polarion test record,
 
+    :param polarion: Polarion client object
+    :param test_run: Test run instance
+    :param polarion_record: The data from Polarion of this testrun
+
+    """
     class ResultType(Enum):
+        """
+        Record result enum
+        """
         No = None
         PASSED = 'passed'
         FAILED = 'failed'
@@ -24,6 +34,12 @@ class Record(object):
         self._defect = self._polarion_record.defectURI
 
     def getResult(self):
+        """
+        Get the test result of this record
+
+        :return: The test case result
+        :rtype: ResultType
+        """
         if self.result != None:
             return self.ResultType(self.result.id)
         return self.ResultType.No
@@ -31,12 +47,21 @@ class Record(object):
     def getComment(self):
         """
         Get a comment if available. The comment may contain HTML if edited in Polarion!
+
+        :return: Get the comment, may contain HTML
+        :rtype: string
         """
         if self.comment != None:
             return self.comment.content
         return None
 
     def setComment(self, comment):
+        """
+        tries to get the severity enum of this workitem type
+        When it fails to get it, the list will be empty
+
+        :param comment: Comment string, may contain HTML
+        """
         self.comment = {
             'type': 'text/html',
             'content': comment,
@@ -44,6 +69,12 @@ class Record(object):
         }
 
     def setResult(self, result: ResultType = ResultType.FAILED, comment=None):
+        """
+        Set the result of this record and save it.
+
+        :param result: The result of this record
+        :param comment: Comment string, may contain HTML
+        """
         if comment != None:
             self.setComment(comment)
 
@@ -52,6 +83,9 @@ class Record(object):
         self.save()
 
     def save(self):
+        """
+        Saves the current test record
+        """
         new_item = {}
         for attr, value in self.__dict__.items():
             if attr.startswith('_') != True:
