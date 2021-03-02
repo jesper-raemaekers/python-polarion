@@ -51,6 +51,8 @@ class Workitem(object):
                     f'Cannot find workitem {self._id} in project {self._project.id}')
 
         if self._polarion_item != None:
+            if self._polarion_item.unresolvable == True:
+                raise Exception(f'Workitem unresolvable')
             self._original_polarion = copy.deepcopy(self._polarion_item)
             for attr, value in self._polarion_item.__dict__.items():
                 for key in value:
@@ -278,7 +280,7 @@ class Workitem(object):
             self._original_polarion = copy.deepcopy(self._polarion_item)
 
     def __repr__(self):
-        return f'Workitem ({self.type.id}) {self._id} ({self.title})'
+        return f'{self._id}: {self.title}'
 
     def __str__(self):
-        return f'Workitem ({self.type.id}) {self._id} ({self.title})'
+        return f'{self._id}: {self.title}'
