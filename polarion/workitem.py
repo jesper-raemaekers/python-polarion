@@ -10,6 +10,15 @@ from enum import Enum
 
 
 class Workitem(object):
+    """
+    Create a Polarion workitem object either from and id or from an Polarion uri.
+
+    :param polarion: Polarion client object
+    :param project: Polarion Project object
+    :param id: Workitem ID
+    :param uri: Polarion uri
+
+    """
     class HyperlinkRoles(Enum):
         INTERNAL_REF = 'internal reference'
         EXTERNAL_REF = 'external reference'
@@ -69,6 +78,9 @@ class Workitem(object):
         """
         tries to get the status enum of this workitem type
         When it fails to get it, the list will be empty
+
+        :return: An array of strings of the statusses
+        :rtype: string[]
         """
         try:
             enum = self._project.getEnum(f'{self.type.id}-status')
@@ -80,6 +92,9 @@ class Workitem(object):
         """
         tries to get the resolution enum of this workitem type
         When it fails to get it, the list will be empty
+
+        :return: An array of strings of the resolutions
+        :rtype: string[]
         """
         try:
             enum = self._project.getEnum(f'{self.type.id}-resolution')
@@ -91,6 +106,9 @@ class Workitem(object):
         """
         tries to get the severity enum of this workitem type
         When it fails to get it, the list will be empty
+
+        :return: An array of strings of the severities
+        :rtype: string[]
         """
         try:
             enum = self._project.getEnum(f'{self.type.id}-severity')
@@ -99,6 +117,12 @@ class Workitem(object):
             return []
 
     def getAvailableStatus(self):
+        """
+        Get all available status option for this workitem
+
+        :return: An array of string of the statusses
+        :rtype: string[]
+        """
         available_status = []
         service = self._polarion.getService('Tracker')
         av_status = service.getAvailableEnumOptionIdsForId(self.uri, 'status')
@@ -107,6 +131,12 @@ class Workitem(object):
         return available_status
 
     def getAvailableActionsDetails(self):
+        """
+        Get all actions option for this workitem with defails
+
+        :return: An array of dictionaries of the actions
+        :rtype: dict[]
+        """
         available_actions = []
         service = self._polarion.getService('Tracker')
         av_actions = service.getAvailableActions(self.uri)
@@ -115,6 +145,12 @@ class Workitem(object):
         return available_actions
 
     def getAvailableActions(self):
+        """
+        Get all actions option for this workitem without details
+
+        :return: An array of strings of the actions
+        :rtype: string[]
+        """
         available_actions = []
         service = self._polarion.getService('Tracker')
         av_actions = service.getAvailableActions(self.uri)
@@ -124,7 +160,9 @@ class Workitem(object):
 
     def preformAction(self, action_name):
         """
-        Preform selected action. An exception will be thorn if some prerequisit is not set.
+        Preform selected action. An exception will be thorn if some prerequisite is not set.
+
+        :param action_name: string containing the action name
         """
         # get id from action name
         service = self._polarion.getService('Tracker')
@@ -135,14 +173,18 @@ class Workitem(object):
 
     def preformActionId(self, actionId: int):
         """
-        Preform selected action. An exception will be thorn if some prerequisit is not set.
+        Preform selected action. An exception will be thorn if some prerequisite is not set.
+
+        :param actionId: number for the action to preform
         """
         service = self._polarion.getService('Tracker')
         service.performWorkflowAction(self.uri, action)
 
     def setStatus(self, status):
         """
-        Sets the status opf the workitem, not respecting any project configured limits or requirements.
+        Sets the status opf the workitem and saves the workitem, not respecting any project configured limits or requirements.
+
+        :param status: name of the status
         """
         if status in self.getVailableStatus():
             self.status.id = status
@@ -151,12 +193,20 @@ class Workitem(object):
     def getDescription(self):
         """
         Get a comment if available. The comment may contain HTML if edited in Polarion!
+
+        :return: The content of the description, may contain HTML
+        :rtype: string
         """
         if self.description != None:
             return self.description.content
         return None
 
     def setDescription(self, description):
+        """
+        Sets the description and saves the workitem
+
+        :param description: the description
+        """
         self.description = {
             'type': 'text/html',
             'content': description,
@@ -165,11 +215,24 @@ class Workitem(object):
         self.save()
 
     def hasTestSteps(self):
+        """
+        Checks if the workitem has test steps
+
+        :return: True/False
+        :rtype: boolean
+        """
         if self._parsed_test_steps != None:
             return len(self._parsed_test_steps) > 0
         return False
 
     def addComment(self, title, comment, parent=None):
+        """
+        Adds a comment to the workitem.
+
+        :param title: Title of the comment (will be None for a reply)
+        :param comment: The comment, may contain html
+        :param parent: A parent comment, if none provided it's a root comment.
+        """
         service = self._polarion.getService('Tracker')
         if parent == None:
             parent = self.uri
@@ -184,10 +247,19 @@ class Workitem(object):
         service.addComment(parent, title, content)
 
     def addHyperlink(self, url, hyperlink_type: HyperlinkRoles):
+        """
+        Adds a hyperlink to the workitem.
+
+        :param url: The URL to add
+        :param hyperlink_type: Select internal or external hyperlink
+        """
         service = self._polarion.getService('Tracker')
         service.addHyperlink(self.uri, url, {'id': hyperlink_type.value})
 
     def save(self):
+        """
+        Update the workitem in polarion
+        """
         updated_item = {}
 
         for attr, value in self._polarion_item.__dict__.items():
