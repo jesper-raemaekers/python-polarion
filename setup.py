@@ -14,6 +14,7 @@ setuptools.setup(
     url="https://github.com/jesper-raemaekers/python-polarion",
     project_urls={
         "Bug Tracker": "https://github.com/jesper-raemaekers/python-polarion/issues",
+        "Documentation": "https://python-polarion.readthedocs.io/en/latest/index.html",
     },
     classifiers=[
         "Programming Language :: Python :: 3",
