@@ -7,6 +7,7 @@ import requests
 import re
 from urllib.parse import urljoin
 from enum import Enum
+from .user import User
 
 
 class Workitem(object):
@@ -78,6 +79,44 @@ class Workitem(object):
                             current_row[columns[col_id]
                                         ] = row.values.Text[col_id].content
                         self._parsed_test_steps.append(current_row)
+
+    def getAssignedUsers(self):
+        """
+        Get an array of assigned users
+
+        :return: An array of User objects
+        :rtype: User[]
+        """
+        assigned_users = []
+        if self.assignee != None:
+            for user in self.assignee.User:
+                assigned_users.append(User(self._polarion, user))
+        return assigned_users
+
+    def removeAssignee(self, user: User):
+        """
+        Remove a user from the assignees
+
+        :param user: The user object to remove
+        """
+        service = self._polarion.getService('Tracker')
+        service.removeAssignee(self.uri, user.id)
+
+    def addAssignee(self, user: User, remove_others=False):
+        """
+        Adds a user as assignee
+
+        :param user: The user object to add
+        :param remove_others: Set to True to make the new user the only assigned user.
+        """
+        service = self._polarion.getService('Tracker')
+
+        if remove_others == True:
+            current_users = self.getAssignedUsers()
+            for current_user in current_users:
+                service.removeAssignee(self.uri, current_user.id)
+
+        service.addAssignee(self.uri, user.id)
 
     def getStatusEnum(self):
         """

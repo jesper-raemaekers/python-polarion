@@ -102,6 +102,16 @@ In this case not workitem specific resolutions are available (Polarion project s
 .. warning::
     Currently there is no option available to check which resolutions are correct for the workflow defined in Polarion. You can set any resolution.
 
+Changin the assignee
+^^^^^^^^^^^^^^^^^^^^
+
+The assignee can be changed by getting a user from the project and setting it as assignee.
+
+.. code:: python
+
+    workitem = project.getWorkitem('PYTH-524')
+    j = project.findUser('john')
+    workitem.addAssignee(j)
 
 Workitem class
 --------------
