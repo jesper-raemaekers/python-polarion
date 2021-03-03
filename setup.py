@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="polarion",  # Replace with your own username
-    version="0.1.1",
+    version="0.1.2",
     author="Jesper Raemaekers",
     author_email="j.raemaekers@relek.nl",
     description="Polarion client for Python",
@@ -14,7 +14,7 @@ setuptools.setup(
     url="https://github.com/jesper-raemaekers/python-polarion",
     project_urls={
         "Bug Tracker": "https://github.com/jesper-raemaekers/python-polarion/issues",
-        "Documentation": "https://python-polarion.readthedocs.io/en/latest/index.html",
+        "Documentation": "https://python-polarion.readthedocs.io/",
     },
     classifiers=[
         "Programming Language :: Python :: 3",
