@@ -8,6 +8,7 @@ from urllib.parse import urljoin
 
 from .workitem import Workitem
 from .testrun import Testrun
+from .user import User
 
 
 class Project(object):
@@ -36,6 +37,27 @@ class Project(object):
             self.tracker_prefix = self.polarion_data.trackerPrefix
         else:
             raise Exception(f'Could not find project {project_id}')
+
+    def getUsers(self):
+        """
+        Gets all users in this project
+        """
+        users = []
+        service = self.polarion.getService('Project')
+        project_users = service.getProjectUsers(self.id)
+        for user in project_users:
+            users.append(User(self.polarion, user))
+        return users
+
+    def findUser(self, name):
+        """
+        Find a specific user by id or name in this project
+        """
+        project_users = self.getUsers()
+        for user in project_users:
+            if user.id.lower() == name.lower() or user.name.lower() == name.lower():
+                return user
+        return None
 
     def getWorkitem(self, id: str):
         """Get a workitem by string
