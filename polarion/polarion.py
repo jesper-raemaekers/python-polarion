@@ -17,6 +17,7 @@ class Polarion(object):
     :param polarion_url: The base URL for the polarion instance. For example http://example/com/polarion
     :param user: The user name to login
     :param password: The password for that user
+    :param static_service_list: Set to True when this class may not use a request to get the services list
 
     """
 
