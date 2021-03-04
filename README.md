@@ -25,7 +25,7 @@ run = project.getTestRun('SWQ-0001')
 
 
 More examples to be found in the quick start section of the documentation.
-[Go to the documentation](https://python-polarion.readthedocs.io/en/latest/index.html)
+[Go to the documentation](https://python-polarion.readthedocs.io/)
 
 # Known issues or missing features
 No way of knowing the test run possible statuses.
