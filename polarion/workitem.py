@@ -80,6 +80,17 @@ class Workitem(object):
                                         ] = row.values.Text[col_id].content
                         self._parsed_test_steps.append(current_row)
 
+    def getAuthor(self):
+        """
+        Get the author of the workitem
+
+        :return: Author
+        :rtype: User
+        """
+        if self.author != None:
+            return User(self._polarion, self.author)
+        return None
+
     def getAssignedUsers(self):
         """
         Get an array of assigned users
