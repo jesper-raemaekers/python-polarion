@@ -20,7 +20,7 @@ class Polarion(object):
 
     """
 
-    def __init__(self, polarion_url, user, password):
+    def __init__(self, polarion_url, user, password, static_service_list=False):
         self.user = user
         self.password = password
         self.url = polarion_url
@@ -31,8 +31,19 @@ class Polarion(object):
             self.url += '/'
         self.url = urljoin(self.url, _baseServiceUrl)
 
-        self._getServices()
+        if static_service_list == True:
+            self._getStaticServices()
+        else:
+            self._getServices()
         self._createSession()
+
+    def _getStaticServices(self):
+        default_services = ['Session', 'Project', 'Tracker',
+                            'Builder', 'Planning', 'TestManagement', 'Security']
+        service_base_url = self.url + '/'
+        for service in default_services:
+            self.services[service] = {'url': urljoin(
+                service_base_url, service + 'WebService')}
 
     def _getServices(self):
         """
