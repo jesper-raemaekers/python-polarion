@@ -262,11 +262,8 @@ class Workitem(object):
 
         :param description: the description
         """
-        self.description = {
-            'type': 'text/html',
-            'content': description,
-            'contentLossy': False
-        }
+        self.description = self._polarion.TextType(
+            content=description, type='text/html', contentLossy=False)
         self.save()
 
     def setResolution(self, resolution):
@@ -276,6 +273,11 @@ class Workitem(object):
         :param resolution: the resolution
         """
         self.resolution = {'id': resolution}
+        if self.resolution != None:
+            self.resolution.id = resolution
+        else:
+            self.resolution = self._polarion.EnumOptionIdType(
+                id=resolution)
         self.save()
 
     def hasTestSteps(self):

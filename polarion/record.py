@@ -58,11 +58,8 @@ class Record(object):
             self.testStepResults.TestStepResult[step_number].result = self._polarion.EnumOptionIdType(
                 id=result.value)
             if comment != None:
-                self.testStepResults.TestStepResult[step_number].comment = {
-                    'type': 'text/html',
-                    'content': comment,
-                    'contentLossy': False
-                }
+                self.testStepResults.TestStepResult[step_number].comment = self._polarion.TextType(
+                    content=comment, type='text/html', contentLossy=False)
 
         self.save()
 
