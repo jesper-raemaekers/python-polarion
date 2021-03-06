@@ -39,6 +39,9 @@ class Polarion(object):
         self._createSession()
         self._getTypes()
 
+    def __del__(self):
+        self.services['Session']['client'].service.endSession()
+
     def _getStaticServices(self):
         default_services = ['Session', 'Project', 'Tracker',
                             'Builder', 'Planning', 'TestManagement', 'Security']

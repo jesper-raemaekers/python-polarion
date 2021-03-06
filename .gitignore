@@ -129,3 +129,4 @@ dmypy.json
 .pyre/
 test.bat
 test.py
+tests/keys.py
