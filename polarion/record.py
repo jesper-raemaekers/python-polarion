@@ -1,5 +1,5 @@
 from enum import Enum
-# from .factory import createObjectFromUri
+from collections import namedtuple
 
 
 class Record(object):
@@ -31,7 +31,40 @@ class Record(object):
                 setattr(self, key, value[key])
 
         self._testcase = self._polarion_record.testCaseURI
+        self._testcase_name = self._testcase.split('}')[1]
         self._defect = self._polarion_record.defectURI
+
+    def setTestStepResult(self, step_number, result: ResultType, comment=None):
+        """"
+        Set the result of a test step
+
+        :param step_number: Step number
+        :param result: The result fo the test step
+        :param comment: An optional comment
+        """
+        if self.testStepResults == None:
+            # get the number of test steps in
+            service = self._polarion.getService('TestManagement')
+            test_steps = service.getTestSteps(self.testCaseURI)
+            number_of_steps = 0
+            if test_steps.steps != None:
+                number_of_steps = len(test_steps.steps.TestStep)
+            self.testStepResults = self._polarion.ArrayOfTestStepResultType()
+            for _i in range(number_of_steps):
+                self.testStepResults.TestStepResult.append(
+                    self._polarion.TestStepResultType())
+
+        if step_number < len(self.testStepResults.TestStepResult):
+            self.testStepResults.TestStepResult[step_number].result = self._polarion.EnumOptionIdType(
+                id=result.value)
+            if comment != None:
+                self.testStepResults.TestStepResult[step_number].comment = {
+                    'type': 'text/html',
+                    'content': comment,
+                    'contentLossy': False
+                }
+
+        self.save()
 
     def getResult(self):
         """
@@ -62,11 +95,8 @@ class Record(object):
 
         :param comment: Comment string, may contain HTML
         """
-        self.comment = {
-            'type': 'text/html',
-            'content': comment,
-            'contentLossy': False
-        }
+        self.comment = self._polarion.TextType(
+            content=comment, type='text/html', contentLossy=False)
 
     def setResult(self, result: ResultType = ResultType.FAILED, comment=None):
         """
@@ -77,9 +107,11 @@ class Record(object):
         """
         if comment != None:
             self.setComment(comment)
-
-        self.result = {}
-        self.result['id'] = result.value
+        if self.result != None:
+            self.result.id = result.value
+        else:
+            self.result = self._polarion.EnumOptionIdType(
+                id=result.value)
         self.save()
 
     def save(self):
@@ -95,8 +127,8 @@ class Record(object):
         service.executeTest(
             self._test_run.uri, new_item)
 
-    # def __repr__(self):
-    #     return f'Record of {self.workitem.id} in run {self.test_run.id} {self.result}'
+    def __repr__(self):
+        return f'{self._testcase_name} in {self._test_run.id} ({self.getResult()} on {self.executed})'
 
-    # def __str__(self):
-    #     return f'Record of {self.workitem.id} in run {self.test_run.id} {self.result}'
+    def __str__(self):
+        return f'{self._testcase_name} in {self._test_run.id} ({self.getResult()} on {self.executed})'

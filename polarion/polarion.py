@@ -37,6 +37,7 @@ class Polarion(object):
         else:
             self._getServices()
         self._createSession()
+        self._getTypes()
 
     def _getStaticServices(self):
         default_services = ['Session', 'Project', 'Tracker',
@@ -101,6 +102,17 @@ class Polarion(object):
                 self.services[service]['client'].service.addComment._proxy._binding.get(
                     'addComment').input.body.type._element[1].nillable = True
 
+    def _getTypes(self):
+        # TODO: check if the namespace is always the same
+        self.EnumOptionIdType = self.getTypeFromService(
+            'TestManagement', 'ns3:EnumOptionId')
+        self.TextType = self.getTypeFromService(
+            'TestManagement', 'ns1:Text')
+        self.ArrayOfTestStepResultType = self.getTypeFromService(
+            'TestManagement', 'ns4:ArrayOfTestStepResult')
+        self.TestStepResultType = self.getTypeFromService(
+            'TestManagement', 'ns4:TestStepResult')
+
     def hasService(self, name: str):
         """
         Checks if a WSDL service is available
@@ -116,6 +128,14 @@ class Polarion(object):
         """
         if name in self.services:
             return self.services[name]['client'].service
+        else:
+            raise Exception('Service does not exsist')
+
+    def getTypeFromService(self, name: str, type_name):
+        """
+        """
+        if name in self.services:
+            return self.services[name]['client'].get_type(type_name)
         else:
             raise Exception('Service does not exsist')
 
