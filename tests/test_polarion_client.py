@@ -7,10 +7,6 @@ import mock
 
 class TestPolarionClient(unittest.TestCase):
 
-    def setUp(self):
-        # sleep(5)
-        pass
-
     def test_wrong_url(self):
         url = polarion_url + '/wrong'
         self.assertRaises(Exception, Polarion.__init__, url,

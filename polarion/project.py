@@ -31,7 +31,7 @@ class Project(object):
         except:
             raise Exception(f'Could not find project {project_id}')
 
-        if 'name' in self.polarion_data:
+        if 'name' in self.polarion_data and self.polarion_data.unresolvable == False:
             # succeeded
             self.name = self.polarion_data.name
             self.tracker_prefix = self.polarion_data.trackerPrefix
