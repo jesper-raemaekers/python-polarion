@@ -2,6 +2,7 @@ import unittest
 from polarion.polarion import Polarion
 from .keys import polarion_user, polarion_password, polarion_url
 from time import sleep
+import mock
 
 
 class TestPolarionClient(unittest.TestCase):
@@ -83,3 +84,14 @@ class TestPolarionClient(unittest.TestCase):
         self.assertIn(polarion_user, pol.__str__())
         self.assertIn(polarion_url, pol.__repr__())
         self.assertIn(polarion_user, pol.__repr__())
+
+    @mock.patch('polarion.project.Project.__init__')
+    def test_project_creation(self, mock_project):
+        mock_project.return_value = None
+        pol = Polarion(polarion_url, polarion_user, polarion_password)
+
+        project = pol.getProject('Random_id')
+        mock_project.assert_called_with(pol, 'Random_id')
+
+        project = pol.getProject('other_project')
+        mock_project.assert_called_with(pol, 'other_project')
