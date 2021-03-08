@@ -362,7 +362,7 @@ class Workitem(object):
             return False
         return self._compareType(a, b)
 
-    def _compareType(self, a, b, skip=False):
+    def _compareType(self, a, b):
         basic_types = [int, float,
                        bool, type(None), str, datetime, date]
 
@@ -377,7 +377,7 @@ class Workitem(object):
                     if a[key] != b[key]:
                         return False
                 else:
-                    if self._compareType(a[key], b[key], True) == False:
+                    if self._compareType(a[key], b[key]) == False:
                         return False
             else:
                 # exit, type mismatch
