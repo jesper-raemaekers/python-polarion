@@ -48,7 +48,7 @@ class TestPolarionWorkitem(unittest.TestCase):
                          msg='Workitems not identical')
 
     def test_workitem_compare(self):
-        executed_workitem = self.global_workitem
+        executed_workitem = self.executing_project.createWorkitem('task')
         checking_workitem = self.checking_project.getWorkitem(
             executed_workitem.id)
 
