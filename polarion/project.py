@@ -68,6 +68,9 @@ class Project(object):
         """
         return Workitem(self.polarion, self, id)
 
+    def createWorkitem(self, workitem_type: str):
+        return Workitem(self.polarion, self, new_workitem_type=workitem_type)
+
     def searchWorkitemFullItem(self, query='', order='Created', limit=-1):
         """Query for available workitems. This will query for the items and then fetch all result. May take a while for a big search with many results.
 

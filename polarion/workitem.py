@@ -8,6 +8,7 @@ import re
 from urllib.parse import urljoin
 from enum import Enum
 from .user import User
+from datetime import datetime, date
 
 
 class Workitem(object):
@@ -27,11 +28,12 @@ class Workitem(object):
         INTERNAL_REF = 'internal reference'
         EXTERNAL_REF = 'external reference'
 
-    def __init__(self, polarion, project, id, uri=None):
+    def __init__(self, polarion, project, id=None, uri=None, new_workitem_type=None):
         self._polarion = polarion
         self._project = project
         self._id = id
         self._uri = uri
+        # new_workitem_type
 
         service = self._polarion.getService('Tracker')
         service_test = self._polarion.getService('TestManagement')
@@ -43,13 +45,25 @@ class Workitem(object):
             except:
                 raise Exception(
                     f'Cannot find workitem {self._id} in project {self._project.id}')
-        else:
+        elif id != None:
             try:
                 self._polarion_item = service.getWorkItemById(
                     self._project.id, self._id)
             except:
                 raise Exception(
                     f'Cannot find workitem {self._id} in project {self._project.id}')
+        elif new_workitem_type != None:
+            self._polarion_item = self._polarion.WorkItemType(
+                type=self._polarion.EnumOptionIdType(id=new_workitem_type))
+            # self._polarion_item.title = 'new title!'
+            self._polarion_item.project = self._project.polarion_data
+            new_uri = service.createWorkItem(self._polarion_item)
+            # reload from polarion
+            self._polarion_item = service.getWorkItemByUri(new_uri)
+            self._id = self._polarion_item.id
+
+        else:
+            raise Exception('No id, uri of new workitem type specified!')
 
         if self._polarion_item != None:
             if self._polarion_item.unresolvable == True:
@@ -339,6 +353,37 @@ class Workitem(object):
             service = self._polarion.getService('Tracker')
             service.updateWorkItem(updated_item)
             self._original_polarion = copy.deepcopy(self._polarion_item)
+
+    def __eq__(self, other):
+        try:
+            a = vars(self)
+            b = vars(other)
+        except:
+            return False
+        return self._compareType(a, b)
+
+    def _compareType(self, a, b, skip=False):
+        basic_types = [int, float,
+                       bool, type(None), str, datetime, date]
+
+        for key in a:
+            if key.startswith('_'):
+                # skip private types
+                continue
+            # first to a quick type compare to catch any easy differences
+            if type(a[key]) == type(b[key]):
+                if type(a[key]) in basic_types:
+                    # direct compare capable
+                    if a[key] != b[key]:
+                        return False
+                else:
+                    if self._compareType(a[key], b[key], True) == False:
+                        return False
+            else:
+                # exit, type mismatch
+                return False
+        # survived all exits, must be good then
+        return True
 
     def __repr__(self):
         return f'{self._id}: {self.title}'

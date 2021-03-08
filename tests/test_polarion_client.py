@@ -1,6 +1,6 @@
 import unittest
 from polarion.polarion import Polarion
-from .keys import polarion_user, polarion_password, polarion_url
+from keys import polarion_user, polarion_password, polarion_url
 from time import sleep
 import mock
 
