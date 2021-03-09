@@ -3,6 +3,7 @@ attrs==20.3.0
 cached-property==1.5.2
 certifi==2020.12.5
 chardet==4.0.0
+coverage==5.5
 defusedxml==0.7.1
 idna==2.10
 isodate==0.6.0
