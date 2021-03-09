@@ -13,5 +13,6 @@ requests==2.25.1
 requests-file==1.5.1
 requests-toolbelt==0.9.1
 six==1.15.0
+unittest-xml-reporting==3.0.4
 urllib3==1.26.3
 zeep==4.0.0
