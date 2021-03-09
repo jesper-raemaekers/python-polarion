@@ -130,3 +130,5 @@ dmypy.json
 test.bat
 test.py
 keys.py
+
+.pol_env
