@@ -65,6 +65,9 @@ class Workitem(object):
         else:
             raise Exception('No id, uri of new workitem type specified!')
 
+        self._buildWorkitemFromPolarion()
+
+    def _buildWorkitemFromPolarion(self):
         if self._polarion_item != None:
             if self._polarion_item.unresolvable == True:
                 raise Exception(f'Workitem unresolvable')
@@ -352,7 +355,11 @@ class Workitem(object):
             updated_item['uri'] = self.uri
             service = self._polarion.getService('Tracker')
             service.updateWorkItem(updated_item)
+            self._polarion_item = service.getWorkItemByUri(self._polarion_item.uri)
+            self._buildWorkitemFromPolarion()
             self._original_polarion = copy.deepcopy(self._polarion_item)
+        
+        
 
     def __eq__(self, other):
         try:
