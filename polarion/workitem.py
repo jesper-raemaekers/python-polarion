@@ -328,6 +328,7 @@ class Workitem(object):
             'contentLossy': False
         }
         service.addComment(parent, title, content)
+        self._reloadFromPolarion()
 
     def addHyperlink(self, url, hyperlink_type: HyperlinkRoles):
         """
@@ -355,11 +356,14 @@ class Workitem(object):
             updated_item['uri'] = self.uri
             service = self._polarion.getService('Tracker')
             service.updateWorkItem(updated_item)
-            self._polarion_item = service.getWorkItemByUri(self._polarion_item.uri)
-            self._buildWorkitemFromPolarion()
-            self._original_polarion = copy.deepcopy(self._polarion_item)
+            self._reloadFromPolarion()
+            
         
-        
+    def _reloadFromPolarion(self):
+        service = self._polarion.getService('Tracker')
+        self._polarion_item = service.getWorkItemByUri(self._polarion_item.uri)
+        self._buildWorkitemFromPolarion()
+        self._original_polarion = copy.deepcopy(self._polarion_item)
 
     def __eq__(self, other):
         try:
@@ -383,6 +387,12 @@ class Workitem(object):
                     # direct compare capable
                     if a[key] != b[key]:
                         return False
+                elif isinstance(a[key], list):
+                    #special case for list items
+                    if len(a[key]) != len(b[key]):
+                        return False
+                    for idx, sub_a in enumerate(a[key]):
+                        self._compareType(sub_a, b[key][idx])
                 else:
                     if self._compareType(a[key], b[key]) == False:
                         return False
