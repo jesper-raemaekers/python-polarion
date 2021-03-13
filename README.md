@@ -33,8 +33,8 @@ More examples to be found in the quick start section of the documentation.
 [Go to the documentation](https://python-polarion.readthedocs.io/)
 
 # Known issues or missing features
-No way of knowing the test run possible statuses.
-Sessions not being checked on validity
-No access to the live docs
+- No way of knowing the test run possible statuses.
+- Sessions not being checked on validity
+- No access to the live docs
 
 
