@@ -55,7 +55,6 @@ class Workitem(object):
         elif new_workitem_type != None:
             self._polarion_item = self._polarion.WorkItemType(
                 type=self._polarion.EnumOptionIdType(id=new_workitem_type))
-            # self._polarion_item.title = 'new title!'
             self._polarion_item.project = self._project.polarion_data
             new_uri = service.createWorkItem(self._polarion_item)
             # reload from polarion
