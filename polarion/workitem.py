@@ -338,6 +338,7 @@ class Workitem(object):
         """
         service = self._polarion.getService('Tracker')
         service.addHyperlink(self.uri, url, {'id': hyperlink_type.value})
+        self._reloadFromPolarion()
 
     def save(self):
         """

@@ -1,6 +1,9 @@
 Polarion Test runs
 ==================
 
+Usage
+--------------
+
 The test run class provides access to the test records.
 
 Currently the :attr:`~Testrun.records` holds the test records.
@@ -88,8 +91,3 @@ Testrun class
 .. autoclass:: polarion.testrun.Testrun
     :members:
 
-Test record class
------------------
-
-.. autoclass:: polarion.record.Record
-    :members:
