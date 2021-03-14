@@ -128,6 +128,7 @@ class Workitem(object):
         """
         service = self._polarion.getService('Tracker')
         service.removeAssignee(self.uri, user.id)
+        self._reloadFromPolarion()
 
     def addAssignee(self, user: User, remove_others=False):
         """
@@ -144,6 +145,7 @@ class Workitem(object):
                 service.removeAssignee(self.uri, current_user.id)
 
         service.addAssignee(self.uri, user.id)
+        self._reloadFromPolarion()
 
     def getStatusEnum(self):
         """
@@ -357,8 +359,7 @@ class Workitem(object):
             service = self._polarion.getService('Tracker')
             service.updateWorkItem(updated_item)
             self._reloadFromPolarion()
-            
-        
+
     def _reloadFromPolarion(self):
         service = self._polarion.getService('Tracker')
         self._polarion_item = service.getWorkItemByUri(self._polarion_item.uri)
@@ -388,7 +389,7 @@ class Workitem(object):
                     if a[key] != b[key]:
                         return False
                 elif isinstance(a[key], list):
-                    #special case for list items
+                    # special case for list items
                     if len(a[key]) != len(b[key]):
                         return False
                     for idx, sub_a in enumerate(a[key]):

@@ -17,6 +17,11 @@ class User(object):
             for key in value:
                 setattr(self, key, value[key])
 
+    def __eq__(self, other):
+        if self.id == other.id:
+            return True
+        return False
+
     def __repr__(self):
         return f'{self.name} ({self.id})'
 
