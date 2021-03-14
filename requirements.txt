@@ -8,6 +8,7 @@ chardet==4.0.0
 colorama==0.4.4
 coverage==5.5
 defusedxml==0.7.1
+discover==0.4.0
 docutils==0.16
 idna==2.10
 importlib-metadata==3.7.2
