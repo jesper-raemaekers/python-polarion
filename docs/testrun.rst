@@ -9,7 +9,7 @@ Currently the :attr:`~Testrun.records` holds the test records.
 List of available attributes
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The attributes are set in the workitem when loading it from polarion. An attribute can be None (when it is not set), a string, number or datetime, or another       .
+The attributes are set in the test run when loading it from polarion. An attribute can be None (when it is not set), a string, number or datetime, or another object.
 When accessing any attribute, a check for None is recommended as the only attributes that are always set are:
 -Type
 -Created

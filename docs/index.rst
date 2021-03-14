@@ -14,6 +14,7 @@ Welcome to Polarion's documentation!
    project
    workitem
    testrun
+   testrecord
    document
 
 
