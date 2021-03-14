@@ -113,6 +113,15 @@ The assignee can be changed by getting a user from the project and setting it as
     j = project.findUser('john')
     workitem.addAssignee(j)
 
+
+Test case workitem
+^^^^^^^^^^^^^^^^^^
+
+Some workitems are test cases and can contain test steps. Use :func:`~Workitem.hasTestSteps` to determine if there are test steps.
+
+Currently the :attr:`~Workitem._parsed_test_steps` holds the test steps.
+
+
 Helpers
 ^^^^^^^
 
@@ -135,19 +144,8 @@ When accessing any attribute, a check for None is recommended as the only attrib
 -Author
 -Type
 -Created
+-Project
 
-=====  =====
-col 1  col 2
-=====  =====
-1      Second column of row 1.
-2      Second column of row 2.
-       Second line of paragraph.
-3      - Second column of row 3.
-
-       - Second item in bullet
-         list (row 3, column 2).
-\      Row 4; column 1 will be empty.
-=====  =====
 
 Other attributes that will be available, but could be None, are listed below.
 Some objects only have one attribute, named id, these values can be accessed directly if not None. If they are None and you want to set them, use the setter method listed below.
