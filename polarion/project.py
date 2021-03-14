@@ -90,8 +90,6 @@ class Project(object):
                 Workitem(self.polarion, self, workitem.id))
         return return_list
 
-        return Workitem(self.polarion, self, id)
-
     def getTestRun(self, id: str):
         """Get a testrun by string
 
@@ -110,7 +108,9 @@ class Project(object):
         :return: The request testrun
         :rtype: Testrun[]
         """
-        query += f' AND project.id:{self.id}'
+        if len(query) > 0:
+            query += ' AND '
+        query += f'project.id:{self.id}'
         return_list = []
         service = self.polarion.getService('TestManagement')
         test_runs = service.searchTestRunsLimited(query, order, limit)
@@ -135,13 +135,7 @@ class Project(object):
         return available
 
     def __repr__(self):
-        if self.polarion_data:
-            return f'Polarion project {self.name} prefix {self.tracker_prefix}'
-        else:
-            return f'Polarion project {self.name}'
+        return f'Polarion project {self.name} prefix {self.tracker_prefix}'
 
     def __str__(self):
-        if self.polarion_data:
-            return f'Polarion project {self.name} prefix {self.tracker_prefix}'
-        else:
-            return f'Polarion project {self.name}'
+        return f'Polarion project {self.name} prefix {self.tracker_prefix}'
