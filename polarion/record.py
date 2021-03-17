@@ -84,6 +84,15 @@ class Record(object):
         if self.comment != None:
             return self.comment.content
         return None
+    
+    def getTestCaseName(self):
+        """
+        Get the test case name including prefix
+
+        :return: The name
+        :rtype: string
+        """
+        return self._testcase_name
 
     def setComment(self, comment):
         """

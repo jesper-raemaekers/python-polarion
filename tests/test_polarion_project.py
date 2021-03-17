@@ -29,3 +29,48 @@ class TestPolarionProject(unittest.TestCase):
 
         self.project.getWorkitem('FAKE-002')
         mock_workitem.assert_called_with(self.pol, self.project, 'FAKE-002')
+
+    def test_get_all_users(self):
+        all_users = self.project.getUsers()
+
+        self.assertGreater(len(all_users), 0)
+
+        single_user = self.project.findUser(all_users[0].id)
+
+        self.assertIsNotNone(single_user)
+
+    def test_get_non_existent_user(self):
+        single_user = self.project.findUser(
+            'kjbhjkhbk,fbdkdjsbfgd')  # no user should be found
+
+        self.assertIsNone(single_user)
+
+    def test_workitem_create_and_search(self):
+        new_workitem = self.project.createWorkitem('task')
+
+        self.assertIsNotNone(new_workitem)
+
+        search_result = self.project.searchWorkitemFullItem(new_workitem.id)
+
+        self.assertEqual(len(search_result), 1)
+        self.assertEqual(new_workitem, search_result[0])
+
+    def test_string(self):
+        self.assertIn(polarion_project_id, self.project.__str__())
+        self.assertIn(polarion_project_id, self.project.__repr__())
+
+    def test_non_existent_project(self):
+        self.assertRaises(Exception, Project.__init__, self.pol, 'fake_id')
+
+    def test_get_enum(self):
+        status = self.project.getEnum('status')
+
+        self.assertGreater(len(status), 0)
+
+    def test_testrun_search(self):
+        test_runs = self.project.searchTestRuns('')
+
+        self.assertGreater(len(test_runs), 0)
+
+        test_run = self.project.getTestRun(test_runs[0].id)
+        self.assertIsNotNone(test_run)

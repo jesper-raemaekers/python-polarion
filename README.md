@@ -3,6 +3,7 @@
 ![Coverage](https://img.shields.io/azure-devops/coverage/jraemaekers/Python%20Polarion/2)
 ![Test](https://img.shields.io/azure-devops/tests/jraemaekers/Python%20Polarion/2)
 [![Documentation Status](https://readthedocs.org/projects/python-polarion/badge/?version=latest)](https://python-polarion.readthedocs.io/en/latest/?badge=latest)
+[![Downloads](https://pepy.tech/badge/polarion)](https://pepy.tech/project/polarion)
 
 
 
@@ -32,8 +33,8 @@ More examples to be found in the quick start section of the documentation.
 [Go to the documentation](https://python-polarion.readthedocs.io/)
 
 # Known issues or missing features
-No way of knowing the test run possible statuses.
-Sessions not being checked on validity
-No access to the live docs
+- No way of knowing the test run possible statuses.
+- Sessions not being checked on validity
+- No access to the live docs
 
 

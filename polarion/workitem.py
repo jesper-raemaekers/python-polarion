@@ -55,7 +55,6 @@ class Workitem(object):
         elif new_workitem_type != None:
             self._polarion_item = self._polarion.WorkItemType(
                 type=self._polarion.EnumOptionIdType(id=new_workitem_type))
-            # self._polarion_item.title = 'new title!'
             self._polarion_item.project = self._project.polarion_data
             new_uri = service.createWorkItem(self._polarion_item)
             # reload from polarion
@@ -129,6 +128,7 @@ class Workitem(object):
         """
         service = self._polarion.getService('Tracker')
         service.removeAssignee(self.uri, user.id)
+        self._reloadFromPolarion()
 
     def addAssignee(self, user: User, remove_others=False):
         """
@@ -145,6 +145,7 @@ class Workitem(object):
                 service.removeAssignee(self.uri, current_user.id)
 
         service.addAssignee(self.uri, user.id)
+        self._reloadFromPolarion()
 
     def getStatusEnum(self):
         """
@@ -339,6 +340,7 @@ class Workitem(object):
         """
         service = self._polarion.getService('Tracker')
         service.addHyperlink(self.uri, url, {'id': hyperlink_type.value})
+        self._reloadFromPolarion()
 
     def save(self):
         """
@@ -357,8 +359,7 @@ class Workitem(object):
             service = self._polarion.getService('Tracker')
             service.updateWorkItem(updated_item)
             self._reloadFromPolarion()
-            
-        
+
     def _reloadFromPolarion(self):
         service = self._polarion.getService('Tracker')
         self._polarion_item = service.getWorkItemByUri(self._polarion_item.uri)
@@ -388,7 +389,7 @@ class Workitem(object):
                     if a[key] != b[key]:
                         return False
                 elif isinstance(a[key], list):
-                    #special case for list items
+                    # special case for list items
                     if len(a[key]) != len(b[key]):
                         return False
                     for idx, sub_a in enumerate(a[key]):
