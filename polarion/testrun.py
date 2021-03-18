@@ -6,6 +6,7 @@ import requests
 import re
 from urllib.parse import urljoin
 from .record import Record
+from .factory import Creator
 
 
 class Testrun(object):
@@ -53,3 +54,7 @@ class Testrun(object):
 
     def __str__(self):
         return f'Testrun {self.id} ({self.title}) created {self.created}'
+
+class TestrunCreator(Creator):
+    def createFromUri(self, polarion, project, uri):
+        return Testrun(polarion, uri)

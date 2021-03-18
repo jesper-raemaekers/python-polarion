@@ -5,6 +5,7 @@ from keys import polarion_user, polarion_password, polarion_url, polarion_projec
 from time import sleep
 from datetime import datetime
 import mock
+from polarion.factory import createFromUri
 
 
 class TestPolarionWorkitem(unittest.TestCase):
@@ -225,3 +226,15 @@ class TestPolarionWorkitem(unittest.TestCase):
         checking_workitem.title = new_value
         self.assertEqual(executed_workitem, checking_workitem,
                          msg='Workitems not identical')
+
+    def test_workitem_creator(self):
+        new_workitem = createFromUri(self.pol, self.executing_project, self.global_workitem.uri)
+        
+        self.assertEqual(self.global_workitem, new_workitem,
+                         msg='Workitems not identical')
+
+    def test_workitem_author_creator(self):
+        author = createFromUri(self.pol, self.executing_project, self.global_workitem.author.uri)
+        
+        self.assertEqual(self.global_workitem.author.id, author.id,
+                         msg='Authors not identical')

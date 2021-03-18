@@ -3,25 +3,27 @@ from zeep.plugins import HistoryPlugin
 from lxml.etree import Element
 from lxml import etree
 import re
+from abc import ABC, abstractmethod
 
-from .workitem import Workitem
-from .testrun import Testrun
+class Creator(ABC):
+    test = 1
+    @abstractmethod
+    def createFromUri(self, polarion, project, uri):
+        pass
 
 
-def createObjectFromUri(polarion, uri):
-    uri_type = _subterraUrl(uri)
-    if uri_type == 'workitem':
-        return Workitem(polarion, None, None, uri)
-    elif uri_type == 'testrun':
-        return Testrun(polarion, uri=uri)
+creator_list = {}
+
+def addCreator(type_name, creator):
+    creator_list[type_name] = creator
+
+def createFromUri(polarion, project, uri):
+    type_name = _subterraUrl(uri)
+    if type_name in creator_list:
+            creator = creator_list[type_name]()
+            return creator.createFromUri(polarion, project, uri)
     else:
-        raise Exception(f'Cannot build object for {uri_type}')
-
-
-def createObjectFromContent(polarion, content):
-    if 'uri' in content:
-        uri_type = _subterraUrl(content.uri)
-
+        raise Exception(f'type {type_name} not supported')
 
 def _subterraUrl(uri):
     uri_parts = uri.split(':')
