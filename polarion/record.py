@@ -1,5 +1,6 @@
 from enum import Enum
 from collections import namedtuple
+from .factory import createFromUri
 
 
 class Record(object):
@@ -119,6 +120,15 @@ class Record(object):
             self.result = self._polarion.EnumOptionIdType(
                 id=result.value)
         self.save()
+
+    def getExecutingUser(self):
+        """
+        Gets the executing user
+
+        :return: The user
+        :rtype: User
+        """
+        return createFromUri(self._polarion, None, self.executedByURI)
 
     def save(self):
         """

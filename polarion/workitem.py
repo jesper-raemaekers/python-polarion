@@ -9,6 +9,7 @@ from urllib.parse import urljoin
 from enum import Enum
 from .user import User
 from datetime import datetime, date
+from .factory import Creator
 
 
 class Workitem(object):
@@ -408,3 +409,7 @@ class Workitem(object):
 
     def __str__(self):
         return f'{self._id}: {self.title}'
+
+class WorkitemCreator(Creator):
+    def createFromUri(self, polarion, project, uri):
+        return Workitem(polarion, project, None, uri)
