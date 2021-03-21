@@ -145,7 +145,7 @@ class Record(object):
 
     def hasAttachment(self):
         """
-        Checks if the workitem has attachments
+        Checks if the Record has attachments
 
         :return: True/False
         :rtype: boolean
@@ -210,6 +210,82 @@ class Record(object):
         file_name = os.path.split(file_path)[1]
         with open(file_path, "rb") as file_content:
             service.addAttachmentToTestRecord(self._test_run.uri, self._index, file_name, title, file_content.read())
+        self._reloadFromPolarion()
+
+    def testStepHasAttachment(self, step_index):
+        """
+        Checks if the a test step has attachments
+
+        :param step_index: The test step index
+        :return: True/False
+        :rtype: boolean
+        """
+        if self.testStepResults == None:
+            return False
+        if self.testStepResults.TestStepResult[step_index].attachments != None:
+            return True
+        return False
+    
+    def getAttachmentFromTestStep(self, step_index, file_name):
+        """
+        Get the attachment data from a test step
+
+        :param step_index: The test step index
+        :param file_name: The attachment file name
+        :return: list of bytes
+        :rtype: bytes[]
+        """
+        #find the file
+        url = None
+        for attachment in self.testStepResults.TestStepResult[step_index].attachments.TestRunAttachment:
+            if attachment.fileName == file_name:
+                url = attachment.url
+
+        if url != None:
+            resp = requests.get(url, auth=(self._polarion.user, self._polarion.password))
+            if resp.ok == True:
+                return resp.content
+            else:
+                raise Exception(f'Could not download attachment {file_name}')
+        else:
+            raise Exception(f'Could not find attachment with name {file_name}')
+
+    
+    def saveAttachmentFromTestStepAsFile(self, step_index, file_name, file_path):
+        """
+        Save an attachment to file from a test step
+
+        :param step_index: The test step index
+        :param file_name: The attachment file name
+        :param file_path: File where to save the attachment
+        """
+        bin = self.getAttachmentFromTestStep(step_index, file_name)
+        with open(file_path, "wb") as file:
+            file.write(bin)
+
+    def deleteAttachmentFromTestStep(self, step_index, file_name):
+        """
+        Delete an attachment from a test step
+
+        :param step_index: The test step index
+        :param file_name: The attachment file name
+        """
+        service = self._polarion.getService('TestManagement')
+        service.deleteAttachmentFromTestStep(self._test_run.uri, self._index, step_index, file_name)
+        self._reloadFromPolarion()
+
+    def addAttachmentToTestStep(self, step_index, file_path, title):
+        """
+        Upload an attachment to a test step
+
+        :param step_index: The test step index
+        :param file_path: Source file to upload
+        :param title: The title of the attachment
+        """
+        service = self._polarion.getService('TestManagement')
+        file_name = os.path.split(file_path)[1]
+        with open(file_path, "rb") as file_content:
+            service.addAttachmentToTestStep(self._test_run.uri, self._index, step_index, file_name, title, file_content.read())
         self._reloadFromPolarion()
 
     def save(self):
