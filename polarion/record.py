@@ -136,12 +136,14 @@ class Record(object):
 
     def getExecutingUser(self):
         """
-        Gets the executing user
+        Gets the executing user if the test was executed
 
         :return: The user
-        :rtype: User
+        :rtype: User/None
         """
-        return createFromUri(self._polarion, None, self.executedByURI)
+        if self.executedByURI != None:
+            return createFromUri(self._polarion, None, self.executedByURI)
+        return None
 
     def hasAttachment(self):
         """
