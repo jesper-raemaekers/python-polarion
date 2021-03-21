@@ -5,11 +5,13 @@ from lxml import etree
 import copy
 import requests
 import re
+import os
 from urllib.parse import urljoin
 from enum import Enum
 from .user import User
 from datetime import datetime, date
 from .factory import Creator
+
 
 
 class Workitem(object):
@@ -342,6 +344,78 @@ class Workitem(object):
         service = self._polarion.getService('Tracker')
         service.addHyperlink(self.uri, url, {'id': hyperlink_type.value})
         self._reloadFromPolarion()
+
+    def hasAttachment(self):
+        """
+        Checks if the workitem has attachments
+
+        :return: True/False
+        :rtype: boolean
+        """
+        if self.attachments != None:
+            return True
+        return False
+    
+    def getAttachment(self, id):
+        """
+        Get the attachment data
+
+        :param id: The attachment id
+        :return: list of bytes
+        :rtype: bytes[]
+        """
+        service = self._polarion.getService('Tracker')
+        return service.getAttachment(self.uri, id)
+
+    
+    def saveAttachmentAsFile(self, id, file_path):
+        """
+        Save an attachment to file.
+
+        :param id: The attachment id
+        :param file_path: File where to save the attachment
+        """
+        bin = self.getAttachment(id)
+        with open(file_path, "wb") as file:
+            file.write(bin)
+
+    def deleteAttachment(self, id):
+        """
+        Delete an attachment.
+
+        :param id: The attachment id
+        """
+        service = self._polarion.getService('Tracker')
+        service.deleteAttachment(self.uri, id)
+        self._reloadFromPolarion()
+
+    def addAttachment(self, file_path, title):
+        """
+        Upload an attachment
+
+        :param file_path: Source file to upload
+        :param title: The title of the attachment
+        """
+        service = self._polarion.getService('Tracker')
+        file_name = os.path.split(file_path)[1]
+        with open(file_path, "rb") as file_content:
+            service.createAttachment(self.uri, file_name, title, file_content.read())
+        self._reloadFromPolarion()
+
+    def updateAttachment(self, id, file_path, title):
+        """
+        Upload an attachment
+
+        :param id: The attachment id
+        :param file_path: Source file to upload
+        :param title: The title of the attachment
+        """
+        service = self._polarion.getService('Tracker')
+        file_name = os.path.split(file_path)[1]
+        with open(file_path, "rb") as file_content:
+            service.updateAttachment(self.uri, id, file_name, title, file_content.read())
+        self._reloadFromPolarion()
+
 
     def save(self):
         """

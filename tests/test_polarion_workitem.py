@@ -6,6 +6,8 @@ from time import sleep
 from datetime import datetime
 import mock
 from polarion.factory import createFromUri
+from filecmp import cmp
+from shutil import copyfile
 
 
 class TestPolarionWorkitem(unittest.TestCase):
@@ -238,3 +240,34 @@ class TestPolarionWorkitem(unittest.TestCase):
         
         self.assertEqual(self.global_workitem.author.id, author.id,
                          msg='Authors not identical')
+
+    def test_attachment(self):
+        self.assertFalse(self.global_workitem.hasAttachment(), msg='Workitem already has attachments')
+        src_1 = 'tests/test_image_1.png'
+        src_2 = 'tests/test_image_2.png'
+        dst = 'tests/test_image.png'
+        download = 'tests/test_image_result.png'
+        copyfile(src_1, dst)
+
+        self.global_workitem.addAttachment(dst, 'Test image 1')
+
+        self.assertTrue(self.global_workitem.hasAttachment(), msg='Workitem has no attachments')
+
+        attachment_id = self.global_workitem.attachments.Attachment[0].id
+
+        self.global_workitem.saveAttachmentAsFile(attachment_id, download)
+
+        self.assertTrue(cmp(src_1, download), 'File downloaded from polarion not the same')
+        
+        copyfile(src_2, dst)
+
+        self.global_workitem.updateAttachment(attachment_id, dst, 'Test image 1')
+
+        self.global_workitem.saveAttachmentAsFile(attachment_id, download)
+
+        self.assertTrue(cmp(src_2, download), 'File downloaded from polarion not the same')
+        self.assertFalse(cmp(src_1, download), 'File downloaded from polarion is the same as the old file')
+
+        self.global_workitem.deleteAttachment(attachment_id)
+
+        self.assertFalse(self.global_workitem.hasAttachment(), msg='Workitem has attachments, but should not')
