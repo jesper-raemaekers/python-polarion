@@ -5,7 +5,7 @@ from lxml import etree
 import requests
 import re
 from urllib.parse import urljoin
-
+from .factory import createFromUri
 from .workitem import Workitem
 from .testrun import Testrun
 from .user import User
@@ -118,6 +118,17 @@ class Project(object):
             return_list.append(
                 Testrun(self.polarion, polarion_test_run=test_run))
         return return_list
+
+    def createTestRun(self, id, title, template_id):
+        """
+        Create a new test run with specified title from an existing test run template
+        :param id: 
+        :param title: 
+        :param template_id: 
+        """
+        service = self.polarion.getService('TestManagement')
+        new_testrun_uri = service.createTestRunWithTitle(self.id, id, title, template_id)
+        return createFromUri(self.polarion, self, new_testrun_uri)
 
     def getEnum(self, enum_name):
         """Get the options for a selected enumeration
