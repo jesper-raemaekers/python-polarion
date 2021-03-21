@@ -53,9 +53,10 @@ class Testrun(object):
 
             self.records = []
             if self._records != None:
-                for r in self._records.TestRecord:
+                # for r in self._records.TestRecord:
+                for index, r in enumerate(self._records.TestRecord):
                     self.records.append(
-                        Record(self._polarion, self, r))
+                        Record(self._polarion, self, r, index))
 
     def _reloadFromPolarion(self):
         service = self._polarion.getService('TestManagement')
