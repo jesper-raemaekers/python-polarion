@@ -122,6 +122,27 @@ Some workitems are test cases and can contain test steps. Use :func:`~Workitem.h
 Currently the :attr:`~Workitem._parsed_test_steps` holds the test steps.
 
 
+Attachments
+^^^^^^^^^^^^^^^^^^
+
+A workitem  may have an attachment. An example for working with attachments:
+
+.. code:: python
+
+    workitem = project.getWorkitem('PYTH-524')
+    #upload a file
+    workitem.addAttachment(path_to_file, 'file title')
+    workitem.hasAttachment() # now true
+    #download a file
+    attachment_id = workitem.attachments.TestRunAttachment[0].id  
+    workitem.saveAttachmentAsFile(attachment_id, path_to_new_file)
+    #update a file
+    workitem.updateAttachment(attachment_id, path_to_file, 'file title')
+    #deleting attachment
+    workitem.deleteAttachment(attachment_id)
+
+
+
 Helpers
 ^^^^^^^
 
@@ -137,7 +158,7 @@ The workitem class implements the __eq__ method allowing it to be compared.
 
 
 List of available attributes
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+----------------------------
 
 The attributes are set in the workitem when loading it from polarion. An attribute can be None (when it is not set), a string, number or datetime, or another object.
 When accessing any attribute, a check for None is recommended as the only attributes that are always set are:

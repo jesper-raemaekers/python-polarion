@@ -8,6 +8,47 @@ The test run class provides access to the test records.
 
 Currently the :attr:`~Testrun.records` holds the test records.
 
+Creating a new test run using :class:`.Project` class
+
+.. code:: python
+
+    new_test_run = project.createTestRun('New-id', 'New test run title', 'template-id')
+
+accessing an existing test run:
+
+.. code:: python
+
+    existing_test_run = self.checking_project.getTestRun('test-id')
+
+
+Set the test run status:
+
+.. code:: python
+
+    existing_test_run.status.id = 'verifiedPassed'
+    existing_test_run.save()
+
+.. note::
+    There is currently no way to get the possible statuses for test run. Look in your Polarion config to find these values.
+
+
+Attachments
+--------------
+
+A test run may have an attachment related to the test run. An example for working with attachments:
+
+.. code:: python
+
+    existing_test_run = self.checking_project.getTestRun('test-id')
+    #upload a file
+    existing_test_run.addAttachment(path_to_file, 'file title')
+    existing_test_run.hasAttachment() # now true
+    #download a file
+    attachment_name = existing_test_run.attachments.TestRunAttachment[0].fileName  
+    existing_test_run.saveAttachmentAsFile(attachment_name, path_to_new_file)
+    #deleting attachment
+    existing_test_run.deleteAttachment(attachment_name)
+
 
 List of available attributes
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
