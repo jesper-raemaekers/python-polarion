@@ -144,9 +144,12 @@ class Testrun(object):
         Update the testrun in polarion
         """
         updated_item = {}
+        skip = ['records']
 
         for attr, value in self._polarion_test_run.__dict__.items():
             for key in value:
+                if key in skip:
+                    continue
                 current_value = getattr(self, key)
                 prev_value = getattr(self._original_polarion_test_run, key)
                 if current_value != prev_value:
