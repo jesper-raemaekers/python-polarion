@@ -4,6 +4,7 @@ from polarion.project import Project
 from keys import polarion_user, polarion_password, polarion_url, polarion_project_id
 from time import sleep
 import mock
+from datetime import datetime
 
 
 class TestPolarionProject(unittest.TestCase):
@@ -74,3 +75,8 @@ class TestPolarionProject(unittest.TestCase):
 
         test_run = self.project.getTestRun(test_runs[0].id)
         self.assertIsNotNone(test_run)
+
+    def test_create_testrun(self):
+        test_run = self.project.createTestRun('unit-' + datetime.now().strftime("%d-%m-%Y-%H-%M-%S"), 'New unit test run', 'unittest-01')
+        self.assertIsNotNone(test_run)
+        

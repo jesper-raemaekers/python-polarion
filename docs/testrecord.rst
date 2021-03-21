@@ -4,6 +4,74 @@ Polarion Test record
 Usage
 --------------
 
+Set the test case status:
+
+.. code:: python
+
+    # get a record from the test run
+    test_record = test_run.records[0]
+    #set status
+    test_record.setResult(Record.ResultType.PASSED, 'some optional comment')
+
+An exception is raised if the test run is not marked as automatic. Manual test cases require signing via Polarion web interface.
+
+.. code::
+
+    zeep.exceptions.Fault: java.lang.IllegalStateException: It is not allowed to sign on behalf of another user.
+
+
+Set the status of an individual test case step:
+
+.. code:: python
+
+    # get a record from the test run
+    test_record = test_run.records[0]
+    #set status
+    test_record.setTestStepResult(step_index, Record.ResultType.PASSED, 'See attachment')
+
+Where step_index is a valid range for the current test case.
+
+
+
+Attachments
+--------------
+
+To prove a test case, a attachment may be uploaded to test records and test case steps.  An example for the record attachments:
+
+.. code:: python
+
+    test_record = test_run.records[0]
+    #upload a file
+    test_record.addAttachment(path_to_file, 'file title')
+    test_record.hasAttachment() # now true
+    #download a file
+    attachment_name = test_record.attachments.TestRunAttachment[0].fileName  
+    test_record.saveAttachmentAsFile(attachment_name, path_to_new_file)
+    #deleting attachment
+    test_record.deleteAttachment(attachment_name)
+
+
+.. note::
+    Attachments to the record can only be uploaded if the record result has been set
+
+An example for step attachments:
+
+.. code:: python
+
+    test_record = test_run.records[0]
+    #upload a file
+    test_record.addAttachmentToTestStep(step_index, path_to_file, 'file title')
+    test_record.testStepHasAttachment(step_index) # now true
+    #download a file
+    attachment_name = test_record.testStepResults.TestStepResult[step_index].attachments.TestRunAttachment[0].fileName
+    test_record.saveAttachmentFromTestStepAsFile(step_index, attachment_name, path_to_new_file)
+    #deleting attachment
+    test_record.deleteAttachmentFromTestStep(step_index, attachment_name)
+    
+
+.. note::
+    Attachments to the test steps can only be uploaded if the test step result has been set.
+
 
 List of available attributes
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
