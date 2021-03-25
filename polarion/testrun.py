@@ -88,11 +88,11 @@ class Testrun(object):
         """
         service = self._polarion.getService('TestManagement')
         at = service.getTestRunAttachment(self.uri, file_name)
-        resp = requests.get(at.url, auth=(self._polarion.user, self._polarion.password))
-        if resp.ok == True:
-            return resp.content
-        else:
-            raise Exception(f'Could not download attachment {file_name}')
+        if at != None:
+            resp = requests.get(at.url, auth=(self._polarion.user, self._polarion.password))
+            if resp.ok == True:
+                return resp.content
+        raise Exception(f'Could not download attachment {file_name}')
 
     
     def saveAttachmentAsFile(self, file_name, file_path):
