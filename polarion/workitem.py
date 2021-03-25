@@ -70,9 +70,7 @@ class Workitem(object):
         self._buildWorkitemFromPolarion()
 
     def _buildWorkitemFromPolarion(self):
-        if self._polarion_item != None:
-            if self._polarion_item.unresolvable == True:
-                raise Exception(f'Workitem unresolvable')
+        if self._polarion_item != None and self._polarion_item.unresolvable == False:
             self._original_polarion = copy.deepcopy(self._polarion_item)
             for attr, value in self._polarion_item.__dict__.items():
                 for key in value:
@@ -98,6 +96,8 @@ class Workitem(object):
                             current_row[columns[col_id]
                                         ] = row.values.Text[col_id].content
                         self._parsed_test_steps.append(current_row)
+        else:
+            raise Exception(f'Workitem not retrieved from Polarion')
 
     def getAuthor(self):
         """

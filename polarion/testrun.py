@@ -43,7 +43,7 @@ class Testrun(object):
 
 
     def _buildWorkitemFromPolarion(self):
-        if self._polarion_test_run != None:
+        if self._polarion_test_run != None and self._polarion_test_run.unresolvable == False:
             for attr, value in self._polarion_test_run.__dict__.items():
                 for key in value:
                     if key == 'records':
@@ -57,6 +57,9 @@ class Testrun(object):
                 for index, r in enumerate(self._records.TestRecord):
                     self.records.append(
                         Record(self._polarion, self, r, index))
+        else:
+            raise Exception(f'Testrun not retrieved from Polarion')
+            
 
     def _reloadFromPolarion(self):
         service = self._polarion.getService('TestManagement')
