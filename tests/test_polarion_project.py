@@ -63,6 +63,9 @@ class TestPolarionProject(unittest.TestCase):
     def test_non_existent_project(self):
         self.assertRaises(Exception, Project.__init__, self.pol, 'fake_id')
 
+    def test_non_existent_testrun(self):
+        self.assertRaises(Exception, self.project.getTestRun, 'fake_id')
+
     def test_get_enum(self):
         status = self.project.getEnum('status')
 

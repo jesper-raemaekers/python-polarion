@@ -18,11 +18,13 @@ class User(object):
             service = self._polarion.getService('Project')
             self._polarion_record = service.getUserByUri(self._uri)
 
-        if self._polarion_record!= None:
+        if self._polarion_record!= None and self._polarion_record.unresolvable == False:
             # parse all polarion attributes to this class
             for attr, value in self._polarion_record.__dict__.items():
                 for key in value:
                     setattr(self, key, value[key])
+        else:
+            raise Exception(f'User not retrieved from Polarion')
 
     def __eq__(self, other):
         if self.id == other.id:

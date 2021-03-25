@@ -43,7 +43,7 @@ class Testrun(object):
 
 
     def _buildWorkitemFromPolarion(self):
-        if self._polarion_test_run != None:
+        if self._polarion_test_run != None and self._polarion_test_run.unresolvable == False:
             for attr, value in self._polarion_test_run.__dict__.items():
                 for key in value:
                     if key == 'records':
@@ -57,6 +57,9 @@ class Testrun(object):
                 for index, r in enumerate(self._records.TestRecord):
                     self.records.append(
                         Record(self._polarion, self, r, index))
+        else:
+            raise Exception(f'Testrun not retrieved from Polarion')
+            
 
     def _reloadFromPolarion(self):
         service = self._polarion.getService('TestManagement')
@@ -85,11 +88,11 @@ class Testrun(object):
         """
         service = self._polarion.getService('TestManagement')
         at = service.getTestRunAttachment(self.uri, file_name)
-        resp = requests.get(at.url, auth=(self._polarion.user, self._polarion.password))
-        if resp.ok == True:
-            return resp.content
-        else:
-            raise Exception(f'Could not download attachment {file_name}')
+        if at != None:
+            resp = requests.get(at.url, auth=(self._polarion.user, self._polarion.password))
+            if resp.ok == True:
+                return resp.content
+        raise Exception(f'Could not download attachment {file_name}')
 
     
     def saveAttachmentAsFile(self, file_name, file_path):
