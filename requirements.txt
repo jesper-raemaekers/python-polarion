@@ -14,7 +14,7 @@ idna==2.10
 importlib-metadata==3.7.2
 isodate==0.6.0
 keyring==23.0.0
-lxml==4.6.2
+lxml==4.6.3
 mock==4.0.3
 packaging==20.9
 pep517==0.9.1
