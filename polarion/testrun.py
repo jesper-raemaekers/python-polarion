@@ -52,14 +52,17 @@ class Testrun(object):
                         setattr(self, key, value[key])
 
             self.records = []
+            self._record_dict = {}
             if self._records != None:
                 # for r in self._records.TestRecord:
                 for index, r in enumerate(self._records.TestRecord):
                     self.records.append(
                         Record(self._polarion, self, r, index))
+                    if r.testcase_id not in self._record_dict:
+                        self._record_dict[r.testcase_id] = self.records[-1]
+
         else:
             raise Exception(f'Testrun not retrieved from Polarion')
-            
 
     def _reloadFromPolarion(self):
         service = self._polarion.getService('TestManagement')
@@ -67,9 +70,31 @@ class Testrun(object):
         self._buildWorkitemFromPolarion()
         self._original_polarion_test_run = copy.deepcopy(self._polarion_test_run)
 
+    def hasTestCase(self, id):
+        """
+        Checks if the the specified test case id is in the records.
+
+        :return: True/False
+        :rtype: boolean
+        """
+        if id in self._record_dict:
+            return True
+        return False
+
+    def getTestCase(self, id):
+        """
+        Get the specified test case record from the test run records
+
+        :return: Specified record fi ti exists
+        :rtype: Record
+        """
+        if self.hasTestCase(id):
+            return self._record_dict[id]
+        return None
+
     def hasAttachment(self):
         """
-        Checks if the workitem has attachments
+        Checks if the test run has attachments
 
         :return: True/False
         :rtype: boolean
