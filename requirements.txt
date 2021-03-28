@@ -10,6 +10,7 @@ coverage==5.5
 defusedxml==0.7.1
 discover==0.4.0
 docutils==0.16
+gitchangelog==3.0.4
 idna==2.10
 importlib-metadata==3.7.2
 isodate==0.6.0
