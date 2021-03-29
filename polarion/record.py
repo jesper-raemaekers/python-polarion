@@ -98,7 +98,14 @@ class Record(object):
         if self.comment != None:
             return self.comment.content
         return None
-    
+
+    @property
+    def testcase_id(self):
+        """
+        The test case name including prefix
+        """
+        return self._testcase_name
+
     def getTestCaseName(self):
         """
         Get the test case name including prefix

@@ -27,6 +27,22 @@ class TestPolarionTestrun(unittest.TestCase):
     def setUp(self):
         pass
 
+    def test_record_list(self):
+        #build list of recods
+        checking_testrun = self.checking_project.getTestRun(self.executing_test_run.id)
+        list_record = []
+        for r in checking_testrun.records:
+            list_record.append(r.getTestCaseName())
+
+            self.assertTrue(self.executing_test_run.hasTestCase(r.getTestCaseName()), msg='Test run does not have test case it should have')
+            executing_record = self.executing_test_run.getTestCase(r.getTestCaseName())
+            checking_record = checking_testrun.getTestCase(r.getTestCaseName())
+            
+            self.assertEqual(executing_record.getTestCaseName(), checking_record.getTestCaseName(), msg='Records did not match')
+        
+        self.assertFalse(self.executing_test_run.hasTestCase(list_record[0] + 'invalid'), msg='Invalid test case was available')
+        self.assertIsNone(self.executing_test_run.getTestCase(list_record[0] + 'invalid'), msg='Invalid test case was returned')
+
 
     def test_run_status(self):
         self.assertEqual(self.executing_test_run.status.id, 'open', msg='Status is not open')
