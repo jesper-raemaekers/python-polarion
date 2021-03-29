@@ -1,0 +1,123 @@
+Changelog
+=========
+
+
+V0.1.11
+-------
+- Added gitchangelog config file. [Jesper Raemaekers]
+- License changed to MIT. [Jesper Raemaekers]
+- Added unit-test for test run helpers. [jesper.raemaekers]
+- Corrected check on record id in test run. [jesper.raemaekers]
+- Update test record doc. [Jesper Raemaekers]
+- Adding method for checking for specific test case id. [Jesper
+  Raemaekers]
+
+
+V0.1.10_20210325.4 (2021-03-25)
+-------------------------------
+- Bump lxml from 4.6.2 to 4.6.3 in /docs. [dependabot[bot]]
+
+  Bumps [lxml](https://github.com/lxml/lxml) from 4.6.2 to 4.6.3.
+  - [Release notes](https://github.com/lxml/lxml/releases)
+  - [Changelog](https://github.com/lxml/lxml/blob/master/CHANGES.txt)
+  - [Commits](https://github.com/lxml/lxml/compare/lxml-4.6.2...lxml-4.6.3)
+- Bump lxml from 4.6.2 to 4.6.3. [dependabot[bot]]
+
+  Bumps [lxml](https://github.com/lxml/lxml) from 4.6.2 to 4.6.3.
+  - [Release notes](https://github.com/lxml/lxml/releases)
+  - [Changelog](https://github.com/lxml/lxml/blob/master/CHANGES.txt)
+  - [Commits](https://github.com/lxml/lxml/compare/lxml-4.6.2...lxml-4.6.3)
+
+
+V0.1.9_20210325.1 (2021-03-25)
+------------------------------
+- Added user test and none check to attachment. [jesper.raemaekers]
+- Added check on resolvability test run. [jesper.raemaekers]
+
+
+V0.1.8_20210321.1 (2021-03-21)
+------------------------------
+- Update docs with attachment info. [jesper.raemaekers]
+- Added check for executing user. [jesper.raemaekers]
+- Added ignored property to testrun save. [jesper.raemaekers]
+- Added test step attachment support. [jesper.raemaekers]
+- Adding attachment support for test record. [jesper.raemaekers]
+- Adding attachment support to testrun. [jesper.raemaekers]
+- Adding attachment methods to workitem. [jesper.raemaekers]
+
+
+V0.1.7_20210318.1 (2021-03-18)
+------------------------------
+- Added user getter to record. [jesper.raemaekers]
+- Added uri factory for workitem, testrun and user. [jesper.raemaekers]
+
+
+V0.1.6_20210317.1 (2021-03-17)
+------------------------------
+- Added getter for test case name. [jesper.raemaekers]
+- Added user compare and updated workitem tests. [jesper.raemaekers]
+- Removed dead code and check for empty query. [jesper.raemaekers]
+- Added discover tot requirements to run all unittests on devops.
+  [jesper.raemaekers]
+- Chapter cleanup. [Jesper Raemaekers]
+- Created seperate page for test records. [Jesper Raemaekers]
+- Added table to testrun doc. [Jesper Raemaekers]
+- Formatted list in readme. [Jesper Raemaekers]
+- Added list of workitem attributes. [Jesper Raemaekers]
+
+
+V0.1.5_20210311.14 (2021-03-11)
+-------------------------------
+- Updated compare function to handle array types. [jesper.raemaekers]
+
+
+V0.1.4_20210311.12 (2021-03-11)
+-------------------------------
+- Workitem now reloads after change. [jesper.raemaekers]
+- Badges on one line. [jesper.raemaekers]
+- Add new build links to readme. [jesper.raemaekers]
+- Added twine. [jesper.raemaekers]
+- Added build to requirements. [jesper.raemaekers]
+- Added coverage to requirements. [jesper.raemaekers]
+- Added xml reporting. [jesper.raemaekers]
+- Delete azure-pipelines.yml. [jesper-raemaekers]
+- Set up CI with Azure Pipelines. [jesper-raemaekers]
+
+  [skip ci]
+- Adding requirements. [jesper.raemaekers]
+- Use fresh workitem for test. [jesper.raemaekers]
+- Unit test now fails due to workitem not reloading with fresh polarion
+  data. [jesper.raemaekers]
+- Added workitem compare. [jesper.raemaekers]
+- Project test and workitem test file added. [jesper.raemaekers]
+- Added project creation test. [jesper.raemaekers]
+- First unittests. [jesper.raemaekers]
+- Applied new way of setting via types. [jesper.raemaekers]
+- Added types to polarion and record step result setting.
+  [jesper.raemaekers]
+- Adding author gette. [jesper.raemaekers]
+- Update doc link in readme. [jesper.raemaekers]
+- Updated comment. [jesper.raemaekers]
+- Added a static services list #1. [jesper.raemaekers]
+
+
+V0.1.2 (2021-03-03)
+-------------------
+- Added assignee handling. [jesper.raemaekers]
+- Getting users from project. [jesper.raemaekers]
+- Resolution setting. [jesper.raemaekers]
+- Add searching for workitems. [jesper.raemaekers]
+
+
+V0.1.1 (2021-03-02)
+-------------------
+- Updating readme to point to documentation. [jesper.raemaekers]
+- Basic documentation for the other classes. [jesper.raemaekers]
+- Workitem comments. [jesper.raemaekers]
+- Updated requirements.txt. [jesper.raemaekers]
+- Adding the requirements.txt for readthedocs. [jesper.raemaekers]
+- Doc updates. [jesper.raemaekers]
+- Fixed styling. [jesper.raemaekers]
+- Added documentation start. [jesper.raemaekers]
+
+
