@@ -56,10 +56,10 @@ class Testrun(object):
             if self._records != None:
                 # for r in self._records.TestRecord:
                 for index, r in enumerate(self._records.TestRecord):
-                    self.records.append(
-                        Record(self._polarion, self, r, index))
-                    if r.testcase_id not in self._record_dict:
-                        self._record_dict[r.testcase_id] = self.records[-1]
+                    new_record = Record(self._polarion, self, r, index)
+                    self.records.append(new_record)
+                    if new_record.testcase_id not in self._record_dict:
+                        self._record_dict[new_record.testcase_id] = new_record
 
         else:
             raise Exception(f'Testrun not retrieved from Polarion')
