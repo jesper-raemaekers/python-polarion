@@ -262,7 +262,7 @@ class Workitem(object):
 
         :param status: name of the status
         """
-        if status in self.getVailableStatus():
+        if status in self.getAvailableStatus():
             self.status.id = status
             self.save()
 

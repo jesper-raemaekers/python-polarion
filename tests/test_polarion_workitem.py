@@ -271,3 +271,15 @@ class TestPolarionWorkitem(unittest.TestCase):
         self.global_workitem.deleteAttachment(attachment_id)
 
         self.assertFalse(self.global_workitem.hasAttachment(), msg='Workitem has attachments, but should not')
+    
+    def test_set_status(self):
+        executed_workitem = self.executing_project.createWorkitem('task')
+
+        new_value = 'random_val'
+        executed_workitem.setStatus(new_value)
+        self.assertNotEqual(executed_workitem.status.id, new_value, msg="Workitem should not have updated to illegal value")
+
+        new_value = executed_workitem.getAvailableStatus()[-1]
+        executed_workitem.setStatus(new_value)
+        self.assertEqual(executed_workitem.status.id, new_value, msg="Workitem should have updated to new value")
+
