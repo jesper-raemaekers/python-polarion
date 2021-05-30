@@ -19,7 +19,7 @@ class TestPolarionTestrun(unittest.TestCase):
         cls.executing_project = cls.pol.getProject(
             polarion_project_id)
             
-        cls.executing_test_run = cls.executing_project.createTestRun('unit-' + datetime.now().strftime("%d-%m-%Y-%H-%M-%S"), 'New unit test run', 'unittest-01')
+        cls.executing_test_run = cls.executing_project.createTestRun('unit-' + datetime.now().strftime("%d-%m-%Y-%H-%M-%S-%f"), 'New unit test run', 'unittest-01')
 
         cls.checking_project = cls.pol.getProject(
             polarion_project_id)

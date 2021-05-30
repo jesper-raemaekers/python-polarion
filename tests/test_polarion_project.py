@@ -80,6 +80,6 @@ class TestPolarionProject(unittest.TestCase):
         self.assertIsNotNone(test_run)
 
     def test_create_testrun(self):
-        test_run = self.project.createTestRun('unit-' + datetime.now().strftime("%d-%m-%Y-%H-%M-%S"), 'New unit test run', 'unittest-01')
+        test_run = self.project.createTestRun('unit-' + datetime.now().strftime("%d-%m-%Y-%H-%M-%S-%f"), 'New unit test run', 'unittest-01')
         self.assertIsNotNone(test_run)
         

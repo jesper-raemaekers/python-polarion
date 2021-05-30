@@ -22,7 +22,7 @@ class TestPolarionTestRecord(unittest.TestCase):
             polarion_url, polarion_user, polarion_password)
         cls.executing_project = cls.pol.getProject(
             polarion_project_id)
-        cls.testrun_id = 'unit-' + datetime.now().strftime("%d-%m-%Y-%H-%M-%S")
+        cls.testrun_id = 'unit-' + datetime.now().strftime("%d-%m-%Y-%H-%M-%S-%f")
         cls.executing_test_run = cls.executing_project.createTestRun(cls.testrun_id, 'New unit test run', 'unittest-01')
         cls.executing_test_record = cls.executing_test_run.records[0]
 

@@ -2,8 +2,16 @@ Changelog
 =========
 
 
-V0.1.11
+V0.1.12
 -------
+- Added ms to test run name name to avoid two identical ones.
+  [jesper.raemaekers]
+- Corrected typo reported in #15 and created test for it.
+  [jesper.raemaekers]
+
+
+V0.1.11 (2021-03-29)
+--------------------
 - Added gitchangelog config file. [Jesper Raemaekers]
 - License changed to MIT. [Jesper Raemaekers]
 - Added unit-test for test run helpers. [jesper.raemaekers]
@@ -119,5 +127,22 @@ V0.1.1 (2021-03-02)
 - Doc updates. [jesper.raemaekers]
 - Fixed styling. [jesper.raemaekers]
 - Added documentation start. [jesper.raemaekers]
+
+
+V0.1.0 (2021-02-28)
+-------------------
+- Removed vscode file. [jesper.raemaekers]
+- Update readme. [jesper.raemaekers]
+- Little cleanup. [jesper.raemaekers]
+- Adding status setter. [jesper.raemaekers]
+- Added comments and hyperlinks to workitem. [jesper.raemaekers]
+- New method of getting values for workitem. [jesper.raemaekers]
+- Testing with attributes. [jesper.raemaekers]
+- Trying to build for pypi. [jesper.raemaekers]
+- Pypi testing. [jesper.raemaekers]
+- Renamed folder. [jesper.raemaekers]
+- Added test run related classes. [Jesper Raemaekers]
+- Test setup for creating structures. [Jesper Raemaekers]
+- Initial commit. [jesper-raemaekers]
 
 
