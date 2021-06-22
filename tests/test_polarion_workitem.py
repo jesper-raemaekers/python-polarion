@@ -283,3 +283,20 @@ class TestPolarionWorkitem(unittest.TestCase):
         executed_workitem.setStatus(new_value)
         self.assertEqual(executed_workitem.status.id, new_value, msg="Workitem should have updated to new value")
 
+    def test_add_link(self):
+        executed_workitem_1 = self.executing_project.createWorkitem('task')
+        executed_workitem_2 = self.executing_project.createWorkitem('task')
+        executed_workitem_3 = self.executing_project.createWorkitem('task')
+
+        self.assertIsNone(executed_workitem_1.linkedWorkItems, msg='Workitem already has a link')
+        self.assertIsNone(executed_workitem_2.linkedWorkItems, msg='Workitem already has a link')
+
+        executed_workitem_1.addLinkedItem(executed_workitem_2, 'relates_to')
+
+        self.assertIsNotNone(executed_workitem_1.linkedWorkItems, msg='Workitem already has no link')
+
+        executed_workitem_1.addLinkedItem(executed_workitem_3, 'relates_to')
+
+
+
+

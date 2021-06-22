@@ -117,6 +117,10 @@ class Polarion(object):
             'TestManagement', 'ns4:TestStepResult')
         self.WorkItemType = self.getTypeFromService(
             'Tracker', 'ns2:WorkItem')
+        self.LinkedWorkItemType = self.getTypeFromService(
+            'Tracker', 'ns2:LinkedWorkItem')
+        self.LinkedWorkItemArrayType = self.getTypeFromService(
+            'Tracker', 'ns2:ArrayOfLinkedWorkItem')
 
     def hasService(self, name: str):
         """

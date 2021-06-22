@@ -254,7 +254,7 @@ class Workitem(object):
         :param actionId: number for the action to preform
         """
         service = self._polarion.getService('Tracker')
-        service.performWorkflowAction(self.uri, action)
+        service.performWorkflowAction(self.uri, actionId)
 
     def setStatus(self, status):
         """
@@ -344,6 +344,19 @@ class Workitem(object):
         service = self._polarion.getService('Tracker')
         service.addHyperlink(self.uri, url, {'id': hyperlink_type.value})
         self._reloadFromPolarion()
+
+    def addLinkedItem(self, workitem, link_type):
+        """
+            Add a link to a workitem
+
+            :param workitem: A workitem
+            :param link_type: The link type
+        """
+
+        service = self._polarion.getService('Tracker')
+        service.addLinkedItem(self.uri, workitem.uri, role={'id': link_type})
+        self._reloadFromPolarion()
+
 
     def hasAttachment(self):
         """
