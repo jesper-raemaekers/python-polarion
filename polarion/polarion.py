@@ -133,8 +133,14 @@ class Polarion(object):
     def getService(self, name: str):
         """
         Get a WSDL service client. The name can be 'Trakcer' or 'Session'
-        TODO: When a service is requested, check if the user's sessions is still valid.
         """
+        # request user info to see if we're still logged in
+        try:
+            _user = self.services['Project']['client'].service.getUser(self.user)
+        except:
+            # if not, create a new session
+            self._createSession()
+
         if name in self.services:
             return self.services[name]['client'].service
         else:
