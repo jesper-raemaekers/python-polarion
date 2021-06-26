@@ -192,6 +192,19 @@ class Workitem(object):
         except:
             return []
 
+    def getAllowedCustomKeys(self):
+        """
+        Gets the list of keys that the workitem is allowed to have.
+
+        :return: An array of strings of the keys
+        :rtype: string[]
+        """
+        try:
+            service = self._polarion.getService('Tracker')
+            return service.getCustomFieldKeys(self.uri)
+        except:
+            return []
+
     def getAvailableStatus(self):
         """
         Get all available status option for this workitem
