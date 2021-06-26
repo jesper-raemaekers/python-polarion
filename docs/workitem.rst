@@ -141,6 +141,36 @@ A workitem  may have an attachment. An example for working with attachments:
     #deleting attachment
     workitem.deleteAttachment(attachment_id)
 
+Linking
+^^^^^^^
+
+Workitems can be linked together using :func:`~Workitem.addLinkedItem`. In this example new_workitem_2 'relates to' new_workitem_1. new_workitem_1 will have the oppoite 'is related to' link.
+
+.. code:: python
+
+    new_workitem_2.addLinkedItem(new_workitem_1, 'relates_to')
+
+
+Custom fields
+^^^^^^^^^^^^^
+
+If the workitem has any custom fields, they will be accessible via the customFields property. The method :func:`~Workitem.setCustomField` is available to set custom field values.
+This method will create the custom field structure if not available.
+
+.. code:: python
+
+    workitem1.setCustomField('string_field', 'new string')
+    workitem1.setCustomField('int_field', 99)
+    workitem1.setCustomField('custom_enum_field', client.EnumOptionIdType(id='okay'))
+
+Enums can be configured so that multiple options can be selected. This is not supported via the workitem class, but can be achieved manually.
+
+.. code:: python
+
+    enum_array = client.ArrayOfEnumOptionIdType()
+    enum_array.EnumOptionId.append(client.EnumOptionIdType(id='open'))
+    enum_array.EnumOptionId.append(client.EnumOptionIdType(id='done'))
+    workitem1.setCustomField('multi_enum_field', enum_array)
 
 
 Helpers
@@ -191,7 +221,7 @@ Some objects only have one attribute, named id, these values can be accessed dir
 +----------------------------+---------------------------+----------------------+-------------------------+
 | created                    | datetime                  | No                   | No                      |
 +----------------------------+---------------------------+----------------------+-------------------------+
-| customFields               |                           | No                   | No                      |
+| customFields               |                           | No                   | setCustomField          |
 +----------------------------+---------------------------+----------------------+-------------------------+
 | description                | object                    | getDescription       | setDescription          |
 +----------------------------+---------------------------+----------------------+-------------------------+
@@ -211,7 +241,7 @@ Some objects only have one attribute, named id, these values can be accessed dir
 +----------------------------+---------------------------+----------------------+-------------------------+
 | linkedRevisionsDerived     |                           | No                   | No                      |
 +----------------------------+---------------------------+----------------------+-------------------------+
-| linkedWorkItems            |                           | No                   | No                      |
+| linkedWorkItems            |                           | No                   | addLinkedItem           |
 +----------------------------+---------------------------+----------------------+-------------------------+
 | linkedWorkItemsDerived     |                           | No                   | No                      |
 +----------------------------+---------------------------+----------------------+-------------------------+

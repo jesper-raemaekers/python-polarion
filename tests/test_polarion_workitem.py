@@ -285,8 +285,7 @@ class TestPolarionWorkitem(unittest.TestCase):
 
     def test_add_link(self):
         executed_workitem_1 = self.executing_project.createWorkitem('task')
-        executed_workitem_2 = self.executing_project.createWorkitem('task')
-        executed_workitem_3 = self.executing_project.createWorkitem('task')
+        executed_workitem_2 = self.executing_project.createWorkitem('task')        
 
         self.assertIsNone(executed_workitem_1.linkedWorkItems, msg='Workitem already has a link')
         self.assertIsNone(executed_workitem_2.linkedWorkItems, msg='Workitem already has a link')
@@ -295,8 +294,94 @@ class TestPolarionWorkitem(unittest.TestCase):
 
         self.assertIsNotNone(executed_workitem_1.linkedWorkItems, msg='Workitem already has no link')
 
-        executed_workitem_1.addLinkedItem(executed_workitem_3, 'relates_to')
+        checking_workitem_1 = self.checking_project.getWorkitem(executed_workitem_1.id)
+        checking_workitem_2 = self.checking_project.getWorkitem(executed_workitem_2.id)
+
+        self.assertEqual('relates_to', checking_workitem_1.linkedWorkItems.LinkedWorkItem[0].role.id)
+        self.assertEqual('relates_to', checking_workitem_2.linkedWorkItemsDerived.LinkedWorkItem[0].role.id)
+        self.assertEqual(checking_workitem_2.uri, checking_workitem_1.linkedWorkItems.LinkedWorkItem[0].workItemURI)
+        self.assertEqual(checking_workitem_1.uri, checking_workitem_2.linkedWorkItemsDerived.LinkedWorkItem[0].workItemURI)
 
 
+    def test_remove_link(self):
+        executed_workitem_1 = self.executing_project.createWorkitem('task')
+        executed_workitem_2 = self.executing_project.createWorkitem('task')      
+        
+        # test 1: create link and remove with role
+        executed_workitem_1.addLinkedItem(executed_workitem_2, 'relates_to') 
+
+        checking_workitem_1 = self.checking_project.getWorkitem(executed_workitem_1.id) 
+
+        self.assertIsNotNone(executed_workitem_1.linkedWorkItems, msg='Workitem already has no link')
+        self.assertIsNotNone(checking_workitem_1.linkedWorkItems, msg='Workitem already has no link')
+
+        executed_workitem_1.removeLinkedItem(executed_workitem_2, 'relates_to')
+
+        checking_workitem_1 = self.checking_project.getWorkitem(executed_workitem_1.id) 
+
+        self.assertIsNone(executed_workitem_1.linkedWorkItems, msg='Workitem already has link remaining')
+        self.assertIsNone(checking_workitem_1.linkedWorkItems, msg='Workitem already has link remaining')
+
+        # test 2: create link and remove without role
+        executed_workitem_1.addLinkedItem(executed_workitem_2, 'relates_to') 
+
+        checking_workitem_1 = self.checking_project.getWorkitem(executed_workitem_1.id) 
+
+        self.assertIsNotNone(executed_workitem_1.linkedWorkItems, msg='Workitem already has no link')
+        self.assertIsNotNone(checking_workitem_1.linkedWorkItems, msg='Workitem already has no link')
+
+        executed_workitem_1.removeLinkedItem(executed_workitem_2)
+
+        checking_workitem_1 = self.checking_project.getWorkitem(executed_workitem_1.id) 
+
+        self.assertIsNone(executed_workitem_1.linkedWorkItems, msg='Workitem already has link remaining')
+        self.assertIsNone(checking_workitem_1.linkedWorkItems, msg='Workitem already has link remaining')
+
+        # test 3: create link and remove from derived item        
+
+        executed_workitem_1.addLinkedItem(executed_workitem_2, 'relates_to') 
+
+        checking_workitem_1 = self.checking_project.getWorkitem(executed_workitem_1.id) 
+
+        self.assertIsNotNone(executed_workitem_1.linkedWorkItems, msg='Workitem already has no link')
+        self.assertIsNotNone(checking_workitem_1.linkedWorkItems, msg='Workitem already has no link')
+
+        executed_workitem_2.removeLinkedItem(executed_workitem_1)
+
+        checking_workitem_1 = self.checking_project.getWorkitem(executed_workitem_1.id) 
+
+        self.assertIsNone(executed_workitem_1.linkedWorkItems, msg='Workitem already has link remaining')
+        self.assertIsNone(checking_workitem_1.linkedWorkItems, msg='Workitem already has link remaining')
+
+    def test_custom_field(self):
+        executed_workitem_1 = self.executing_project.createWorkitem('task')
+
+        self.assertIsNone(executed_workitem_1.customFields, msg='Workitem already has a custom field')
+
+        executed_workitem_1.setCustomField(key='int_field', value=12)
+
+        checking_workitem_1 = self.checking_project.getWorkitem(executed_workitem_1.id) 
+
+        self.assertIsNotNone(executed_workitem_1.customFields, msg='Workitem already does not have a custom field')
+        self.assertEqual(12, executed_workitem_1.customFields.Custom[0].value, msg='value not the same as set')
+        self.assertIsNotNone(checking_workitem_1.customFields, msg='Workitem already does not have a custom field')
+        self.assertEqual(12, checking_workitem_1.customFields.Custom[0].value, msg='value not the same as set')
+
+        executed_workitem_1.setCustomField(key='int_field', value=24)
+
+        checking_workitem_1 = self.checking_project.getWorkitem(executed_workitem_1.id) 
+
+        self.assertEqual(24, executed_workitem_1.customFields.Custom[0].value, msg='value not the same as set')
+        self.assertEqual(24, checking_workitem_1.customFields.Custom[0].value, msg='value not the same as set')
+
+        executed_workitem_1.setCustomField(key='string_field', value='12')
+
+        checking_workitem_1 = self.checking_project.getWorkitem(executed_workitem_1.id) 
+        self.assertEqual('12', executed_workitem_1.customFields.Custom[0].value, msg='value not the same as set')
+        self.assertEqual('12', checking_workitem_1.customFields.Custom[0].value, msg='value not the same as set')
+
+        self.assertRaises(Exception, executed_workitem_1.setCustomField, 'random_invalid_key', 0)
+
+        
 
 

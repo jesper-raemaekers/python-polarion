@@ -107,20 +107,16 @@ class Polarion(object):
 
     def _getTypes(self):
         # TODO: check if the namespace is always the same
-        self.EnumOptionIdType = self.getTypeFromService(
-            'TestManagement', 'ns3:EnumOptionId')
-        self.TextType = self.getTypeFromService(
-            'TestManagement', 'ns1:Text')
-        self.ArrayOfTestStepResultType = self.getTypeFromService(
-            'TestManagement', 'ns4:ArrayOfTestStepResult')
-        self.TestStepResultType = self.getTypeFromService(
-            'TestManagement', 'ns4:TestStepResult')
-        self.WorkItemType = self.getTypeFromService(
-            'Tracker', 'ns2:WorkItem')
-        self.LinkedWorkItemType = self.getTypeFromService(
-            'Tracker', 'ns2:LinkedWorkItem')
-        self.LinkedWorkItemArrayType = self.getTypeFromService(
-            'Tracker', 'ns2:ArrayOfLinkedWorkItem')
+        self.EnumOptionIdType = self.getTypeFromService('TestManagement', 'ns3:EnumOptionId')
+        self.TextType = self.getTypeFromService('TestManagement', 'ns1:Text')
+        self.ArrayOfTestStepResultType = self.getTypeFromService('TestManagement', 'ns4:ArrayOfTestStepResult')
+        self.TestStepResultType = self.getTypeFromService('TestManagement', 'ns4:TestStepResult')
+        self.WorkItemType = self.getTypeFromService('Tracker', 'ns2:WorkItem')
+        self.LinkedWorkItemType = self.getTypeFromService('Tracker', 'ns2:LinkedWorkItem')
+        self.LinkedWorkItemArrayType = self.getTypeFromService('Tracker', 'ns2:ArrayOfLinkedWorkItem')
+        self.ArrayOfCustomType = self.getTypeFromService('Tracker', 'ns2:ArrayOfCustom')
+        self.CustomType = self.getTypeFromService('Tracker', 'ns2:Custom')
+        self.ArrayOfEnumOptionIdType = self.getTypeFromService('Tracker', 'ns2:ArrayOfEnumOptionId')
 
     def hasService(self, name: str):
         """

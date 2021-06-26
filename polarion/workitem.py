@@ -347,6 +347,30 @@ class Workitem(object):
         service.addComment(parent, title, content)
         self._reloadFromPolarion()
 
+    def setCustomField(self, key, value):
+        """
+        Set the custom field 'key' to the value
+        :param key: custom field key
+        :param value: custom field value
+        :return: None
+        """
+        if key not in self.getAllowedCustomKeys():
+            raise Exception(f"key {key} is not allowed for this workitem")
+        
+        if self.customFields is None:
+            # nothing exists, create a custom field structure
+            self.customFields = self._polarion.ArrayOfCustomType()
+            self.customFields.Custom.append(self._polarion.CustomType(key=key, value=value))
+        else:
+            custom_field = next((custom_field for custom_field in self.customFields.Custom if custom_field["key"] == key), None)
+            if custom_field is not None:
+                # custom field is there and we can update the value
+                custom_field.value = value
+            else:
+                # custom field is not there, add it.
+                self.customFields.Custom.append(self._polarion.CustomType(key=key, value=value))
+        self.save()
+
     def addHyperlink(self, url, hyperlink_type: HyperlinkRoles):
         """
         Adds a hyperlink to the workitem.
@@ -369,7 +393,31 @@ class Workitem(object):
         service = self._polarion.getService('Tracker')
         service.addLinkedItem(self.uri, workitem.uri, role={'id': link_type})
         self._reloadFromPolarion()
+        workitem._reloadFromPolarion()
 
+    def removeLinkedItem(self, workitem, role=None):
+        """
+        Remove the workitem from the linked items list. If the role is specified, the specified link will be removed.
+        If not specified, all links with the workitem will be removed
+
+        :param workitem: Workitem to be removed
+        :param role: the role to remove
+        :return: None
+        """
+        service = self._polarion.getService('Tracker')
+        if role is not None:
+            service.removeLinkedItem(self.uri, workitem.uri, role={'id': role})
+        else:
+            if self.linkedWorkItems is not None:
+                for linked_item in self.linkedWorkItems.LinkedWorkItem:
+                    if linked_item.workItemURI == workitem.uri:
+                        service.removeLinkedItem(self.uri, linked_item.workItemURI, role=linked_item.role)
+            if self.linkedWorkItemsDerived is not None:
+                for linked_item in self.linkedWorkItemsDerived.LinkedWorkItem:
+                    if linked_item.workItemURI == workitem.uri:
+                        service.removeLinkedItem(linked_item.workItemURI, self.uri, role=linked_item.role)
+        self._reloadFromPolarion()
+        workitem._reloadFromPolarion()
 
     def hasAttachment(self):
         """
