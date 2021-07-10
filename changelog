@@ -2,8 +2,14 @@ Changelog
 =========
 
 
-V0.1.13
+V0.1.14
 -------
+- Fixed bug reported in #17. [jesper.raemaekers]
+- Fixed test steps not loading bug from #17. [jesper.raemaekers]
+
+
+V0.1.13 (2021-06-27)
+--------------------
 - Added custom field setter and remove link method. [jesper.raemaekers]
 - Updated urllib3. [jesper.raemaekers]
 - Added extra method to get possible custom keys. [jesper.raemaekers]
