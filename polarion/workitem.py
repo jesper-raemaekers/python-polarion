@@ -39,7 +39,6 @@ class Workitem(object):
         # new_workitem_type
 
         service = self._polarion.getService('Tracker')
-        service_test = self._polarion.getService('TestManagement')
 
         if self._uri:
             try:
@@ -77,9 +76,11 @@ class Workitem(object):
                     setattr(self, key, value[key])
             self._polarion_test_steps = None
             try:
+                service_test = self._polarion.getService('TestManagement')
                 self._polarion_test_steps = service_test.getTestSteps(self.uri)
             except:
                 # fail silently as there are probably not test steps for this workitem
+                # todo: logging support
                 pass
             self._parsed_test_steps = None
             if self._polarion_test_steps != None:
