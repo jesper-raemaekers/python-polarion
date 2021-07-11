@@ -109,8 +109,11 @@ class Polarion(object):
         # TODO: check if the namespace is always the same
         self.EnumOptionIdType = self.getTypeFromService('TestManagement', 'ns3:EnumOptionId')
         self.TextType = self.getTypeFromService('TestManagement', 'ns1:Text')
+        self.ArrayOfTextType = self.getTypeFromService('TestManagement', 'ns1:ArrayOfText')
         self.ArrayOfTestStepResultType = self.getTypeFromService('TestManagement', 'ns4:ArrayOfTestStepResult')
         self.TestStepResultType = self.getTypeFromService('TestManagement', 'ns4:TestStepResult')
+        self.TestStepType = self.getTypeFromService('TestManagement', 'ns4:TestStep')
+        self.ArrayOfTestStepType = self.getTypeFromService('TestManagement', 'ns4:ArrayOfTestStep')
         self.WorkItemType = self.getTypeFromService('Tracker', 'ns2:WorkItem')
         self.LinkedWorkItemType = self.getTypeFromService('Tracker', 'ns2:LinkedWorkItem')
         self.LinkedWorkItemArrayType = self.getTypeFromService('Tracker', 'ns2:ArrayOfLinkedWorkItem')
