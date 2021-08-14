@@ -4,6 +4,8 @@ Changelog
 
 V0.1.15
 -------
+- Prevent crash when using Polarion without addComment enabled #22.
+  [jesper.raemaekers]
 - Handle case where addComment is not in WSDL interface. #22.
   [jesper.raemaekers]
 
