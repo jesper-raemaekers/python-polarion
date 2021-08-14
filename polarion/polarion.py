@@ -101,9 +101,10 @@ class Polarion(object):
                 self.services[service]['client'].set_default_soapheaders(
                     [self.sessionHeaderElement])
             if service == 'Tracker':
-                # allow addComment to be send without title, needed for reply comments
-                self.services[service]['client'].service.addComment._proxy._binding.get(
-                    'addComment').input.body.type._element[1].nillable = True
+                if hasattr(self.services[service]['client'].service, 'addComment'):
+                    # allow addComment to be send without title, needed for reply comments
+                    self.services[service]['client'].service.addComment._proxy._binding.get(
+                        'addComment').input.body.type._element[1].nillable = True
 
     def _getTypes(self):
         # TODO: check if the namespace is always the same
