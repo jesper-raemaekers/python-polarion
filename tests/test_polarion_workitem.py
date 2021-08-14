@@ -1,4 +1,5 @@
 import unittest
+from unittest.mock import MagicMock
 from polarion.polarion import Polarion
 from polarion.project import Project
 from keys import polarion_user, polarion_password, polarion_url, polarion_project_id
@@ -89,6 +90,22 @@ class TestPolarionWorkitem(unittest.TestCase):
                 self.assertEqual(
                     comment.text.content, comment_content, msg='Comment content not equal')
         self.assertTrue(found, 'Comment title not found in checking workitem')
+
+    def test_add_comment_not_available(self):
+        # create a local polarion service as we'll destroy the global one
+        polarion = Polarion(
+            polarion_url, polarion_user, polarion_password)        
+
+        executing_project = polarion.getProject(
+            polarion_project_id)
+
+        executing_workitem = executing_project.getWorkitem(self.global_workitem.id)
+
+        # replace the getService with someting that will not return anything with content.
+        polarion.getService = MagicMock(return_value={})
+
+        with self.assertRaises(Exception):
+            executing_workitem.addComment('', 'A comment that will fail')
 
     def test_assignee(self):
         self.assertEqual(len(self.global_workitem.getAssignedUsers(
