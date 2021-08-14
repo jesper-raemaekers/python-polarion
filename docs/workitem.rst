@@ -172,6 +172,10 @@ Enums can be configured so that multiple options can be selected. This is not su
     enum_array.EnumOptionId.append(client.EnumOptionIdType(id='done'))
     workitem1.setCustomField('multi_enum_field', enum_array)
 
+Disabled features in Polarion
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+It has been reported that the addComment function can be disabled in Polarion. An exception will be thrown if this is the case in a specific Polarion instance. 
 
 Helpers
 ^^^^^^^

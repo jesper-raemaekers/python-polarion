@@ -330,23 +330,28 @@ class Workitem(object):
         """
         Adds a comment to the workitem.
 
+        Throws an exception if the function is disabled in Polarion.
+
         :param title: Title of the comment (will be None for a reply)
         :param comment: The comment, may contain html
         :param parent: A parent comment, if none provided it's a root comment.
         """
         service = self._polarion.getService('Tracker')
-        if parent == None:
-            parent = self.uri
+        if hasattr(service, 'addComment'):
+            if parent == None:
+                parent = self.uri
+            else:
+                # force title to be empty, not allowed for reply comments
+                title = None
+            content = {
+                'type': 'text/html',
+                'content': comment,
+                'contentLossy': False
+            }
+            service.addComment(parent, title, content)
+            self._reloadFromPolarion()
         else:
-            # force title to be empty, not allowed for reply comments
-            title = None
-        content = {
-            'type': 'text/html',
-            'content': comment,
-            'contentLossy': False
-        }
-        service.addComment(parent, title, content)
-        self._reloadFromPolarion()
+            raise Exception("addComment binding not found in Trackter Service. Adding comments might be disabled.")
 
     def setCustomField(self, key, value):
         """

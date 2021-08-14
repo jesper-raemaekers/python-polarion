@@ -5,7 +5,8 @@ Creating the Polarion client:
 
 .. code:: python
 
-    client = polarion.Polarion('http://example.com/polarion', 'user', 'password')
+    from polarion.polarion import Polarion
+    client = Polarion('http://example.com/polarion', 'user', 'password')
 
 
 Opening a project using the project name:
