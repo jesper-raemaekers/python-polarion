@@ -2,8 +2,15 @@ Changelog
 =========
 
 
-V0.1.14
+V0.1.15
 -------
+- Handle case where addComment is not in WSDL interface. #22.
+  [jesper.raemaekers]
+
+
+V0.1.14 (2021-07-10)
+--------------------
+- Preparation for release 0.1.14. [jesper.raemaekers]
 - Fixed bug reported in #17. [jesper.raemaekers]
 - Fixed test steps not loading bug from #17. [jesper.raemaekers]
 
