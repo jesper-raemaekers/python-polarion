@@ -6,6 +6,7 @@ import requests
 import re
 from urllib.parse import urljoin
 from .project import Project
+import atexit
 
 _baseServiceUrl = 'ws/services'
 
@@ -39,7 +40,13 @@ class Polarion(object):
         self._createSession()
         self._getTypes()
 
-    def __del__(self):
+        atexit.register(self._atexit_cleanup)
+
+    def _atexit_cleanup(self):
+        """
+        Cleanup function to logout when Python is shutting down.
+        :return: None
+        """
         self.services['Session']['client'].service.endSession()
 
     def _getStaticServices(self):
