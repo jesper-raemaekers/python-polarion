@@ -111,6 +111,33 @@ class Workitem(object):
             return User(self._polarion, self.author)
         return None
 
+    def removeApprovee(self, user: User):
+        """
+        Remove a user from the approvers
+
+        :param user: The user object to remove
+        """
+        service = self._polarion.getService('Tracker')
+        service.removeApprovee(self.uri, user.id)
+        self._reloadFromPolarion()
+
+    def addApprovee(self, user: User, remove_others=False):
+        """
+        Adds a user as approvee
+
+        :param user: The user object to add
+        :param remove_others: Set to True to make the new user the only approver user.
+        """
+        service = self._polarion.getService('Tracker')
+
+        if remove_others == True:
+            current_users = self.getApproverUsers()
+            for current_user in current_users:
+                service.removeApprovee(self.uri, current_user.id)
+
+        service.addApprovee(self.uri, user.id)
+        self._reloadFromPolarion()
+
     def getAssignedUsers(self):
         """
         Get an array of assigned users
@@ -222,7 +249,7 @@ class Workitem(object):
 
     def getAvailableActionsDetails(self):
         """
-        Get all actions option for this workitem with defails
+        Get all actions option for this workitem with details
 
         :return: An array of dictionaries of the actions
         :rtype: dict[]
@@ -248,9 +275,9 @@ class Workitem(object):
             available_actions.append(action.nativeActionId)
         return available_actions
 
-    def preformAction(self, action_name):
+    def performAction(self, action_name):
         """
-        Preform selected action. An exception will be thorn if some prerequisite is not set.
+        Perform selected action. An exception will be thrown if some prerequisite is not set.
 
         :param action_name: string containing the action name
         """
@@ -261,11 +288,11 @@ class Workitem(object):
             if action.nativeActionId == action_name or action.actionName == action_name:
                 service.performWorkflowAction(self.uri, action.actionId)
 
-    def preformActionId(self, actionId: int):
+    def performActionId(self, actionId: int):
         """
-        Preform selected action. An exception will be thorn if some prerequisite is not set.
+        Perform selected action. An exception will be thrown if some prerequisite is not set.
 
-        :param actionId: number for the action to preform
+        :param actionId: number for the action to perform
         """
         service = self._polarion.getService('Tracker')
         service.performWorkflowAction(self.uri, actionId)
