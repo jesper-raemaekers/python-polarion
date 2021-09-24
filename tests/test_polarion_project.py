@@ -82,4 +82,14 @@ class TestPolarionProject(unittest.TestCase):
     def test_create_testrun(self):
         test_run = self.project.createTestRun('unit-' + datetime.now().strftime("%d-%m-%Y-%H-%M-%S-%f"), 'New unit test run', 'unittest-01')
         self.assertIsNotNone(test_run)
+
+    @mock.patch('polarion.plan.Plan.__init__')
+    def test_get_plan(self, mock_plan):
+        mock_plan.return_value = None
+
+        self.project.getPlan('FAKE-001')
+        mock_plan.assert_called_with(self.pol, self.project, id='FAKE-001')
+
+        self.project.getPlan('FAKE-002')
+        mock_plan.assert_called_with(self.pol, self.project, id='FAKE-002')
         

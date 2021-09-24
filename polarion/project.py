@@ -9,7 +9,7 @@ from .factory import createFromUri
 from .workitem import Workitem
 from .testrun import Testrun
 from .user import User
-
+from .plan import Plan
 
 class Project(object):
     """
@@ -67,6 +67,18 @@ class Project(object):
         :rtype: Workitem
         """
         return Workitem(self.polarion, self, id)
+
+    def getPlan(self, id: str):
+        """Get a plan by string
+
+        :param id: The ID of the project plan.
+        :return: The request plan
+        :rtype: Plan
+        """
+        return Plan(self.polarion, self, id=id)
+
+    def createPlan(self, new_plan_name, new_plan_id, new_plan_template, new_plan_parent=None):
+        return Plan(self.polarion, self, new_plan_name=new_plan_name, new_plan_id=new_plan_id, new_plan_template=new_plan_template, new_plan_parent=new_plan_parent)
 
     def createWorkitem(self, workitem_type: str):
         return Workitem(self.polarion, self, new_workitem_type=workitem_type)

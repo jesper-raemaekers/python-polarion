@@ -16,6 +16,7 @@ Welcome to Polarion's documentation!
    testrun
    testrecord
    document
+   plan
 
 
 

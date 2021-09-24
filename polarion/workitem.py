@@ -13,7 +13,6 @@ from datetime import datetime, date
 from .factory import Creator
 
 
-
 class Workitem(object):
     """
     Create a Polarion workitem object either from and id or from an Polarion uri.
@@ -536,7 +535,6 @@ class Workitem(object):
         with open(file_path, "rb") as file_content:
             service.updateAttachment(self.uri, id, file_name, title, file_content.read())
         self._reloadFromPolarion()
-
 
     def save(self):
         """

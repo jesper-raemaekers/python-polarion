@@ -2,8 +2,29 @@ Changelog
 =========
 
 
-V0.1.15
--------
+V0.2.0
+------
+- Created basic docs for Plans. [jesper.raemaekers]
+- Added basic support for Plans. [jesper.raemaekers]
+- Removed commented code #27. [jesper.raemaekers]
+- Fix setresolution bug #27. [jesper.raemaekers]
+- Completed approvee methods as discussed in #24. [jesper.raemaekers]
+- Small modifications. [Axel Seibert]
+
+  workitem:
+  - addApprovee
+  - removeApprovee
+
+  project:
+  - searchWorkitem
+
+  polarion:
+  - tried the exit handler
+
+
+V0.1.15 (2021-08-14)
+--------------------
+- Update changelog and ready for release 0.1.15. [jesper.raemaekers]
 - Prevent crash when using Polarion without addComment enabled #22.
   [jesper.raemaekers]
 - Handle case where addComment is not in WSDL interface. #22.
