@@ -40,7 +40,6 @@ class Polarion(object):
         self._createSession()
         self._getTypes()
 
-    def __del__(self):
         atexit.register(self._atexit_cleanup)
         
     def _atexit_cleanup(self):

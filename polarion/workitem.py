@@ -138,6 +138,20 @@ class Workitem(object):
         service.addApprovee(self.uri, user.id)
         self._reloadFromPolarion()
 
+    def getApproverUsers(self):
+        """
+        Get an array of approval users
+
+        :return: An array of User objects
+        :rtype: User[]
+        """
+        assigned_users = []
+        if self.approvals != None:
+            for approval in self.approvals.Approval:
+                assigned_users.append(User(self._polarion, approval.user))
+        return assigned_users
+
+
     def getAssignedUsers(self):
         """
         Get an array of assigned users

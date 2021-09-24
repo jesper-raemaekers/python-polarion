@@ -399,6 +399,35 @@ class TestPolarionWorkitem(unittest.TestCase):
 
         self.assertRaises(Exception, executed_workitem_1.setCustomField, 'random_invalid_key', 0)
 
+    def test_approvvee(self):
+        executed_workitem_1 = self.executing_project.createWorkitem('task')
+        all_users = self.executing_project.getUsers()
+        testing_user_1 = all_users[0]
+        testing_user_2 = all_users[1]
+
+        executed_workitem_1.addApprovee(testing_user_1)
+
+        checking_workitem_1 = self.checking_project.getWorkitem(executed_workitem_1.id) 
+
+        self.assertEqual(executed_workitem_1.approvals.Approval[0].user.id, testing_user_1.id, msg='Approving user not equal to assign user')
+        self.assertEqual(checking_workitem_1.approvals.Approval[0].user.id, testing_user_1.id, msg='Approving user not equal to assign user')
+
+        executed_workitem_1.removeApprovee(testing_user_1)
+        checking_workitem_1 = self.checking_project.getWorkitem(executed_workitem_1.id) 
+
+        self.assertIsNone(executed_workitem_1.approvals, msg='Approvvee not removed')
+        self.assertIsNone(checking_workitem_1.approvals, msg='Approvvee not removed')
+
+        executed_workitem_1.addApprovee(testing_user_1)
+        executed_workitem_1.addApprovee(testing_user_2, remove_others=True)
+        checking_workitem_1 = self.checking_project.getWorkitem(executed_workitem_1.id)
+        self.assertEqual(executed_workitem_1.approvals.Approval[0].user.id, testing_user_2.id, msg='Approving user not equal to assign user')
+        self.assertEqual(checking_workitem_1.approvals.Approval[0].user.id, testing_user_2.id, msg='Approving user not equal to assign user')
+
+
+
+        
+
         
 
 
