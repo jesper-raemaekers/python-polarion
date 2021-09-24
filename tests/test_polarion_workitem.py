@@ -424,6 +424,23 @@ class TestPolarionWorkitem(unittest.TestCase):
         self.assertEqual(executed_workitem_1.approvals.Approval[0].user.id, testing_user_2.id, msg='Approving user not equal to assign user')
         self.assertEqual(checking_workitem_1.approvals.Approval[0].user.id, testing_user_2.id, msg='Approving user not equal to assign user')
 
+    def test_resolution(self):
+        executed_workitem_1 = self.executing_project.createWorkitem('task')
+
+        resolutions = executed_workitem_1.getResolutionEnum()
+        
+        executed_workitem_1.setResolution('done')
+        checking_workitem_1 = self.checking_project.getWorkitem(executed_workitem_1.id) 
+
+        self.assertEqual(executed_workitem_1.resolution.id, 'done', msg='Resolution not as set')
+        self.assertEqual(checking_workitem_1.resolution.id, 'done', msg='Resolution not as set')
+
+        executed_workitem_1.setResolution('incomplete')
+        checking_workitem_1 = self.checking_project.getWorkitem(executed_workitem_1.id) 
+
+        self.assertEqual(executed_workitem_1.resolution.id, 'incomplete', msg='Resolution not as set')
+        self.assertEqual(checking_workitem_1.resolution.id, 'incomplete', msg='Resolution not as set')
+
 
 
         

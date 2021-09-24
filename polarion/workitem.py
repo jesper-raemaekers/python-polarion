@@ -348,7 +348,7 @@ class Workitem(object):
 
         :param resolution: the resolution
         """
-        self.resolution = {'id': resolution}
+        # self.resolution =  {'id': resolution} # resolution
         if self.resolution != None:
             self.resolution.id = resolution
         else:
