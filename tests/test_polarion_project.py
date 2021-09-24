@@ -87,9 +87,9 @@ class TestPolarionProject(unittest.TestCase):
     def test_get_plan(self, mock_plan):
         mock_plan.return_value = None
 
-        self.project.getWorkitem('FAKE-001')
-        mock_plan.assert_called_with(self.pol, self.project, 'FAKE-001')
+        self.project.getPlan('FAKE-001')
+        mock_plan.assert_called_with(self.pol, self.project, id='FAKE-001')
 
-        self.project.getWorkitem('FAKE-002')
-        mock_plan.assert_called_with(self.pol, self.project, 'FAKE-002')
+        self.project.getPlan('FAKE-002')
+        mock_plan.assert_called_with(self.pol, self.project, id='FAKE-002')
         
