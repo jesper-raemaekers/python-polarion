@@ -112,6 +112,9 @@ class Polarion(object):
                     # allow addComment to be send without title, needed for reply comments
                     self.services[service]['client'].service.addComment._proxy._binding.get(
                         'addComment').input.body.type._element[1].nillable = True
+            if service == 'Planning':
+                self.services[service]['client'].service.createPlan._proxy._binding.get(
+                        'createPlan').input.body.type._element[3].nillable = True
 
     def _getTypes(self):
         # TODO: check if the namespace is always the same
@@ -125,6 +128,7 @@ class Polarion(object):
         self.ArrayOfCustomType = self.getTypeFromService('Tracker', 'ns2:ArrayOfCustom')
         self.CustomType = self.getTypeFromService('Tracker', 'ns2:Custom')
         self.ArrayOfEnumOptionIdType = self.getTypeFromService('Tracker', 'ns2:ArrayOfEnumOptionId')
+        self.ArrayOfSubterraURIType = self.getTypeFromService('Tracker', 'ns1:ArrayOfSubterraURI')
 
     def hasService(self, name: str):
         """
