@@ -2,13 +2,21 @@ Changelog
 =========
 
 
-V0.2.0
+V0.2.1
 ------
+- Updated readme. [jesper.raemaekers]
+- Added method for getting workitems in plan. [jesper.raemaekers]
+
+
+V0.2.0 (2021-09-24)
+-------------------
+- Preparations for release 0.2.0. [jesper.raemaekers]
+- Corrections to unittest for plans. [jesper.raemaekers]
 - Created basic docs for Plans. [jesper.raemaekers]
 - Added basic support for Plans. [jesper.raemaekers]
 - Removed commented code #27. [jesper.raemaekers]
 - Fix setresolution bug #27. [jesper.raemaekers]
-- Completed approvee methods as discussed in #24. [jesper.raemaekers]
+- Completed approvvee methods as discussed in #24. [jesper.raemaekers]
 - Small modifications. [Axel Seibert]
 
   workitem:
