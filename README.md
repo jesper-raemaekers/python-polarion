@@ -8,7 +8,6 @@
 
 
 This package allows access to a Polarion server.
-Note that this is the first release and that updates will change the interface in the near future.
 
 # Installation
 
@@ -18,7 +17,7 @@ pip install polarion
 
 # Getting started
 
-Creating the Polarion client and getting workitems or test runs:
+Creating the Polarion client and getting workitems, test runs or plans:
 
 ```python
 from polarion import polarion
@@ -26,6 +25,27 @@ client = polarion.Polarion('http://example.com/polarion', 'user', 'password')
 project = client.getProject('Python')
 workitem = project.getWorkitem('PYTH-510')
 run = project.getTestRun('SWQ-0001')
+plan = project.getPlan('00002')
+```
+
+Modifying workitems:
+
+```python
+workitem.setDescription('Some description..')
+workitem.addComment('test comment', 'sent from Python')
+workitem.addHyperlink('google.com', workitem.HyperlinkRoles.EXTERNAL_REF)
+```
+
+Or test run results:
+```python
+run = project.getTestRun('SWQ-0001')
+run.records[0].setResult(record.Record.ResultType.PASSED, ' Comment with test result')
+```
+
+Adding workitems to a plan:
+```python
+plan.addToPlan(workitem)
+plan.removeFromPlan(workitem)
 ```
 
 
