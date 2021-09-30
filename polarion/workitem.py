@@ -21,6 +21,7 @@ class Workitem(object):
     :param project: Polarion Project object
     :param id: Workitem ID
     :param uri: Polarion uri
+    :param polarion_workitem: Polarion workitem content
 
     """
     class HyperlinkRoles(Enum):
@@ -30,12 +31,11 @@ class Workitem(object):
         INTERNAL_REF = 'internal reference'
         EXTERNAL_REF = 'external reference'
 
-    def __init__(self, polarion, project, id=None, uri=None, new_workitem_type=None):
+    def __init__(self, polarion, project, id=None, uri=None, new_workitem_type=None, polarion_workitem=None):
         self._polarion = polarion
         self._project = project
         self._id = id
         self._uri = uri
-        # new_workitem_type
 
         service = self._polarion.getService('Tracker')
 
@@ -46,14 +46,14 @@ class Workitem(object):
             except:
                 raise Exception(
                     f'Cannot find workitem {self._id} in project {self._project.id}')
-        elif id != None:
+        elif id is not None:
             try:
                 self._polarion_item = service.getWorkItemById(
                     self._project.id, self._id)
             except:
                 raise Exception(
                     f'Cannot find workitem {self._id} in project {self._project.id}')
-        elif new_workitem_type != None:
+        elif new_workitem_type is not None:
             self._polarion_item = self._polarion.WorkItemType(
                 type=self._polarion.EnumOptionIdType(id=new_workitem_type))
             self._polarion_item.project = self._project.polarion_data
@@ -62,8 +62,10 @@ class Workitem(object):
             self._polarion_item = service.getWorkItemByUri(new_uri)
             self._id = self._polarion_item.id
 
+        elif polarion_workitem is not None:
+            self._polarion_item = polarion_workitem
         else:
-            raise Exception('No id, uri of new workitem type specified!')
+            raise Exception('No id, uri, polarion workitem or new workitem type specified!')
 
         self._buildWorkitemFromPolarion()
 

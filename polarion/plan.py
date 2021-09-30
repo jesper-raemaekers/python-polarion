@@ -97,6 +97,7 @@ class Plan(object):
             service = self._polarion.getService('Planning')
             service.addPlanItems(self.uri, [workitem.uri])
             workitem._reloadFromPolarion() # noqa: call private to reload from polarion so the plan status is updated
+            self._reloadFromPolarion()
         else:
             raise Exception(f'Workitem type {workitem.id} is not allowed in this plan')
 
@@ -109,6 +110,7 @@ class Plan(object):
         service = self._polarion.getService('Planning')
         service.removePlanItems(self.uri, [workitem.uri])
         workitem._reloadFromPolarion()  # noqa: call private to reload from polarion so the plan status is updated
+        self._reloadFromPolarion()
 
     def addAllowedType(self, type):
         """
@@ -131,6 +133,17 @@ class Plan(object):
             service = self._polarion.getService('Planning')
             service.removePlanAllowedType(self.uri, self._polarion.EnumOptionIdType(id=type))
             self._reloadFromPolarion()
+
+    def getWorkitemsInPlan(self):
+        """
+        Get all workitems from this plan
+        :return: Array of workitems
+        """
+        workitems = []
+        if self.records is not None:
+            for workitem in self.records.PlanRecord:
+                workitems.append(Workitem(self._polarion, self._project, polarion_workitem=workitem.item))
+        return workitems
 
     def save(self):
         """

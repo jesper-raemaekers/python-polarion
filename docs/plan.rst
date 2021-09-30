@@ -35,11 +35,17 @@ If the workitem type is not allowed in the plan, an exception will be raised.
 You can however add or remove workitem types to the plan.
 
 .. code:: python
+
     workitem = project.getWorkitem('xxx-000)
     plan.addAllowedType(workitem.type.id)
     plan.removeAllowedType(workitem.type.id)
     plan.addAllowedType('task')
 
+A list of workitems in this plan can be retreived.
+
+.. code:: python
+
+    workitems = plan.getWorkitemsInPlan()
 
 Plan class
 ----------

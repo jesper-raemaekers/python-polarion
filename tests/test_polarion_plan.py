@@ -21,13 +21,20 @@ class TestPolarionPlan(unittest.TestCase):
     def test_add_remove_workitem(self):
         workitem_package = self.executing_project.createWorkitem('workpackage')
 
+        workitems_in_plan_start = self.executing_plan.getWorkitemsInPlan()
         self.executing_plan.addToPlan(workitem_package)
+        workitems_in_plan_end = self.executing_plan.getWorkitemsInPlan()
 
         self.assertEqual(workitem_package.plannedInURIs.SubterraURI[0], self.executing_plan.uri, msg='Plan in workitem does not match current plan')
+        self.assertEqual(len(workitems_in_plan_start) + 1, len(workitems_in_plan_end), msg='Workitems in plan did not increase by 1')
 
+        workitems_in_plan_start = self.executing_plan.getWorkitemsInPlan()
         self.executing_plan.removeFromPlan(workitem_package)
+        workitems_in_plan_end = self.executing_plan.getWorkitemsInPlan()
 
         self.assertIsNone(workitem_package.plannedInURIs, msg='Workitem still in plan')
+        self.assertEqual(len(workitems_in_plan_start) - 1, len(workitems_in_plan_end),
+                         msg='Workitems in plan did not decrease by 1')
 
     def test_add_remove_workitem_new_type(self):
         workitem_task = self.executing_project.createWorkitem('task')
