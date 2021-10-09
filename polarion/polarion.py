@@ -112,9 +112,12 @@ class Polarion(object):
                     # allow addComment to be send without title, needed for reply comments
                     self.services[service]['client'].service.addComment._proxy._binding.get(
                         'addComment').input.body.type._element[1].nillable = True
+                    self.services[service]['client'].service.getModuleWorkItemUris._proxy._binding.get(
+                        'getModuleWorkItemUris').input.body.type._element[1].nillable = True
             if service == 'Planning':
                 self.services[service]['client'].service.createPlan._proxy._binding.get(
                         'createPlan').input.body.type._element[3].nillable = True
+
 
     def _getTypes(self):
         # TODO: check if the namespace is always the same

@@ -10,6 +10,7 @@ from .workitem import Workitem
 from .testrun import Testrun
 from .user import User
 from .plan import Plan
+from .module import Module
 
 class Project(object):
     """
@@ -169,6 +170,38 @@ class Project(object):
             if a.id not in available:
                 available.append(a.id)
         return available
+
+    def getDocumentSpaces(self):
+        """
+        Get a list al all document spaces.
+        :return:string[]
+        """
+        service = self.polarion.getService('Tracker')
+        spaces = service.getDocumentSpaces('Python')
+        return sorted(spaces)
+
+    def getDocumentLocations(self):
+        """
+        Get a list of all document locations.
+        :return:string[]
+        """
+        service = self.polarion.getService('Tracker')
+        locations = service.getDocumentLocations('Python')
+        return sorted(locations)
+
+    def getDocumentsInSpace(self, space):
+        """
+        Get all documents in a space.
+        :param space: Name of the space.
+        :return: Module[]
+        """
+        documents = []
+        service = self.polarion.getService('Tracker')
+        uris = service.getModuleUris('Python', space)
+        for uri in uris:
+            documents.append(Module(self.polarion, self, uri))
+        return documents
+
 
     def __repr__(self):
         return f'Polarion project {self.name} prefix {self.tracker_prefix}'
