@@ -1,5 +1,6 @@
 from zeep import Client
 from zeep.plugins import HistoryPlugin
+from zeep.transports import Transport
 from lxml.etree import Element
 from lxml import etree
 import requests
@@ -19,13 +20,15 @@ class Polarion(object):
     :param user: The user name to login
     :param password: The password for that user
     :param static_service_list: Set to True when this class may not use a request to get the services list
+    :param skip_cert_verification: Set to True to skip certification validation for TLS connection
 
     """
 
-    def __init__(self, polarion_url, user, password, static_service_list=False):
+    def __init__(self, polarion_url, user, password, static_service_list=False, skip_cert_verification=False):
         self.user = user
         self.password = password
         self.url = polarion_url
+        self.skip_cert_verification = skip_cert_verification
 
         self.services = {}
 
@@ -41,7 +44,7 @@ class Polarion(object):
         self._getTypes()
 
         atexit.register(self._atexit_cleanup)
-        
+
     def _atexit_cleanup(self):
         """
         Cleanup function to logout when Python is shutting down.
@@ -61,7 +64,7 @@ class Polarion(object):
         """
         Parse the list of services available in the overview
         """
-        service_overview = requests.get(self.url)
+        service_overview = requests.get(self.url, verify=not self.skip_cert_verification)
         service_base_url = self.url + '/'
         if service_overview.ok:
             services = re.findall("(\w+)WebService", service_overview.text)
@@ -77,7 +80,7 @@ class Polarion(object):
         if 'Session' in self.services:
             self.history = HistoryPlugin()
             self.services['Session']['client'] = Client(
-                self.services['Session']['url'] + '?wsdl', plugins=[self.history])
+                self.services['Session']['url'] + '?wsdl', plugins=[self.history], transport=self._getTransport())
             try:
                 self.sessionHeaderElement = None
                 self.services['Session']['client'].service.logIn(
@@ -104,7 +107,7 @@ class Polarion(object):
             if service != 'Session':
                 if 'client' not in service:
                     self.services[service]['client'] = Client(
-                        self.services[service]['url'] + '?wsdl')
+                        self.services[service]['url'] + '?wsdl', transport=self._getTransport())
                 self.services[service]['client'].set_default_soapheaders(
                     [self.sessionHeaderElement])
             if service == 'Tracker':
@@ -129,6 +132,14 @@ class Polarion(object):
         self.CustomType = self.getTypeFromService('Tracker', 'ns2:Custom')
         self.ArrayOfEnumOptionIdType = self.getTypeFromService('Tracker', 'ns2:ArrayOfEnumOptionId')
         self.ArrayOfSubterraURIType = self.getTypeFromService('Tracker', 'ns1:ArrayOfSubterraURI')
+
+    def _getTransport(self):
+        """
+        Gets the zeep transport object
+        """
+        transport = Transport()
+        transport.session.verify = not self.skip_cert_verification
+        return transport
 
     def hasService(self, name: str):
         """
