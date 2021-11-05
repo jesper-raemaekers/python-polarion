@@ -1,12 +1,12 @@
-from zeep import Client
-from zeep.plugins import HistoryPlugin
-from lxml.etree import Element
-from lxml import etree
-import requests
+import atexit
 import re
 from urllib.parse import urljoin
+
+import requests
+from zeep import Client
+from zeep.plugins import HistoryPlugin
+
 from .project import Project
-import atexit
 
 _baseServiceUrl = 'ws/services'
 
@@ -33,7 +33,7 @@ class Polarion(object):
             self.url += '/'
         self.url = urljoin(self.url, _baseServiceUrl)
 
-        if static_service_list == True:
+        if static_service_list:
             self._getStaticServices()
         else:
             self._getServices()
@@ -41,7 +41,7 @@ class Polarion(object):
         self._getTypes()
 
         atexit.register(self._atexit_cleanup)
-        
+
     def _atexit_cleanup(self):
         """
         Cleanup function to logout when Python is shutting down.
@@ -64,7 +64,7 @@ class Polarion(object):
         service_overview = requests.get(self.url)
         service_base_url = self.url + '/'
         if service_overview.ok:
-            services = re.findall("(\w+)WebService", service_overview.text)
+            services = re.findall(r"(\w+)WebService", service_overview.text)
             for service in services:
                 if service not in self.services:
                     self.services[service] = {'url': urljoin(
@@ -85,7 +85,7 @@ class Polarion(object):
                 tree = self.history.last_received['envelope'].getroottree()
                 self.sessionHeaderElement = tree.find(
                     './/{http://ws.polarion.com/session}sessionID')
-            except:
+            except Exception:
                 raise Exception(
                     f'Could not log in to Polarion for user {self.user}')
             if self.sessionHeaderElement is not None:
@@ -98,7 +98,7 @@ class Polarion(object):
         """
         Updates all services with the correct session ID
         """
-        if self.sessionHeaderElement == None:
+        if self.sessionHeaderElement is None:
             raise Exception('Cannot update services when not logged in')
         for service in self.services:
             if service != 'Session':
@@ -118,8 +118,7 @@ class Polarion(object):
                         'moveWorkItemToDocument').input.body.type._element[2].nillable = True
             if service == 'Planning':
                 self.services[service]['client'].service.createPlan._proxy._binding.get(
-                        'createPlan').input.body.type._element[3].nillable = True
-
+                    'createPlan').input.body.type._element[3].nillable = True
 
     def _getTypes(self):
         # TODO: check if the namespace is always the same
@@ -150,7 +149,7 @@ class Polarion(object):
         # request user info to see if we're still logged in
         try:
             _user = self.services['Project']['client'].service.getUser(self.user)
-        except:
+        except Exception:
             # if not, create a new session
             self._createSession()
 

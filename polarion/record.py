@@ -1,5 +1,4 @@
 from enum import Enum
-from collections import namedtuple
 from .factory import createFromUri
 import os
 import requests
@@ -44,7 +43,7 @@ class Record(object):
 
     def _reloadFromPolarion(self):
         service = self._polarion.getService('TestManagement')
-        self._polarion_record = service.getTestCaseRecords(self._test_run.uri, self._testcase )[0]
+        self._polarion_record = service.getTestCaseRecords(self._test_run.uri, self._testcase)[0]
         self._buildWorkitemFromPolarion()
         # self._original_polarion_test_run = copy.deepcopy(self._polarion_test_run)
 
@@ -56,12 +55,12 @@ class Record(object):
         :param result: The result fo the test step
         :param comment: An optional comment
         """
-        if self.testStepResults == None:
+        if self.testStepResults is None:
             # get the number of test steps in
             service = self._polarion.getService('TestManagement')
             test_steps = service.getTestSteps(self.testCaseURI)
             number_of_steps = 0
-            if test_steps.steps != None:
+            if test_steps.steps is not None:
                 number_of_steps = len(test_steps.steps.TestStep)
             self.testStepResults = self._polarion.ArrayOfTestStepResultType()
             for _i in range(number_of_steps):
@@ -71,7 +70,7 @@ class Record(object):
         if step_number < len(self.testStepResults.TestStepResult):
             self.testStepResults.TestStepResult[step_number].result = self._polarion.EnumOptionIdType(
                 id=result.value)
-            if comment != None:
+            if comment is not None:
                 self.testStepResults.TestStepResult[step_number].comment = self._polarion.TextType(
                     content=comment, type='text/html', contentLossy=False)
 
@@ -84,7 +83,7 @@ class Record(object):
         :return: The test case result
         :rtype: ResultType
         """
-        if self.result != None:
+        if self.result is not None:
             return self.ResultType(self.result.id)
         return self.ResultType.No
 
@@ -95,7 +94,7 @@ class Record(object):
         :return: Get the comment, may contain HTML
         :rtype: string
         """
-        if self.comment != None:
+        if self.comment is not None:
             return self.comment.content
         return None
 
@@ -132,9 +131,9 @@ class Record(object):
         :param result: The result of this record
         :param comment: Comment string, may contain HTML
         """
-        if comment != None:
+        if comment is not None:
             self.setComment(comment)
-        if self.result != None:
+        if self.result is not None:
             self.result.id = result.value
         else:
             self.result = self._polarion.EnumOptionIdType(
@@ -148,7 +147,7 @@ class Record(object):
         :return: The user
         :rtype: User/None
         """
-        if self.executedByURI != None:
+        if self.executedByURI is not None:
             return createFromUri(self._polarion, None, self.executedByURI)
         return None
 
@@ -159,7 +158,7 @@ class Record(object):
         :return: True/False
         :rtype: boolean
         """
-        if self.attachments != None:
+        if self.attachments is not None:
             return True
         return False
     
@@ -171,22 +170,21 @@ class Record(object):
         :return: list of bytes
         :rtype: bytes[]
         """
-        #find the file
+        # find the file
         url = None
         for attachment in self.attachments.TestRunAttachment:
             if attachment.fileName == file_name:
                 url = attachment.url
 
-        if url != None:
+        if url is not None:
             resp = requests.get(url, auth=(self._polarion.user, self._polarion.password))
-            if resp.ok == True:
+            if resp.ok:
                 return resp.content
             else:
                 raise Exception(f'Could not download attachment {file_name}')
         else:
             raise Exception(f'Could not find attachment with name {file_name}')
 
-    
     def saveAttachmentAsFile(self, file_name, file_path):
         """
         Save an attachment to file.
@@ -229,9 +227,9 @@ class Record(object):
         :return: True/False
         :rtype: boolean
         """
-        if self.testStepResults == None:
+        if self.testStepResults is None:
             return False
-        if self.testStepResults.TestStepResult[step_index].attachments != None:
+        if self.testStepResults.TestStepResult[step_index].attachments is not None:
             return True
         return False
     
@@ -244,22 +242,21 @@ class Record(object):
         :return: list of bytes
         :rtype: bytes[]
         """
-        #find the file
+        # find the file
         url = None
         for attachment in self.testStepResults.TestStepResult[step_index].attachments.TestRunAttachment:
             if attachment.fileName == file_name:
                 url = attachment.url
 
-        if url != None:
+        if url is not None:
             resp = requests.get(url, auth=(self._polarion.user, self._polarion.password))
-            if resp.ok == True:
+            if resp.ok:
                 return resp.content
             else:
                 raise Exception(f'Could not download attachment {file_name}')
         else:
             raise Exception(f'Could not find attachment with name {file_name}')
 
-    
     def saveAttachmentFromTestStepAsFile(self, step_index, file_name, file_path):
         """
         Save an attachment to file from a test step
@@ -303,14 +300,13 @@ class Record(object):
         """
         new_item = {}
         for attr, value in self.__dict__.items():
-            if attr.startswith('_') != True:
+            if not attr.startswith('_'):
                 # only add if public value
                 new_item[attr] = value
         service = self._polarion.getService('TestManagement')
         service.executeTest(
             self._test_run.uri, new_item)
         self._reloadFromPolarion()
-        
 
     def __repr__(self):
         return f'{self._testcase_name} in {self._test_run.id} ({self.getResult()} on {self.executed})'

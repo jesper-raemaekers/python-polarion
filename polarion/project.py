@@ -1,10 +1,3 @@
-from zeep import Client
-from zeep.plugins import HistoryPlugin
-from lxml.etree import Element
-from lxml import etree
-import requests
-import re
-from urllib.parse import urljoin
 from .factory import createFromUri
 from .workitem import Workitem
 from .testrun import Testrun
@@ -30,10 +23,10 @@ class Project(object):
         service = self.polarion.getService('Project')
         try:
             self.polarion_data = service.getProject(self.id)
-        except:
+        except Exception:
             raise Exception(f'Could not find project {project_id}')
 
-        if 'name' in self.polarion_data and self.polarion_data.unresolvable == False:
+        if 'name' in self.polarion_data and not self.polarion_data.unresolvable:
             # succeeded
             self.name = self.polarion_data.name
             self.tracker_prefix = self.polarion_data.trackerPrefix
@@ -80,26 +73,30 @@ class Project(object):
         return Plan(self.polarion, self, id=id)
 
     def createPlan(self, new_plan_name, new_plan_id, new_plan_template, new_plan_parent=None):
-        return Plan(self.polarion, self, new_plan_name=new_plan_name, new_plan_id=new_plan_id, new_plan_template=new_plan_template, new_plan_parent=new_plan_parent)
+        return Plan(self.polarion, self, new_plan_name=new_plan_name, new_plan_id=new_plan_id, new_plan_template=new_plan_template,
+                    new_plan_parent=new_plan_parent)
 
     def createWorkitem(self, workitem_type: str):
         return Workitem(self.polarion, self, new_workitem_type=workitem_type)
 
-    def searchWorkitem(self, query='', order='Created', fieldList=['id'], limit=-1):
+    def searchWorkitem(self, query='', order='Created', field_list=None, limit=-1):
         """Query for available workitems. This will only query for the items.
         If you also want the Workitems to be retrieved, used searchWorkitemFullItem.
         
         :param query: The query to use while searching
         :param order: Order by
-        :param fieldList: list of fields to retrieve for each search result
+        :param field_list: list of fields to retrieve for each search result
         :param limit: The limit of workitems, -1 for no limit
         :return: The search results
         :rtype: Workitem[] but only with the given fields set
         """
+        if field_list is None:
+            field_list = ['id']
+
         query += f' AND project.id:{self.id}'
         service = self.polarion.getService('Tracker')
         return service.queryWorkItemsLimited(
-            query, order, fieldList, limit)
+            query, order, field_list, limit)
 
     def searchWorkitemFullItem(self, query='', order='Created', limit=-1):
         """Query for available workitems. This will query for the items and then fetch all result. May take a while for a big search with many results.
