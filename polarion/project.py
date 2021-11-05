@@ -10,7 +10,7 @@ from .workitem import Workitem
 from .testrun import Testrun
 from .user import User
 from .plan import Plan
-from .module import Module
+from .document import Document
 
 class Project(object):
     """
@@ -193,17 +193,17 @@ class Project(object):
         """
         Get all documents in a space.
         :param space: Name of the space.
-        :return: Module[]
+        :return: Document[]
         """
         documents = []
         service = self.polarion.getService('Tracker')
         uris = service.getModuleUris(self.id, space)
         for uri in uris:
-            documents.append(Module(self.polarion, self, uri))
+            documents.append(Document(self.polarion, self, uri))
         return documents
 
-    def getModuleByLocation(self, location):
-        return Module(self.polarion, self, self.polarion.getService('Tracker').getModuleByLocation(self.id, location).uri)
+    def getDocumentByLocation(self, location):
+        return Document(self.polarion, self, self.polarion.getService('Tracker').getModuleByLocation(self.id, location).uri)
 
     def __repr__(self):
         return f'Polarion project {self.name} prefix {self.tracker_prefix}'
