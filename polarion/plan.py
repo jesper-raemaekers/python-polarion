@@ -2,12 +2,14 @@ from .factory import Creator
 from .workitem import Workitem
 import copy
 
+
 class Plan(object):
     """
     A polarion Plan
     """
 
-    def __init__(self, polarion, project, polarion_record=None, uri=None, id=None, new_plan_name=None, new_plan_id=None, new_plan_parent=None, new_plan_template=None):
+    def __init__(self, polarion, project, polarion_record=None, uri=None, id=None, new_plan_name=None, new_plan_id=None, new_plan_parent=None,
+                 new_plan_template=None):
         """
 
         :param polarion: Polarion client
@@ -41,7 +43,7 @@ class Plan(object):
         self._buildPlanFromPolarion()
 
     def _buildPlanFromPolarion(self):
-        if self._polarion_record != None and self._polarion_record.unresolvable == False:
+        if self._polarion_record is not None and not self._polarion_record.unresolvable:
             # parse all polarion attributes to this class
             self._original_polarion = copy.deepcopy(self._polarion_record)
             for attr, value in self._polarion_record.__dict__.items():
@@ -87,7 +89,7 @@ class Plan(object):
         self.startedOn = date
         self.save()
 
-    def addToPlan(self, workitem:Workitem):
+    def addToPlan(self, workitem: Workitem):
         """
         Add a workitem to the plan
         :param workitem: Workitem
@@ -96,7 +98,7 @@ class Plan(object):
         if any(x.id == workitem.type.id for x in self.allowedTypes.EnumOptionId):
             service = self._polarion.getService('Planning')
             service.addPlanItems(self.uri, [workitem.uri])
-            workitem._reloadFromPolarion() # noqa: call private to reload from polarion so the plan status is updated
+            workitem._reloadFromPolarion()  # noqa: call private to reload from polarion so the plan status is updated
             self._reloadFromPolarion()
         else:
             raise Exception(f'Workitem type {workitem.id} is not allowed in this plan')
@@ -168,7 +170,7 @@ class Plan(object):
         self._polarion_record = service.getPlanByUri(self._polarion_record.uri)
         self._buildPlanFromPolarion()
         self._original_polarion = copy.deepcopy(self._polarion_record)
-        
+
     def __eq__(self, other):
         if self.id == other.id:
             return True
@@ -179,6 +181,7 @@ class Plan(object):
 
     def __str__(self):
         return f'{self.name} ({self.id})'
+
 
 class PlanCreator(Creator):
     def createFromUri(self, polarion, project, uri):

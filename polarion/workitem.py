@@ -1,16 +1,10 @@
-from zeep import Client
-from zeep.plugins import HistoryPlugin
-from lxml.etree import Element
-from lxml import etree
 import copy
-import requests
-import re
 import os
-from urllib.parse import urljoin
-from enum import Enum
-from .user import User
 from datetime import datetime, date
+from enum import Enum
+
 from .factory import Creator, createFromUri
+from .user import User
 
 
 class Workitem(object):
@@ -24,6 +18,7 @@ class Workitem(object):
     :param polarion_workitem: Polarion workitem content
 
     """
+
     class HyperlinkRoles(Enum):
         """
         Hyperlink reference type enum
@@ -43,14 +38,14 @@ class Workitem(object):
             try:
                 self._polarion_item = service.getWorkItemByUri(self._uri)
                 self._id = self._polarion_item.id
-            except:
+            except Exception:
                 raise Exception(
                     f'Cannot find workitem {self._id} in project {self._project.id}')
         elif id is not None:
             try:
                 self._polarion_item = service.getWorkItemById(
                     self._project.id, self._id)
-            except:
+            except Exception:
                 raise Exception(
                     f'Cannot find workitem {self._id} in project {self._project.id}')
         elif new_workitem_type is not None:
@@ -70,7 +65,7 @@ class Workitem(object):
         self._buildWorkitemFromPolarion()
 
     def _buildWorkitemFromPolarion(self):
-        if self._polarion_item != None and self._polarion_item.unresolvable == False:
+        if self._polarion_item is not None and not self._polarion_item.unresolvable:
             self._original_polarion = copy.deepcopy(self._polarion_item)
             for attr, value in self._polarion_item.__dict__.items():
                 for key in value:
@@ -79,13 +74,13 @@ class Workitem(object):
             try:
                 service_test = self._polarion.getService('TestManagement')
                 self._polarion_test_steps = service_test.getTestSteps(self.uri)
-            except:
+            except Exception:
                 # fail silently as there are probably not test steps for this workitem
                 # todo: logging support
                 pass
             self._parsed_test_steps = None
-            if self._polarion_test_steps != None:
-                if self._polarion_test_steps.keys != None and self._polarion_test_steps.steps:
+            if self._polarion_test_steps is not None:
+                if self._polarion_test_steps.keys is not None and self._polarion_test_steps.steps:
                     # oh god, parse the test steps...
                     columns = []
                     self._parsed_test_steps = []
@@ -95,8 +90,7 @@ class Workitem(object):
                     for row in self._polarion_test_steps.steps.TestStep:
                         current_row = {}
                         for col_id in range(len(row.values.Text)):
-                            current_row[columns[col_id]
-                                        ] = row.values.Text[col_id].content
+                            current_row[columns[col_id]] = row.values.Text[col_id].content
                         self._parsed_test_steps.append(current_row)
         else:
             raise Exception(f'Workitem not retrieved from Polarion')
@@ -108,7 +102,7 @@ class Workitem(object):
         :return: Author
         :rtype: User
         """
-        if self.author != None:
+        if self.author is not None:
             return User(self._polarion, self.author)
         return None
 
@@ -131,7 +125,7 @@ class Workitem(object):
         """
         service = self._polarion.getService('Tracker')
 
-        if remove_others == True:
+        if remove_others:
             current_users = self.getApproverUsers()
             for current_user in current_users:
                 service.removeApprovee(self.uri, current_user.id)
@@ -147,11 +141,10 @@ class Workitem(object):
         :rtype: User[]
         """
         assigned_users = []
-        if self.approvals != None:
+        if self.approvals is not None:
             for approval in self.approvals.Approval:
                 assigned_users.append(User(self._polarion, approval.user))
         return assigned_users
-
 
     def getAssignedUsers(self):
         """
@@ -161,7 +154,7 @@ class Workitem(object):
         :rtype: User[]
         """
         assigned_users = []
-        if self.assignee != None:
+        if self.assignee is not None:
             for user in self.assignee.User:
                 assigned_users.append(User(self._polarion, user))
         return assigned_users
@@ -185,7 +178,7 @@ class Workitem(object):
         """
         service = self._polarion.getService('Tracker')
 
-        if remove_others == True:
+        if remove_others:
             current_users = self.getAssignedUsers()
             for current_user in current_users:
                 service.removeAssignee(self.uri, current_user.id)
@@ -204,7 +197,7 @@ class Workitem(object):
         try:
             enum = self._project.getEnum(f'{self.type.id}-status')
             return enum
-        except:
+        except Exception:
             return []
 
     def getResolutionEnum(self):
@@ -218,7 +211,7 @@ class Workitem(object):
         try:
             enum = self._project.getEnum(f'{self.type.id}-resolution')
             return enum
-        except:
+        except Exception:
             return []
 
     def getSeverityEnum(self):
@@ -232,7 +225,7 @@ class Workitem(object):
         try:
             enum = self._project.getEnum(f'{self.type.id}-severity')
             return enum
-        except:
+        except Exception:
             return []
 
     def getAllowedCustomKeys(self):
@@ -245,7 +238,7 @@ class Workitem(object):
         try:
             service = self._polarion.getService('Tracker')
             return service.getCustomFieldKeys(self.uri)
-        except:
+        except Exception:
             return []
 
     def getAvailableStatus(self):
@@ -329,7 +322,7 @@ class Workitem(object):
         :return: The content of the description, may contain HTML
         :rtype: string
         """
-        if self.description != None:
+        if self.description is not None:
             return self.description.content
         return None
 
@@ -350,7 +343,7 @@ class Workitem(object):
         :param resolution: the resolution
         """
 
-        if self.resolution != None:
+        if self.resolution is not None:
             self.resolution.id = resolution
         else:
             self.resolution = self._polarion.EnumOptionIdType(
@@ -364,7 +357,7 @@ class Workitem(object):
         :return: True/False
         :rtype: boolean
         """
-        if self._parsed_test_steps != None:
+        if self._parsed_test_steps is not None:
             return len(self._parsed_test_steps) > 0
         return False
 
@@ -380,7 +373,7 @@ class Workitem(object):
         """
         service = self._polarion.getService('Tracker')
         if hasattr(service, 'addComment'):
-            if parent == None:
+            if parent is None:
                 parent = self.uri
             else:
                 # force title to be empty, not allowed for reply comments
@@ -404,7 +397,7 @@ class Workitem(object):
         """
         if key not in self.getAllowedCustomKeys():
             raise Exception(f"key {key} is not allowed for this workitem")
-        
+
         if self.customFields is None:
             # nothing exists, create a custom field structure
             self.customFields = self._polarion.ArrayOfCustomType()
@@ -474,10 +467,10 @@ class Workitem(object):
         :return: True/False
         :rtype: boolean
         """
-        if self.attachments != None:
+        if self.attachments is not None:
             return True
         return False
-    
+
     def getAttachment(self, id):
         """
         Get the attachment data
@@ -489,7 +482,6 @@ class Workitem(object):
         service = self._polarion.getService('Tracker')
         return service.getAttachment(self.uri, id)
 
-    
     def saveAttachmentAsFile(self, id, file_path):
         """
         Save an attachment to file.
@@ -620,7 +612,7 @@ class Workitem(object):
         try:
             a = vars(self)
             b = vars(other)
-        except:
+        except Exception:
             return False
         return self._compareType(a, b)
 
@@ -645,7 +637,7 @@ class Workitem(object):
                     for idx, sub_a in enumerate(a[key]):
                         self._compareType(sub_a, b[key][idx])
                 else:
-                    if self._compareType(a[key], b[key]) == False:
+                    if not self._compareType(a[key], b[key]):
                         return False
             else:
                 # exit, type mismatch
@@ -658,6 +650,7 @@ class Workitem(object):
 
     def __str__(self):
         return f'{self._id}: {self.title}'
+
 
 class WorkitemCreator(Creator):
     def createFromUri(self, polarion, project, uri):

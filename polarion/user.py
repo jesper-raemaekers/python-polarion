@@ -1,5 +1,6 @@
 from .factory import Creator
 
+
 class User(object):
     """
     A polarion user
@@ -14,11 +15,11 @@ class User(object):
         self._polarion_record = polarion_record
         self._uri = uri
 
-        if uri != None:
+        if uri is not None:
             service = self._polarion.getService('Project')
             self._polarion_record = service.getUserByUri(self._uri)
 
-        if self._polarion_record!= None and self._polarion_record.unresolvable == False:
+        if self._polarion_record is not None and not self._polarion_record.unresolvable:
             # parse all polarion attributes to this class
             for attr, value in self._polarion_record.__dict__.items():
                 for key in value:
@@ -36,6 +37,7 @@ class User(object):
 
     def __str__(self):
         return f'{self.name} ({self.id})'
+
 
 class UserCreator(Creator):
     def createFromUri(self, polarion, project, uri):
