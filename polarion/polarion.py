@@ -114,6 +114,8 @@ class Polarion(object):
                         'addComment').input.body.type._element[1].nillable = True
                     self.services[service]['client'].service.getModuleWorkItemUris._proxy._binding.get(
                         'getModuleWorkItemUris').input.body.type._element[1].nillable = True
+                    self.services[service]['client'].service.moveWorkItemToDocument._proxy._binding.get(
+                        'moveWorkItemToDocument').input.body.type._element[2].nillable = True
             if service == 'Planning':
                 self.services[service]['client'].service.createPlan._proxy._binding.get(
                         'createPlan').input.body.type._element[3].nillable = True

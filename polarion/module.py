@@ -54,6 +54,39 @@ class Module:
         """
         return createFromUri(self._polarion, self._project, self.getWorkItemUris()[0])
 
+    def insertComment(self, text):
+        """
+        Inserts a comment with no reference to a workitem. Only shows up in the comment list if unreferenced comments
+        are enabled there.
+        :param text:
+        :return:
+        """
+        service = self._polarion.getService('Tracker')
+        service.createDocumentComment(self._uri, self._polarion.TextType(
+            content=text, type='text/html', contentLossy=False))
+
+    def insertCommentAtWorkitem(self, workitem, text):
+        """
+        Inserts a comment with reference to a workitem.
+        :param text:
+        :return:
+        """
+        service = self._polarion.getService('Tracker')
+        service.createDocumentCommentReferringWI(self._uri, workitem.uri, self._polarion.TextType(
+            content=text, type='text/html', contentLossy=False))
+
+    def insertCommentReply(self, comment_uri, text):
+        """
+        Inserts a comment with reference to a workitem.
+        :param text:
+        :return:
+        """
+        service = self._polarion.getService('Tracker')
+        service.createDocumentCommentReply(comment_uri, self._polarion.TextType(
+            content=text, type='text/html', contentLossy=False))
+
+
+
 
 
     def __repr__(self):
