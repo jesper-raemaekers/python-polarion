@@ -12,6 +12,7 @@ from .user import User
 from .plan import Plan
 from .document import Document
 
+
 class Project(object):
     """
     A Polarion project instance usable to access workitem, testruns and more. usually create by using the Polarion client.
@@ -97,7 +98,7 @@ class Project(object):
         """
         query += f' AND project.id:{self.id}'
         service = self.polarion.getService('Tracker')
-        return  service.queryWorkItemsLimited(
+        return service.queryWorkItemsLimited(
             query, order, fieldList, limit)
 
     def searchWorkitemFullItem(self, query='', order='Created', limit=-1):
@@ -171,6 +172,17 @@ class Project(object):
                 available.append(a.id)
         return available
 
+    def createDocument(self, location, name, title, allowed_workitem_types, structure_link_role):
+        allowed_workitem_ids = []
+        for allowed_workitem_type in allowed_workitem_types:
+            allowed_workitem_ids.append(self.polarion.EnumOptionIdType(id=allowed_workitem_type))
+
+        structure_link_role_id = self.polarion.EnumOptionIdType(id=structure_link_role)
+
+        service = self.polarion.getService('Tracker')
+        uri = service.createDocument(self.id, location, name, title, allowed_workitem_ids, structure_link_role_id, None)
+        return Document(self.polarion, self, uri)
+
     def getDocumentSpaces(self):
         """
         Get a list al all document spaces.
@@ -199,11 +211,17 @@ class Project(object):
         service = self.polarion.getService('Tracker')
         uris = service.getModuleUris(self.id, space)
         for uri in uris:
-            documents.append(Document(self.polarion, self, uri))
+            documents.append(Document(self.polarion, self, uri=uri))
         return documents
 
-    def getDocumentByLocation(self, location):
-        return Document(self.polarion, self, self.polarion.getService('Tracker').getModuleByLocation(self.id, location).uri)
+    def getDocument(self, location):
+        """
+        Get a document by location.
+
+        :param location: Location of the document.
+        :return: Document
+        """
+        return Document(self.polarion, self, location=location)
 
     def __repr__(self):
         return f'Polarion project {self.name} prefix {self.tracker_prefix}'
