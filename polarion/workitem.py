@@ -538,6 +538,13 @@ class Workitem(object):
             service.updateAttachment(self.uri, id, file_name, title, file_content.read())
         self._reloadFromPolarion()
 
+    def delete(self):
+        """
+        Delete the work item in polarion
+        """
+        service = self._polarion.getService('Tracker')
+        service.deleteWorkItem(self.uri)
+
     def save(self):
         """
         Update the workitem in polarion
