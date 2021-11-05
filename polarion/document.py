@@ -2,10 +2,11 @@ import copy
 
 from .factory import createFromUri
 
-class Module:
+
+class Document:
     def __init__(self, polarion, project, uri):
         """
-        Create a Module.
+        Create a Document.
         :param polarion: Polarion client object
         :param project: Polarion Project object
         :param uri: Polarion uri
@@ -16,14 +17,14 @@ class Module:
 
         if self._uri is not None:
             service = self._polarion.getService('Tracker')
-            self._prolarion_module = service.getModuleByUri(self._uri)
+            self._polarion_document = service.getModuleByUri(self._uri)
 
         self._buildFromPolarion()
 
     def _buildFromPolarion(self):
-        if self._prolarion_module is not None and self._prolarion_module.unresolvable is False:
-            self._original_polarion = copy.deepcopy(self._prolarion_module)
-            for attr, value in self._prolarion_module.__dict__.items():
+        if self._polarion_document is not None and self._polarion_document.unresolvable is False:
+            self._original_polarion = copy.deepcopy(self._polarion_document)
+            for attr, value in self._polarion_document.__dict__.items():
                 for key in value:
                     setattr(self, key, value[key])
 
@@ -99,7 +100,7 @@ class Module:
         service.createaModule(self._project, location, name, allowed_workitem_ids, structure_link_role_id, False, None)
 
     def __repr__(self):
-        return f'Polarion module {self.title} in {self.moduleFolder}'
+        return f'Polarion document {self.title} in {self.moduleFolder}'
 
     def __str__(self):
-        return f'Polarion module {self.title} in {self.moduleFolder}'
+        return f'Polarion document {self.title} in {self.moduleFolder}'
