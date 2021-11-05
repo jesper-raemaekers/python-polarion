@@ -44,7 +44,7 @@ class Document:
         self._polarion_document = service.geModuleByUri(self._uri)
         self._buildFromPolarion()
 
-    def getWorkItemUris(self):
+    def getWorkitemUris(self):
         """
         Get the uris of all workitems in the document.
         :return: string[]
@@ -60,7 +60,7 @@ class Document:
         :return: Workitem[]
         """
         workitems = []
-        workitem_uris = self.getWorkItemUris()
+        workitem_uris = self.getWorkitemUris()
         for workitem_uri in workitem_uris:
             workitems.append(createFromUri(self._polarion, self._project, workitem_uri))
         return workitems
@@ -70,7 +70,7 @@ class Document:
         Get the top level workitem, which is usually the title.
         :return: Workitem
         """
-        return createFromUri(self._polarion, self._project, self.getWorkItemUris()[0])
+        return createFromUri(self._polarion, self._project, self.getWorkitemUris()[0])
 
     def addComment(self, title, comment, parent=None):
         """
