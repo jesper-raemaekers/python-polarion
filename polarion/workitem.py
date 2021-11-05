@@ -588,6 +588,10 @@ class Workitem(object):
         else:
             return None
 
+    def createInModule(self, module, parent):
+        service = self._polarion.getService('Tracker')
+        service.createWorkItemInModule(module.uri, parent.uri, self._polarion_item)
+
     def save(self):
         """
         Update the workitem in polarion
