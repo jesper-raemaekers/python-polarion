@@ -177,7 +177,7 @@ class Project(object):
         :return:string[]
         """
         service = self.polarion.getService('Tracker')
-        spaces = service.getDocumentSpaces('Python')
+        spaces = service.getDocumentSpaces(self.id)
         return sorted(spaces)
 
     def getDocumentLocations(self):
@@ -186,7 +186,7 @@ class Project(object):
         :return:string[]
         """
         service = self.polarion.getService('Tracker')
-        locations = service.getDocumentLocations('Python')
+        locations = service.getDocumentLocations(self.id)
         return sorted(locations)
 
     def getDocumentsInSpace(self, space):
@@ -197,11 +197,13 @@ class Project(object):
         """
         documents = []
         service = self.polarion.getService('Tracker')
-        uris = service.getModuleUris('Python', space)
+        uris = service.getModuleUris(self.id, space)
         for uri in uris:
             documents.append(Module(self.polarion, self, uri))
         return documents
 
+    def getModuleByLocation(self, location):
+        return Module(self.polarion, self, self.polarion.getService('Tracker').getModuleByLocation(self.id, location).uri)
 
     def __repr__(self):
         return f'Polarion project {self.name} prefix {self.tracker_prefix}'

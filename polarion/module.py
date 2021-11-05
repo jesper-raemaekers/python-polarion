@@ -1,4 +1,5 @@
 import copy
+
 from .factory import createFromUri
 
 class Module:
@@ -54,7 +55,15 @@ class Module:
         """
         return createFromUri(self._polarion, self._project, self.getWorkItemUris()[0])
 
+    def createModule(self, name, location, allowed_workitem_types, structure_link_role):
+        allowed_workitem_ids = []
+        for allowed_workitem_type in allowed_workitem_types:
+            allowed_workitem_ids.append(self._polarion.EnumOptionIdType(id=allowed_workitem_type))
 
+        structure_link_role_id = self._polarion.EnumOptionIdType(id=structure_link_role)
+
+        service = self._polarion.getService('Tracker')
+        service.createaModule(self._project, location, name, allowed_workitem_ids, structure_link_role_id, False, None)
 
     def __repr__(self):
         return f'Polarion module {self.title} in {self.moduleFolder}'
