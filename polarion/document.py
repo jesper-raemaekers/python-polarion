@@ -177,6 +177,14 @@ class Document:
             service.updateModule(updated_item)
             self._reloadFromPolarion()
 
+
+    def delete(self):
+        """
+        Deletes a document
+        """
+        service = self._polarion.getService('Tracker')
+        service.deleteModule(self.uri)
+
     def __repr__(self):
         return f'Polarion document {self.title} in {self.moduleFolder}'
 

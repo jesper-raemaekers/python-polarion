@@ -25,7 +25,7 @@ class TestPolarionWorkitem(unittest.TestCase):
             for delete_document in delete_documents:
                 checking_document = cls.checking_project.getDocument(delete_document)
                 if checking_document is not None:
-                    cls.checking_project.deleteDocument(checking_document)
+                    checking_document.delete()
         except Exception:
             pass
 
