@@ -191,15 +191,6 @@ class Project(object):
         uri = service.createDocument(self.id, location, name, title, allowed_workitem_ids, structure_link_role_id, home_page_content)
         return Document(self.polarion, self, uri)
 
-    def deleteDocument(self, document):
-        """
-        Deletes a document
-
-        :param document: Document to delete
-        """
-        service = self.polarion.getService('Tracker')
-        service.deleteModule(document.uri)
-
     def getDocumentSpaces(self):
         """
         Get a list al all document spaces.
