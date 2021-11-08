@@ -169,7 +169,7 @@ class Project(object):
                 available.append(a.id)
         return available
 
-    def createDocument(self, location, name, title, allowed_workitem_types, structure_link_role):
+    def createDocument(self, location, name, title, allowed_workitem_types, structure_link_role, home_page_content=''):
         allowed_workitem_ids = []
         for allowed_workitem_type in allowed_workitem_types:
             allowed_workitem_ids.append(self.polarion.EnumOptionIdType(id=allowed_workitem_type))
@@ -177,8 +177,12 @@ class Project(object):
         structure_link_role_id = self.polarion.EnumOptionIdType(id=structure_link_role)
 
         service = self.polarion.getService('Tracker')
-        uri = service.createDocument(self.id, location, name, title, allowed_workitem_ids, structure_link_role_id, None)
+        uri = service.createDocument(self.id, location, name, title, allowed_workitem_ids, structure_link_role_id, home_page_content)
         return Document(self.polarion, self, uri)
+
+    def deleteDocument(self, document):
+        service = self.polarion.getService('Tracker')
+        service.deleteModule(document.uri)
 
     def getDocumentSpaces(self):
         """

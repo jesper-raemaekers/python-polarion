@@ -3,6 +3,8 @@ import os
 from datetime import datetime, date
 from enum import Enum
 
+from zeep import xsd
+
 from .factory import Creator, createFromUri
 from .user import User
 
@@ -580,9 +582,9 @@ class Workitem(object):
         else:
             return None
 
-    def createInDocument(self, document, parent):
+    def moveToDocument(self, document, parent):
         service = self._polarion.getService('Tracker')
-        service.createWorkItemInModule(document.uri, parent.uri, self._polarion_item)
+        service.moveWorkItemToDocument(self.uri, document.uri, parent.uri if parent is not None else xsd.const.Nil, -1, False)
 
     def save(self):
         """

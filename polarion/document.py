@@ -103,10 +103,12 @@ class Document:
         service.createDocumentCommentReply(comment_uri, self._polarion.TextType(
             content=text, type='text/html', contentLossy=False))
 
-    def createModule(self, name, location, allowed_workitem_types, structure_link_role):
-        allowed_workitem_ids = []
-        for allowed_workitem_type in allowed_workitem_types:
-            allowed_workitem_ids.append(self._polarion.EnumOptionIdType(id=allowed_workitem_type))
+    def add_heading(self, title, parent_workitem=None):
+        heading = self._project.createWorkitem('heading')
+        heading.title = title
+        heading.save()
+        heading.moveToDocument(self, parent_workitem)
+        return heading
 
     def reuse(self, target_project_id, target_name, link_role, derived_fields=None):
         """
