@@ -19,7 +19,7 @@ class Project(object):
         self.polarion = polarion
         self.id = project_id
 
-        # get detaisl from polarion on this project
+        # get details from polarion on this project
         service = self.polarion.getService('Project')
         try:
             self.polarion_data = service.getProject(self.id)
@@ -170,6 +170,17 @@ class Project(object):
         return available
 
     def createDocument(self, location, name, title, allowed_workitem_types, structure_link_role, home_page_content=''):
+        """
+        Creates a new document
+
+        :param location: Document location, the default location is _default
+        :param name: Name of the document
+        :param title: Document title
+        :param allowed_workitem_types: List of workitem types to be allowed inside the document
+        :param structure_link_role: Link role to be used when defining the document hierarchy between parents and children
+        :param home_page_content: Initial content of the document as HTML
+        :return: New document
+        """
         allowed_workitem_ids = []
         for allowed_workitem_type in allowed_workitem_types:
             allowed_workitem_ids.append(self.polarion.EnumOptionIdType(id=allowed_workitem_type))
@@ -181,6 +192,11 @@ class Project(object):
         return Document(self.polarion, self, uri)
 
     def deleteDocument(self, document):
+        """
+        Deletes a document
+
+        :param document: Document to delete
+        """
         service = self.polarion.getService('Tracker')
         service.deleteModule(document.uri)
 

@@ -1,5 +1,7 @@
 import copy
 
+from zeep import xsd
+
 from .factory import createFromUri, Creator
 
 
@@ -9,7 +11,8 @@ class Document:
         Create a Document.
         :param polarion: Polarion client object
         :param project: Polarion Project object
-        :param uri: Polarion uri
+        :param uri: Polarion uri (first possibility to get a document)
+        :param location: Document location (second possibility to get a document)
         """
         self._uri = uri
         self._project = project
@@ -41,7 +44,7 @@ class Document:
 
     def _reloadFromPolarion(self):
         service = self._polarion.getService('Tracker')
-        self._polarion_document = service.geModuleByUri(self._uri)
+        self._polarion_document = service.getModuleByUri(self._uri)
         self._buildFromPolarion()
 
     def getWorkitemUris(self):
@@ -53,7 +56,7 @@ class Document:
         workitems = service.getModuleWorkItemUris(self._uri, None, True)
         return workitems
 
-    def getWorkItems(self):
+    def getWorkitems(self):
         """
         Get all complete workitems.
         That may take some time on a large document.
@@ -71,6 +74,21 @@ class Document:
         :return: Workitem
         """
         return createFromUri(self._polarion, self._project, self.getWorkitemUris()[0])
+
+    def getChildren(self, workitem):
+        """
+        Gets the children of a workitem in the document.
+
+        :param workitem: Workitem to get children for
+        :return: List of workitems
+        """
+        workitem_children = []
+        if workitem.linkedWorkItemsDerived is not None:
+            document_uris = self.getWorkitemUris()
+            children = (w for w in workitem.linkedWorkItemsDerived.LinkedWorkItem if w.role.id == self.structureLinkRole.id and w.workItemURI in document_uris)
+            for child in children:
+                workitem_children.append(createFromUri(self._polarion, self._project, child.workItemURI))
+        return workitem_children
 
     def addComment(self, title, comment, parent=None):
         """
@@ -99,31 +117,39 @@ class Document:
         else:
             raise Exception("addComment binding not found in Tracker Service. Adding comments might be disabled.")
 
-    def add_heading(self, title, parent_workitem=None):
+    def addHeading(self, title, parent_workitem=None):
+        """
+        Adds a heading to a document
+
+        :param title: Title of the heading
+        :param parent_workitem: Parent workitem in the document hierarchy, set to None to create it on top level
+        :return: Heading workitem
+        """
         heading = self._project.createWorkitem('heading')
         heading.title = title
         heading.save()
         heading.moveToDocument(self, parent_workitem)
         return heading
 
-    def reuse(self, target_project_id, target_name, link_role, derived_fields=None):
+    def reuse(self, target_project_id, target_location, target_name, target_title, link_role='derived_from', derived_fields=None):
         """
         Reuse this document in a different project.
 
         :param target_project_id: The target project id
-        :param target_name: The target name
-        :param link_role: The link role
+        :param target_location: Location of the target document
+        :param target_name: The target document's name
+        :param target_title: Title of the target document
+        :param link_role: Link role of the derived documents
         :param derived_fields: List of fields to be derived in the target document
         :return: The new document
         """
         if derived_fields is None:
-            # TODO: Which are the default derived fields?
-            derived_fields = ['id', 'description']
+            derived_fields = ['title', 'description']
         service = self._polarion.getService('Tracker')
-        new_uri = service.reuseModule(self._uri, target_project_id, None, target_name, link_role, None, None, derived_fields)
+        new_uri = service.reuseDocument(self._uri, target_project_id, target_location, target_name, target_title, True, link_role, derived_fields)
         return createFromUri(self._polarion, self._project, new_uri)
 
-    def update(self, revision, auto_suspect):
+    def update(self, revision=None, auto_suspect=False):
         """
         Update a reused document to a revision of the source document.
 
@@ -131,7 +157,7 @@ class Document:
         :param auto_suspect: If set to True, changed workitems will mark their links as suspect
         """
         service = self._polarion.getService('Tracker')
-        service.updateDerivedDocument(self._uri, revision, auto_suspect)
+        service.updateDerivedDocument(self._uri, revision if revision is not None else xsd.const.Nil, auto_suspect)
 
     def save(self):
         """

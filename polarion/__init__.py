@@ -7,4 +7,4 @@ from .document import DocumentCreator
 addCreator('workitem', WorkitemCreator)
 addCreator('testrun', TestrunCreator)
 addCreator('user', UserCreator)
-addCreator('document', DocumentCreator)
+addCreator('module', DocumentCreator)

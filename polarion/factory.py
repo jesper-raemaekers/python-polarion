@@ -31,7 +31,7 @@ def _subterraUrl(uri):
     if uri_parts[0] != 'subterra':
         raise Exception(f'Not a subterra uri: {uri}')
     uri_type = re.findall(r"{(\w+)}", uri)
-    if len(uri_type) == 1:
+    if len(uri_type) >= 1:
         return uri_type[0].lower()
     else:
-        raise Exception(f'Not a valid polarion uri')
+        raise Exception(f'{uri} is not a valid polarion uri')
