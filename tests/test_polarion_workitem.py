@@ -1,9 +1,7 @@
 import unittest
 from unittest.mock import MagicMock
 from polarion.polarion import Polarion
-from polarion.project import Project
 from keys import polarion_user, polarion_password, polarion_url, polarion_project_id
-from time import sleep
 from datetime import datetime
 import mock
 from polarion.factory import createFromUri

@@ -28,10 +28,10 @@ Headings are used to group workitems in a document. Headings can be created as c
     chapter_1 = document.addHeading('Chapter 1')
     document.addHeading('Chapter 1.1', chapter_1)
 
-Work items in a document
+Workitems in a document
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-Work items in a Polarion document are organized as a tree. By getting the top level item, you can iterate through all items by traversing their children in the document.
+Workitems in a Polarion document are organized as a tree. By getting the top level item, you can iterate through all items by traversing their children in the document.
 
 .. code:: python
 
@@ -40,7 +40,7 @@ Work items in a Polarion document are organized as a tree. By getting the top le
     for child in children:
         print(child)
 
-As an alternative, you can just get all work items in a document and work with them as a list.
+As an alternative, you can just get all workitems in a document and work with them as a list.
 
 .. code:: python
 
@@ -66,6 +66,106 @@ In the following example, an existing document is reused, changed and the reused
     reused_document = original_document.reuse(project.id, '_default', 'Reused document', 'derived_from')
     original_document.getTopLevelWorkitem().setDescription('Changed description')
     reused_document.update()
+
+Comments
+^^^^^^^^
+
+You can add comments and replies to comments to a document.
+
+.. code:: python
+
+    comment = document.addComment('This is a document comment')
+    document.addComment('And this is a reply', comment)
+
+List of available attributes
+----------------------------
+
+The attributes are set in the document when loading it from polarion. An attribute can be None (when it is not set), a string, number or datetime, or another object.
+When accessing any attribute, a check for None is recommended as the only attributes that are always set are:
+-Author
+-AutoSuspect
+-Created
+-Project
+-StructureLinkRole
+-UseOutlineNumbering
+
+Other attributes that will be available, but could be None, are listed below.
+Some objects only have one attribute, named id, these values can be accessed directly if not None. If they are None and you want to set them, use the setter method listed below.
+
+
++----------------------------+---------------------------+----------------------+-------------------------+
+| Attribute                  | Type (when not None)      | getter               | setter                  |
++============================+===========================+======================+=========================+
+| allowedWITypes             | object                    | No                   | No                      |
++----------------------------+---------------------------+----------------------+-------------------------+
+| areLinksFromParentToChild  | boolean                   | No                   | No                      |
++----------------------------+---------------------------+----------------------+-------------------------+
+| author                     | object                    | getAuthor            | No                      |
++----------------------------+---------------------------+----------------------+-------------------------+
+| autoSuspect                | boolean                   | No                   | No                      |
++----------------------------+---------------------------+----------------------+-------------------------+
+| branchedFrom               | string                    | No                   | No                      |
++----------------------------+---------------------------+----------------------+-------------------------+
+| branchedWithQuery          | string                    | No                   | No                      |
++----------------------------+---------------------------+----------------------+-------------------------+
+| comments                   | object                    | No                   | addComment              |
++----------------------------+---------------------------+----------------------+-------------------------+
+| created                    | datetime                  | No                   | No                      |
++----------------------------+---------------------------+----------------------+-------------------------+
+| customFields               |                           | No                   | No                      |
++----------------------------+---------------------------+----------------------+-------------------------+
+| derivedFields              |                           | No                   | No                      |
++----------------------------+---------------------------+----------------------+-------------------------+
+| derivedFromLinkRole        |                           | No                   | No                      |
++----------------------------+---------------------------+----------------------+-------------------------+
+| derivedFromURI             | string                    | No                   | No                      |
++----------------------------+---------------------------+----------------------+-------------------------+
+| headingSidebarField        | object                    | No                   | No                      |
++----------------------------+---------------------------+----------------------+-------------------------+
+| homePageContent            | string                    | No                   | No                      |
++----------------------------+---------------------------+----------------------+-------------------------+
+| id                         | string                    | No                   | No                      |
++----------------------------+---------------------------+----------------------+-------------------------+
+| linkedOslcResources        |                           | No                   | No                      |
++----------------------------+---------------------------+----------------------+-------------------------+
+| location                   | string                    | No                   | No                      |
++----------------------------+---------------------------+----------------------+-------------------------+
+| moduleAbsoluteLocation     | string                    | No                   | No                      |
++----------------------------+---------------------------+----------------------+-------------------------+
+| moduleFolder               | string                    | No                   | No                      |
++----------------------------+---------------------------+----------------------+-------------------------+
+| moduleLocation             | string                    | No                   | No                      |
++----------------------------+---------------------------+----------------------+-------------------------+
+| moduleName                 | string                    | No                   | No                      |
++----------------------------+---------------------------+----------------------+-------------------------+
+| project                    | object                    | No                   | No                      |
++----------------------------+---------------------------+----------------------+-------------------------+
+| status                     | object (id)               | No                   | No                      |
+|                            |                           |                      |                         |
+| status.id                  | string                    |                      |                         |
++----------------------------+---------------------------+----------------------+-------------------------+
+| structureLinkRole          | object (id)               | No                   | No                      |
+|                            |                           |                      |                         |
+| structureLinkRole.id       | string                    |                      |                         |
++----------------------------+---------------------------+----------------------+-------------------------+
+| title                      | string                    | No                   | No                      |
++----------------------------+---------------------------+----------------------+-------------------------+
+| type                       | object (id)               | No                   | No                      |
+|                            |                           |                      |                         |
+| type.id                    | string                    |                      |                         |
++----------------------------+---------------------------+----------------------+-------------------------+
+| unresolvable               | boolean                   | No                   | No                      |
++----------------------------+---------------------------+----------------------+-------------------------+
+| updated                    | datetime                  | No                   |  No                     |
++----------------------------+---------------------------+----------------------+-------------------------+
+| updatedBy                  | object                    | No                   |  No                     |
++----------------------------+---------------------------+----------------------+-------------------------+
+| uri                        | string                    | No                   |  No                     |
++----------------------------+---------------------------+----------------------+-------------------------+
+| useOutlineNumbering        | boolean                   | No                   | No                      |
++----------------------------+---------------------------+----------------------+-------------------------+
+| variantURI                 | string                    | No                   |  No                     |
++----------------------------+---------------------------+----------------------+-------------------------+
 
 Document class
 --------------

@@ -5,6 +5,7 @@ from enum import Enum
 
 from zeep import xsd
 
+from .comment import Comment
 from .factory import Creator, createFromUri
 from .user import User
 
@@ -363,32 +364,24 @@ class Workitem(object):
             return len(self._parsed_test_steps) > 0
         return False
 
-    def addComment(self, title, comment, parent=None):
+    def addComment(self, title, text, parent=None):
         """
-        Adds a comment to the workitem.
+        Inserts a work item comment either as a new thread or as a reply to an existing comment.
 
-        Throws an exception if the function is disabled in Polarion.
-
-        :param title: Title of the comment (will be None for a reply)
-        :param comment: The comment, may contain html
+        :param title: Comment title
+        :param text: Comment text as HTML
         :param parent: A parent comment, if none provided it's a root comment.
+        :return:
         """
-        service = self._polarion.getService('Tracker')
-        if hasattr(service, 'addComment'):
-            if parent is None:
-                parent = self.uri
-            else:
-                # force title to be empty, not allowed for reply comments
-                title = None
-            content = {
-                'type': 'text/html',
-                'content': comment,
-                'contentLossy': False
-            }
-            service.addComment(parent, title, content)
-            self._reloadFromPolarion()
+        if parent is None:
+            parent = self.uri
         else:
-            raise Exception("addComment binding not found in Trackter Service. Adding comments might be disabled.")
+            # force title to be empty, not allowed for reply comments
+            title = None
+
+        uri = Comment.add_comment(self._polarion.getService('Tracker'), parent, title, text)
+        self._reloadFromPolarion()
+        return uri
 
     def setCustomField(self, key, value):
         """

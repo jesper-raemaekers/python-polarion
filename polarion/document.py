@@ -2,6 +2,7 @@ import copy
 
 from zeep import xsd
 
+from .comment import Comment
 from .factory import createFromUri, Creator
 
 
@@ -90,36 +91,31 @@ class Document:
                 workitem_children.append(createFromUri(self._polarion, self._project, child.workItemURI))
         return workitem_children
 
-    def insertComment(self, text):
+    def getAuthor(self):
         """
-        Inserts a comment with no reference to a workitem. Only shows up in the comment list if unreferenced comments
-        are enabled there.
-        :param text:
-        :return:
-        """
-        service = self._polarion.getService('Tracker')
-        service.createDocumentComment(self._uri, self._polarion.TextType(
-            content=text, type='text/html', contentLossy=False))
+        Get the author of the document
 
-    def insertCommentAtWorkitem(self, workitem, text):
+        :return: Author
+        :rtype: User
         """
-        Inserts a comment with reference to a workitem.
-        :param text:
-        :return:
-        """
-        service = self._polarion.getService('Tracker')
-        service.createDocumentCommentReferringWI(self._uri, workitem.uri, self._polarion.TextType(
-            content=text, type='text/html', contentLossy=False))
+        if self.author is not None:
+            return User(self._polarion, self.author)
+        return None
 
-    def insertCommentReply(self, comment_uri, text):
+    def addComment(self, text, parent=None):
         """
-        Inserts a comment with reference to a workitem.
-        :param text:
+        Inserts a document comment either as a new thread or as a reply to an existing comment.
+
+        :param text: Comment text as HTML
+        :param parent: A parent comment, if none provided it's a root comment.
         :return:
         """
-        service = self._polarion.getService('Tracker')
-        service.createDocumentCommentReply(comment_uri, self._polarion.TextType(
-            content=text, type='text/html', contentLossy=False))
+        if parent is None:
+            parent = self._uri
+
+        uri = Comment.add_comment(self._polarion.getService('Tracker'), parent, None, text)
+        self._reloadFromPolarion()
+        return uri
 
     def addHeading(self, title, parent_workitem=None):
         """
@@ -180,7 +176,6 @@ class Document:
             service = self._polarion.getService('Tracker')
             service.updateModule(updated_item)
             self._reloadFromPolarion()
-
 
     def delete(self):
         """
