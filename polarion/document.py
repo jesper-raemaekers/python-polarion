@@ -97,7 +97,14 @@ class Document:
             service.addComment(parent, title, content)
             self._reloadFromPolarion()
         else:
-            raise Exception("addComment binding not found in Trackter Service. Adding comments might be disabled.")
+            raise Exception("addComment binding not found in Tracker Service. Adding comments might be disabled.")
+
+    def add_heading(self, title, parent_workitem=None):
+        heading = self._project.createWorkitem('heading')
+        heading.title = title
+        heading.save()
+        heading.moveToDocument(self, parent_workitem)
+        return heading
 
     def reuse(self, target_project_id, target_name, link_role, derived_fields=None):
         """
