@@ -56,7 +56,7 @@ class TestPolarionWorkitem(unittest.TestCase):
 
         # Reuse document
         executing_document = self.executing_project.getDocument('_default/Test name')
-        reused_document = executing_document.reuse(self.executing_project.id, '_default', 'Reused', 'derived_from')
+        reused_document = executing_document.reuse(self.executing_project.id, '_default', 'Reused', 'Reused document')
 
         # Now update workitem in original document
         workitem.title = 'Newer document task'
