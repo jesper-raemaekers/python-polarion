@@ -3,7 +3,7 @@ import re
 from urllib.parse import urljoin
 
 import requests
-from zeep import Client
+from zeep import Client, Transport
 from zeep.plugins import HistoryPlugin
 
 from .project import Project
