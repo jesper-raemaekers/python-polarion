@@ -90,6 +90,20 @@ class Document:
                 workitem_children.append(createFromUri(self._polarion, self._project, child.workItemURI))
         return workitem_children
 
+    def getParent(self, workitem):
+        """
+        Gets the parent of a workitem in the document.
+
+        :param workitem: Workitem to get parent for
+        :return: Parent workitem, None if no parent
+        """
+        parent = None
+        if workitem.linkedWorkItems is not None:
+            document_uris = self.getWorkitemUris()
+            parent_uri = [w for w in workitem.linkedWorkItems.LinkedWorkItem if w.role.id == self.structureLinkRole.id and w.workItemURI in document_uris][0]
+            parent = createFromUri(self._polarion, self._project, parent_uri.workItemURI)
+        return parent
+
     def addComment(self, title, comment, parent=None):
         """
         Adds a comment to the document.

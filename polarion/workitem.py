@@ -539,57 +539,13 @@ class Workitem(object):
         service = self._polarion.getService('Tracker')
         service.deleteWorkItem(self.uri)
 
-    def hasChildren(self):
-        """
-        Check if this workitem has any children.
-        It just check the derived linked workitems for the 'parent' role.
-        :return: True is there are children.
-        """
-        has_child = False
-        if self.linkedWorkItemsDerived is not None:
-            if any(w.role.id == 'parent' for w in self.linkedWorkItemsDerived.LinkedWorkItem):
-                has_child = True
-        return has_child
-
-    def getChildren(self):
-        """
-        Get all child workitems.
-        :return: Workitem[]
-        """
-        if self.hasChildren() is True:
-            workitem_children = []
-            # children = (w.role.id == 'parent' for w in self.linkedWorkItemsDerived.LinkedWorkItem)
-            children = (w for w in self.linkedWorkItemsDerived.LinkedWorkItem if w.role.id == 'parent')
-            for child in children:
-                workitem_children.append(createFromUri(self._polarion, self._project, child.workItemURI))
-            return workitem_children
-        else:
-            return []
-
-    def hasParent(self):
-        """
-        Check if this workitem has a parent.
-        It just check the linked workitems for the 'parent' role.
-        :return: True is it has a parent.
-        """
-        has_parent = False
-        if self.linkedWorkItems is not None:
-            if any(w.role.id == 'parent' for w in self.linkedWorkItems.LinkedWorkItem):
-                has_parent = True
-        return has_parent
-
-    def getParent(self):
-        """
-        Get the parent workitem if available.
-        :return: Workitem
-        """
-        if self.hasParent() is True:
-            link = next(w.role.id == 'parent' for w in self.linkedWorkItems.LinkedWorkItem)
-            return createFromUri(self._polarion, self._project, link.workItemURI)
-        else:
-            return None
-
     def moveToDocument(self, document, parent):
+        """
+        Move the work item into a document as a child of another workitem
+
+        :param document: Target document
+        :param parent: Parent workitem, None if it shall be placed as top item
+        """
         service = self._polarion.getService('Tracker')
         service.moveWorkItemToDocument(self.uri, document.uri, parent.uri if parent is not None else xsd.const.Nil, -1, False)
 

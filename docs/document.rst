@@ -32,6 +32,7 @@ Work items in a document
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
 Work items in a Polarion document are organized as a tree. By getting the top level item, you can iterate through all items by traversing their children in the document.
+Additionally, you can get the parent of a workitem.
 
 .. code:: python
 
@@ -39,6 +40,7 @@ Work items in a Polarion document are organized as a tree. By getting the top le
     children = document.getChildren(top_work_item)
     for child in children:
         print(child)
+        print(document.getParent(child))
 
 As an alternative, you can just get all work items in a document and work with them as a list.
 

@@ -90,7 +90,11 @@ class TestPolarionWorkitem(unittest.TestCase):
     def test_get_children(self):
         executing_document = self.executing_project.getDocument('_default/Test name')
 
-        children = executing_document.getChildren(executing_document.getTopLevelWorkitem())
+        top_level = executing_document.getTopLevelWorkitem()
+        children = executing_document.getChildren(top_level)
         workitem_titles = [workitem.title for workitem in children]
         self.assertIn('Newer document task', workitem_titles)
         self.assertIn('Test2', workitem_titles)
+
+        self.assertEqual(top_level.title, executing_document.getParent(children[0]).title)
+        self.assertEqual(top_level.title, executing_document.getParent(children[1]).title)
