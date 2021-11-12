@@ -84,8 +84,8 @@ class TestPolarionWorkitem(unittest.TestCase):
         self.assertEqual('Changed title', checking_document.title)
 
     def test_get_spaces(self):
-        self.assertListEqual(['_default'], self.checking_project.getDocumentSpaces())
-        self.assertEqual(2, len(self.checking_project.getDocumentsInSpace('_default')))
+        self.assertIn('_default', self.checking_project.getDocumentSpaces())
+        self.assertGreaterEqual(2, len(self.checking_project.getDocumentsInSpace('_default')))
 
     def test_get_children(self):
         executing_document = self.executing_project.getDocument('_default/Test name')
