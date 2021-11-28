@@ -1,15 +1,10 @@
-from zeep import Client
-from zeep.plugins import HistoryPlugin
-from lxml.etree import Element
-from lxml import etree
-import requests
-import re
-from urllib.parse import urljoin
 from .factory import createFromUri
 from .workitem import Workitem
 from .testrun import Testrun
 from .user import User
 from .plan import Plan
+from .document import Document
+
 
 class Project(object):
     """
@@ -24,14 +19,14 @@ class Project(object):
         self.polarion = polarion
         self.id = project_id
 
-        # get detaisl from polarion on this project
+        # get details from polarion on this project
         service = self.polarion.getService('Project')
         try:
             self.polarion_data = service.getProject(self.id)
-        except:
+        except Exception:
             raise Exception(f'Could not find project {project_id}')
 
-        if 'name' in self.polarion_data and self.polarion_data.unresolvable == False:
+        if 'name' in self.polarion_data and not self.polarion_data.unresolvable:
             # succeeded
             self.name = self.polarion_data.name
             self.tracker_prefix = self.polarion_data.trackerPrefix
@@ -78,26 +73,30 @@ class Project(object):
         return Plan(self.polarion, self, id=id)
 
     def createPlan(self, new_plan_name, new_plan_id, new_plan_template, new_plan_parent=None):
-        return Plan(self.polarion, self, new_plan_name=new_plan_name, new_plan_id=new_plan_id, new_plan_template=new_plan_template, new_plan_parent=new_plan_parent)
+        return Plan(self.polarion, self, new_plan_name=new_plan_name, new_plan_id=new_plan_id, new_plan_template=new_plan_template,
+                    new_plan_parent=new_plan_parent)
 
     def createWorkitem(self, workitem_type: str):
         return Workitem(self.polarion, self, new_workitem_type=workitem_type)
 
-    def searchWorkitem(self, query='', order='Created', fieldList=['id'], limit=-1):
+    def searchWorkitem(self, query='', order='Created', field_list=None, limit=-1):
         """Query for available workitems. This will only query for the items.
         If you also want the Workitems to be retrieved, used searchWorkitemFullItem.
         
         :param query: The query to use while searching
         :param order: Order by
-        :param fieldList: list of fields to retrieve for each search result
+        :param field_list: list of fields to retrieve for each search result
         :param limit: The limit of workitems, -1 for no limit
         :return: The search results
         :rtype: Workitem[] but only with the given fields set
         """
+        if field_list is None:
+            field_list = ['id']
+
         query += f' AND project.id:{self.id}'
         service = self.polarion.getService('Tracker')
-        return  service.queryWorkItemsLimited(
-            query, order, fieldList, limit)
+        return service.queryWorkItemsLimited(
+            query, order, field_list, limit)
 
     def searchWorkitemFullItem(self, query='', order='Created', limit=-1):
         """Query for available workitems. This will query for the items and then fetch all result. May take a while for a big search with many results.
@@ -169,6 +168,68 @@ class Project(object):
             if a.id not in available:
                 available.append(a.id)
         return available
+
+    def createDocument(self, location, name, title, allowed_workitem_types, structure_link_role, home_page_content=''):
+        """
+        Creates a new document
+
+        :param location: Document location, the default location is _default
+        :param name: Name of the document
+        :param title: Document title
+        :param allowed_workitem_types: List of workitem types to be allowed inside the document
+        :param structure_link_role: Link role to be used when defining the document hierarchy between parents and children
+        :param home_page_content: Initial content of the document as HTML
+        :return: New document
+        """
+        allowed_workitem_ids = []
+        for allowed_workitem_type in allowed_workitem_types:
+            allowed_workitem_ids.append(self.polarion.EnumOptionIdType(id=allowed_workitem_type))
+
+        structure_link_role_id = self.polarion.EnumOptionIdType(id=structure_link_role)
+
+        service = self.polarion.getService('Tracker')
+        uri = service.createDocument(self.id, location, name, title, allowed_workitem_ids, structure_link_role_id, home_page_content)
+        return Document(self.polarion, self, uri)
+
+    def getDocumentSpaces(self):
+        """
+        Get a list al all document spaces.
+        :return:string[]
+        """
+        service = self.polarion.getService('Tracker')
+        spaces = service.getDocumentSpaces(self.id)
+        return sorted(spaces)
+
+    def getDocumentLocations(self):
+        """
+        Get a list of all document locations.
+        :return:string[]
+        """
+        service = self.polarion.getService('Tracker')
+        locations = service.getDocumentLocations(self.id)
+        return sorted(locations)
+
+    def getDocumentsInSpace(self, space):
+        """
+        Get all documents in a space.
+        :param space: Name of the space.
+        :return: Document[]
+        """
+        documents = []
+        service = self.polarion.getService('Tracker')
+        uris = service.getModuleUris(self.id, space)
+        for uri in uris:
+            documents.append(Document(self.polarion, self, uri=uri))
+        return documents
+
+    def getDocument(self, location):
+        """
+        Get a document by location.
+
+        :param location: Location of the document.
+        :return: Document
+        """
+        return Document(self.polarion, self, location=location)
 
     def __repr__(self):
         return f'Polarion project {self.name} prefix {self.tracker_prefix}'
