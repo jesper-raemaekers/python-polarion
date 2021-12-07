@@ -2,12 +2,11 @@ import copy
 
 from zeep import xsd
 
-from .base.comments import Comments
 from .base.custom_fields import CustomFields
 from .factory import createFromUri, Creator
 
 
-class Document(CustomFields, Comments):
+class Document(CustomFields):
     def __init__(self, polarion, project, uri=None, location=None):
         """
         Create a Document.
@@ -109,33 +108,6 @@ class Document(CustomFields, Comments):
             parent = createFromUri(self._polarion, self._project, parent_uri.workItemURI)
         return parent
 
-    def addComment(self, title, comment, parent=None):
-        """
-        Adds a comment to the document.
-
-        Throws an exception if the function is disabled in Polarion.
-
-        :param title: Title of the comment (will be None for a reply)
-        :param comment: The comment, may contain html
-        :param parent: A parent comment, if none provided it's a root comment.
-        """
-        service = self._polarion.getService('Tracker')
-        if hasattr(service, 'addComment'):
-            if parent is None:
-                parent = self._uri
-            else:
-                # force title to be empty, not allowed for reply comments
-                title = None
-            content = {
-                'type': 'text/html',
-                'content': comment,
-                'contentLossy': False
-            }
-            service.addComment(parent, title, content)
-            self._reloadFromPolarion()
-        else:
-            raise Exception("addComment binding not found in Tracker Service. Adding comments might be disabled.")
-
     def addHeading(self, title, parent_workitem=None):
         """
         Adds a heading to a document
@@ -149,6 +121,17 @@ class Document(CustomFields, Comments):
         heading.save()
         heading.moveToDocument(self, parent_workitem)
         return heading
+
+    def isCustomFieldAllowed(self, _):
+        """
+        Checks if the custom field of a given key is allowed.
+
+        The Polarion interface to get allowed custom fields only supports work items.
+
+        :return: If the field is allowed
+        :rtype: bool
+        """
+        return True
 
     def reuse(self, target_project_id, target_location, target_name, target_title, link_role='derived_from',
               derived_fields=None):

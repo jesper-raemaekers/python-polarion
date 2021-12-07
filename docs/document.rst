@@ -69,6 +69,29 @@ In the following example, an existing document is reused, changed and the reused
     original_document.getTopLevelWorkitem().setDescription('Changed description')
     reused_document.update()
 
+Custom fields
+^^^^^^^^^^^^^
+
+If the document has any custom fields, they will be accessible via the customFields property. The method :func:`~Document.setCustomField` is available to set custom field values.
+This method will create the custom field structure if not available.
+
+.. code:: python
+
+    document.setCustomField('string_field', 'new string')
+    document.setCustomField('int_field', 99)
+    document.setCustomField('custom_enum_field', client.EnumOptionIdType(id='okay'))
+
+Enums can be configured so that multiple options can be selected. This is not supported via the document class, but can be achieved manually.
+
+.. code:: python
+
+    enum_array = client.ArrayOfEnumOptionIdType()
+    enum_array.EnumOptionId.append(client.EnumOptionIdType(id='open'))
+    enum_array.EnumOptionId.append(client.EnumOptionIdType(id='done'))
+    document.setCustomField('multi_enum_field', enum_array)
+
+Note that Polarion does not support checking custom field availability for documents, so make sure that the document has the custom field configured before setting it.
+
 Document class
 --------------
 

@@ -4,18 +4,12 @@ from polarion.base.polarion_object import PolarionObject
 
 
 class CustomFields(PolarionObject, ABC):
-    def getAllowedCustomKeys(self):
-        """
-        Gets the list of keys that the workitem is allowed to have.
+    def __init__(self, polarion, project, _id=None, uri=None):
+        super().__init__(polarion, project, _id, uri)
+        self.customFields = None
 
-        :return: An array of strings of the keys
-        :rtype: string[]
-        """
-        try:
-            service = self._polarion.getService('Tracker')
-            return service.getCustomFieldKeys(self.uri)
-        except Exception:
-            return []
+    def isCustomFieldAllowed(self, key):
+        raise NotImplementedError
 
     def setCustomField(self, key, value):
         """
@@ -24,7 +18,7 @@ class CustomFields(PolarionObject, ABC):
         :param value: custom field value
         :return: None
         """
-        if key not in self.getAllowedCustomKeys():
+        if not self.isCustomFieldAllowed(key):
             raise Exception(f"key {key} is not allowed for this workitem")
 
         if self.customFields is None:

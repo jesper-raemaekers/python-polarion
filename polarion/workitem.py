@@ -233,6 +233,28 @@ class Workitem(CustomFields, Comments):
         except Exception:
             return []
 
+    def getAllowedCustomKeys(self):
+        """
+        Gets the list of keys that the workitem is allowed to have.
+
+        :return: An array of strings of the keys
+        :rtype: string[]
+        """
+        try:
+            service = self._polarion.getService('Tracker')
+            return service.getCustomFieldKeys(self.uri)
+        except Exception:
+            return []
+
+    def isCustomFieldAllowed(self, key):
+        """
+        Checks if the custom field of a given key is allowed.
+
+        :return: If the field is allowed
+        :rtype: bool
+        """
+        return key in self.getAllowedCustomKeys()
+
     def getAvailableStatus(self):
         """
         Get all available status option for this workitem

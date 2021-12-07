@@ -394,8 +394,8 @@ class TestPolarionWorkitem(unittest.TestCase):
         executed_workitem_1.setCustomField(key='string_field', value='12')
 
         checking_workitem_1 = self.checking_project.getWorkitem(executed_workitem_1.id) 
-        self.assertEqual('12', executed_workitem_1.customFields.Custom[0].value, msg='value not the same as set')
-        self.assertEqual('12', checking_workitem_1.customFields.Custom[0].value, msg='value not the same as set')
+        self.assertEqual('12', executed_workitem_1.customFields.Custom[1].value, msg='value not the same as set')
+        self.assertEqual('12', checking_workitem_1.customFields.Custom[1].value, msg='value not the same as set')
 
         self.assertRaises(Exception, executed_workitem_1.setCustomField, 'random_invalid_key', 0)
 
