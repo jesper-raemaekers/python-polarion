@@ -54,6 +54,4 @@ More examples to be found in the quick start section of the documentation.
 
 # Known issues or missing features
 - No way of knowing the test run possible statuses.
-- No access to the live docs
-
 
