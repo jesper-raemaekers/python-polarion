@@ -88,6 +88,7 @@ class Polarion(object):
                 tree = self.history.last_received['envelope'].getroottree()
                 self.sessionHeaderElement = tree.find(
                     './/{http://ws.polarion.com/session}sessionID')
+                self.services['Session']['client'].set_default_soapheaders([self.sessionHeaderElement])
             except:
                 raise Exception(
                     f'Could not log in to Polarion for user {self.user}')
