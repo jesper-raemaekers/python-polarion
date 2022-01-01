@@ -5,11 +5,13 @@ from enum import Enum
 
 from zeep import xsd
 
-from .factory import Creator, createFromUri
+from .base.comments import Comments
+from .base.custom_fields import CustomFields
+from .factory import Creator
 from .user import User
 
 
-class Workitem(object):
+class Workitem(CustomFields, Comments):
     """
     Create a Polarion workitem object either from and id or from an Polarion uri.
 
@@ -29,6 +31,7 @@ class Workitem(object):
         EXTERNAL_REF = 'external reference'
 
     def __init__(self, polarion, project, id=None, uri=None, new_workitem_type=None, polarion_workitem=None):
+        super().__init__(polarion, project, id, uri)
         self._polarion = polarion
         self._project = project
         self._id = id
@@ -243,6 +246,15 @@ class Workitem(object):
         except Exception:
             return []
 
+    def isCustomFieldAllowed(self, key):
+        """
+        Checks if the custom field of a given key is allowed.
+
+        :return: If the field is allowed
+        :rtype: bool
+        """
+        return key in self.getAllowedCustomKeys()
+
     def getAvailableStatus(self):
         """
         Get all available status option for this workitem
@@ -362,57 +374,6 @@ class Workitem(object):
         if self._parsed_test_steps is not None:
             return len(self._parsed_test_steps) > 0
         return False
-
-    def addComment(self, title, comment, parent=None):
-        """
-        Adds a comment to the workitem.
-
-        Throws an exception if the function is disabled in Polarion.
-
-        :param title: Title of the comment (will be None for a reply)
-        :param comment: The comment, may contain html
-        :param parent: A parent comment, if none provided it's a root comment.
-        """
-        service = self._polarion.getService('Tracker')
-        if hasattr(service, 'addComment'):
-            if parent is None:
-                parent = self.uri
-            else:
-                # force title to be empty, not allowed for reply comments
-                title = None
-            content = {
-                'type': 'text/html',
-                'content': comment,
-                'contentLossy': False
-            }
-            service.addComment(parent, title, content)
-            self._reloadFromPolarion()
-        else:
-            raise Exception("addComment binding not found in Trackter Service. Adding comments might be disabled.")
-
-    def setCustomField(self, key, value):
-        """
-        Set the custom field 'key' to the value
-        :param key: custom field key
-        :param value: custom field value
-        :return: None
-        """
-        if key not in self.getAllowedCustomKeys():
-            raise Exception(f"key {key} is not allowed for this workitem")
-
-        if self.customFields is None:
-            # nothing exists, create a custom field structure
-            self.customFields = self._polarion.ArrayOfCustomType()
-            self.customFields.Custom.append(self._polarion.CustomType(key=key, value=value))
-        else:
-            custom_field = next((custom_field for custom_field in self.customFields.Custom if custom_field["key"] == key), None)
-            if custom_field is not None:
-                # custom field is there and we can update the value
-                custom_field.value = value
-            else:
-                # custom field is not there, add it.
-                self.customFields.Custom.append(self._polarion.CustomType(key=key, value=value))
-        self.save()
 
     def addHyperlink(self, url, hyperlink_type: HyperlinkRoles):
         """
@@ -547,7 +508,8 @@ class Workitem(object):
         :param parent: Parent workitem, None if it shall be placed as top item
         """
         service = self._polarion.getService('Tracker')
-        service.moveWorkItemToDocument(self.uri, document.uri, parent.uri if parent is not None else xsd.const.Nil, -1, False)
+        service.moveWorkItemToDocument(self.uri, document.uri, parent.uri if parent is not None else xsd.const.Nil, -1,
+                                       False)
 
     def save(self):
         """

@@ -1,11 +1,13 @@
 import copy
 import os
 import requests
+
+from .base.comments import Comments
 from .record import Record
 from .factory import Creator
 
 
-class Testrun(object):
+class Testrun(Comments):
     """
     Create a Polarion testrun object from uri or directly with Polarion content
 
@@ -17,7 +19,7 @@ class Testrun(object):
     """
 
     def __init__(self, polarion, uri=None, polarion_test_run=None):
-        self._polarion = polarion
+        super().__init__(polarion, None, None, uri)
 
         if uri is not None:
             service = self._polarion.getService('TestManagement')

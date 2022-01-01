@@ -2,10 +2,11 @@ import copy
 
 from zeep import xsd
 
+from .base.custom_fields import CustomFields
 from .factory import createFromUri, Creator
 
 
-class Document:
+class Document(CustomFields):
     def __init__(self, polarion, project, uri=None, location=None):
         """
         Create a Document.
@@ -14,6 +15,7 @@ class Document:
         :param uri: Polarion uri (first possibility to get a document)
         :param location: Document location (second possibility to get a document)
         """
+        super().__init__(polarion, project, uri=uri)
         self._uri = uri
         self._project = project
         self._polarion = polarion
@@ -85,7 +87,8 @@ class Document:
         workitem_children = []
         if workitem.linkedWorkItemsDerived is not None:
             document_uris = self.getWorkitemUris()
-            children = (w for w in workitem.linkedWorkItemsDerived.LinkedWorkItem if w.role.id == self.structureLinkRole.id and w.workItemURI in document_uris)
+            children = (w for w in workitem.linkedWorkItemsDerived.LinkedWorkItem if
+                        w.role.id == self.structureLinkRole.id and w.workItemURI in document_uris)
             for child in children:
                 workitem_children.append(createFromUri(self._polarion, self._project, child.workItemURI))
         return workitem_children
@@ -100,36 +103,10 @@ class Document:
         parent = None
         if workitem.linkedWorkItems is not None:
             document_uris = self.getWorkitemUris()
-            parent_uri = [w for w in workitem.linkedWorkItems.LinkedWorkItem if w.role.id == self.structureLinkRole.id and w.workItemURI in document_uris][0]
+            parent_uri = [w for w in workitem.linkedWorkItems.LinkedWorkItem if
+                          w.role.id == self.structureLinkRole.id and w.workItemURI in document_uris][0]
             parent = createFromUri(self._polarion, self._project, parent_uri.workItemURI)
         return parent
-
-    def addComment(self, title, comment, parent=None):
-        """
-        Adds a comment to the document.
-
-        Throws an exception if the function is disabled in Polarion.
-
-        :param title: Title of the comment (will be None for a reply)
-        :param comment: The comment, may contain html
-        :param parent: A parent comment, if none provided it's a root comment.
-        """
-        service = self._polarion.getService('Tracker')
-        if hasattr(service, 'addComment'):
-            if parent is None:
-                parent = self._uri
-            else:
-                # force title to be empty, not allowed for reply comments
-                title = None
-            content = {
-                'type': 'text/html',
-                'content': comment,
-                'contentLossy': False
-            }
-            service.addComment(parent, title, content)
-            self._reloadFromPolarion()
-        else:
-            raise Exception("addComment binding not found in Tracker Service. Adding comments might be disabled.")
 
     def addHeading(self, title, parent_workitem=None):
         """
@@ -145,7 +122,19 @@ class Document:
         heading.moveToDocument(self, parent_workitem)
         return heading
 
-    def reuse(self, target_project_id, target_location, target_name, target_title, link_role='derived_from', derived_fields=None):
+    def isCustomFieldAllowed(self, _):
+        """
+        Checks if the custom field of a given key is allowed.
+
+        The Polarion interface to get allowed custom fields only supports work items.
+
+        :return: If the field is allowed
+        :rtype: bool
+        """
+        return True
+
+    def reuse(self, target_project_id, target_location, target_name, target_title, link_role='derived_from',
+              derived_fields=None):
         """
         Reuse this document in a different project.
 
@@ -160,7 +149,8 @@ class Document:
         if derived_fields is None:
             derived_fields = ['title', 'description']
         service = self._polarion.getService('Tracker')
-        new_uri = service.reuseDocument(self._uri, target_project_id, target_location, target_name, target_title, True, link_role, derived_fields)
+        new_uri = service.reuseDocument(self._uri, target_project_id, target_location, target_name, target_title, True,
+                                        link_role, derived_fields)
         return createFromUri(self._polarion, self._project, new_uri)
 
     def update(self, revision=None, auto_suspect=False):
@@ -190,7 +180,6 @@ class Document:
             service = self._polarion.getService('Tracker')
             service.updateModule(updated_item)
             self._reloadFromPolarion()
-
 
     def delete(self):
         """

@@ -1,4 +1,5 @@
 import unittest
+from datetime import datetime
 
 from polarion.polarion import Polarion
 from keys import polarion_user, polarion_password, polarion_url, polarion_project_id
@@ -29,9 +30,12 @@ class TestPolarionWorkitem(unittest.TestCase):
         except Exception:
             pass
 
+        cls.executing_document = cls.executing_project.createDocument('_default', 'Test name', 'Test title', ['task'], 'relates_to')
+
     def test_create_and_reuse_document(self):
         # Create a document
-        executing_document = self.executing_project.createDocument('_default', 'Test name', 'Test title', ['task'], 'relates_to')
+        executing_document = self.executing_project.getDocument('_default/Test name')
+
         checking_document = self.checking_project.getDocument('_default/Test name')
         self.assertEqual(executing_document.title, checking_document.title)
 
@@ -98,3 +102,29 @@ class TestPolarionWorkitem(unittest.TestCase):
 
         self.assertEqual(top_level.title, executing_document.getParent(children[0]).title)
         self.assertEqual(top_level.title, executing_document.getParent(children[1]).title)
+
+    def test_custom_field(self):
+        executing_document = self.executing_project.getDocument('_default/Test name')
+
+        self.assertIsNone(executing_document.customFields, msg='Document already has a custom field')
+
+        executing_document.setCustomField(key='int_field', value=12)
+
+        checking_document = self.checking_project.getDocument('_default/Test name')
+
+        self.assertIsNotNone(executing_document.customFields, msg='Document already does not have a custom field')
+        self.assertEqual(12, executing_document.customFields.Custom[0].value, msg='value not the same as set')
+        self.assertIsNotNone(checking_document.customFields, msg='Document already does not have a custom field')
+        self.assertEqual(12, checking_document.customFields.Custom[0].value, msg='value not the same as set')
+
+        executing_document.setCustomField(key='int_field', value=24)
+
+        checking_document = self.checking_project.getDocument('_default/Test name')
+        self.assertEqual(24, executing_document.customFields.Custom[0].value, msg='value not the same as set')
+        self.assertEqual(24, checking_document.customFields.Custom[0].value, msg='value not the same as set')
+
+        executing_document.setCustomField(key='string_field', value='12')
+
+        checking_document = self.checking_project.getDocument('_default/Test name')
+        self.assertEqual('12', executing_document.customFields.Custom[1].value, msg='value not the same as set')
+        self.assertEqual('12', checking_document.customFields.Custom[1].value, msg='value not the same as set')
