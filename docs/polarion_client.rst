@@ -13,6 +13,26 @@ The class can be instantiated like this:
     pol = polarion.Polarion('http://example.com/polarion', 'user', 'password')
     print(pol) # Polarion client for http://example.com/polarion/ws/services with user <user>
 
+Self signed certificates
+------------------------
+
+If your polarion instance has a self signed certificate or an expired certificate, a https connections will be rejected.
+You can skip certificate verification by passed an additional argument.
+
+.. code:: python
+
+    pol = polarion.Polarion('http://example.com/polarion', 'user', 'password', skip_cert_verification=False)
+
+SVN repository location
+-----------------------
+
+The SVN repository access can be different from the standard (http://example.com/repo).
+If this is the case, pass the new location using svn_repo_url. This is used while download attachment form test runs or test records.
+
+.. code:: python
+
+    pol = polarion.Polarion('http://example.com/polarion', 'user', 'password', svn_repo_url='http://example.com/repo_location')
+
 
 Services
 --------

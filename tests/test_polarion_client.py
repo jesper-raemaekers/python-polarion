@@ -1,7 +1,9 @@
 import unittest
 from polarion.polarion import Polarion
-from keys import polarion_user, polarion_password, polarion_url
-from time import sleep
+from keys import polarion_user, polarion_password, polarion_url, polarion_project_id
+from filecmp import cmp
+from shutil import copyfile
+from datetime import datetime
 import mock
 
 
@@ -91,3 +93,24 @@ class TestPolarionClient(unittest.TestCase):
 
         project = pol.getProject('other_project')
         mock_project.assert_called_with(pol, 'other_project')
+
+    def test_alternative_repo(self):
+        # this test only works if the SVN repo is available under /repoext as wel
+        pol = Polarion(polarion_url, polarion_user, polarion_password, svn_repo_url=polarion_url.replace('polarion', 'repoext'))
+        project = pol.getProject(polarion_project_id)
+        testrun = project.createTestRun('unit-' + datetime.now().strftime("%d-%m-%Y-%H-%M-%S-%f"), 'New unit test run',
+                                                                     'unittest-01')
+
+        src_1 = 'test_image_1.png'
+        dst = 'test_image.png'
+        download = 'test_image_result.png'
+        copyfile(src_1, dst)
+
+        testrun.addAttachment(dst, 'Test image 1')
+
+        attachment_file = testrun.attachments.TestRunAttachment[0].fileName
+
+        testrun.saveAttachmentAsFile(attachment_file, download)
+
+        self.assertTrue(cmp(src_1, download), 'File downloaded from polarion not the same')
+
