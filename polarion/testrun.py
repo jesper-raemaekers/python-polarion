@@ -107,10 +107,9 @@ class Testrun(Comments):
         """
         service = self._polarion.getService('TestManagement')
         at = service.getTestRunAttachment(self.uri, file_name)
+
         if at is not None:
-            resp = requests.get(at.url, auth=(self._polarion.user, self._polarion.password))
-            if resp.ok:
-                return resp.content
+            return self._polarion.downloadFromSvn(at.url)
         raise Exception(f'Could not download attachment {file_name}')
 
     def saveAttachmentAsFile(self, file_name, file_path):

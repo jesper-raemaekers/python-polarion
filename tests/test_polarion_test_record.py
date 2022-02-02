@@ -86,9 +86,9 @@ class TestPolarionTestRecord(unittest.TestCase):
 
             self.assertFalse(self.executing_test_record.testStepHasAttachment(step_index), msg='Test step already has attachments')
 
-            src_1 = 'tests/test_image_1.png'
-            src_2 = 'tests/test_image_2.png'
-            download = 'tests/test_image_result.png'
+            src_1 = 'test_image_1.png'
+            src_2 = 'test_image_2.png'
+            download = 'test_image_result.png'
 
             self.executing_test_record.addAttachmentToTestStep(step_index, src_1, 'Test image 1')
 
@@ -119,9 +119,9 @@ class TestPolarionTestRecord(unittest.TestCase):
         self.executing_test_record.setResult(Record.ResultType.BLOCKED, 'See attachment')
 
         self.assertFalse(self.executing_test_record.hasAttachment(), msg='Record already has attachments')
-        src_1 = 'tests/test_image_1.png'
-        src_2 = 'tests/test_image_2.png'
-        download = 'tests/test_image_result.png'
+        src_1 = 'test_image_1.png'
+        src_2 = 'test_image_2.png'
+        download = 'test_image_result.png'
 
 
         self.executing_test_record.addAttachment(src_1, 'Test image 1')

@@ -1,7 +1,6 @@
 import atexit
 import re
-from urllib.parse import urljoin
-
+from urllib.parse import urljoin, urlparse
 import requests
 from zeep import Client, Transport
 from zeep.plugins import HistoryPlugin
@@ -20,14 +19,16 @@ class Polarion(object):
     :param password: The password for that user
     :param static_service_list: Set to True when this class may not use a request to get the services list
     :param skip_cert_verification: Set to True to skip certification validation for TLS connection
+    :param svn_repo_url: Set to the correct url when the SVN repo is not accessible via <host>/repo. For example http://example/repo_extern
 
     """
 
-    def __init__(self, polarion_url, user, password, static_service_list=False, skip_cert_verification=False):
+    def __init__(self, polarion_url, user, password, static_service_list=False, skip_cert_verification=False, svn_repo_url=None):
         self.user = user
         self.password = password
         self.url = polarion_url
         self.skip_cert_verification = skip_cert_verification
+        self.svn_repo_url = svn_repo_url
 
         self.services = {}
 
@@ -184,6 +185,33 @@ class Polarion(object):
         :rtype: Project
         """
         return Project(self, project_id)
+
+    def downloadFromSvn(self, url):
+
+        if self.svn_repo_url is not None:
+            # user specified new url to try, use that instead of the default value
+            orig_url = urlparse(url)
+            orig_url_path_without_repo = '/'.join(orig_url.path.split('/')[2:])
+            new_root_url = urlparse(self.svn_repo_url)
+            new_repo_url = f'{new_root_url.scheme}://{new_root_url.netloc}/{new_root_url.path.strip("/")}/{orig_url_path_without_repo}'
+            resp = requests.get(new_repo_url, auth=(self.user, self.password))
+            if resp.ok:
+                return resp.content
+            raise Exception(f'Could not download attachment from {url}. Got error {resp.status_code}: {resp.reason}')
+        else:
+            # try the url that was given
+            resp = requests.get(url, auth=(self.user, self.password))
+            if resp.ok:
+                return resp.content
+
+            # if that fails then sneakily try downloading it with the default polarion SVN repo user and password
+            resp_default = requests.get(url, auth=('polarion', 'aurora'))
+            if resp_default.ok:
+                return resp_default.content
+
+            # if that also fails, tough luck.
+            raise Exception(f'Could not download attachment from {url}. Got error {resp.status_code}: {resp.reason}.\n'
+                            f'Trying with the default polarion login details yielded {resp_default.status_code}: {resp_default.reason}')
 
     def __repr__(self):
         return f'Polarion client for {self.url} with user {self.user}'

@@ -177,11 +177,7 @@ class Record(object):
                 url = attachment.url
 
         if url is not None:
-            resp = requests.get(url, auth=(self._polarion.user, self._polarion.password))
-            if resp.ok:
-                return resp.content
-            else:
-                raise Exception(f'Could not download attachment {file_name}')
+            return self._polarion.downloadFromSvn(url)
         else:
             raise Exception(f'Could not find attachment with name {file_name}')
 
@@ -249,11 +245,7 @@ class Record(object):
                 url = attachment.url
 
         if url is not None:
-            resp = requests.get(url, auth=(self._polarion.user, self._polarion.password))
-            if resp.ok:
-                return resp.content
-            else:
-                raise Exception(f'Could not download attachment {file_name}')
+            return self._polarion.downloadFromSvn(url)
         else:
             raise Exception(f'Could not find attachment with name {file_name}')
 

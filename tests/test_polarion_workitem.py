@@ -260,10 +260,10 @@ class TestPolarionWorkitem(unittest.TestCase):
 
     def test_attachment(self):
         self.assertFalse(self.global_workitem.hasAttachment(), msg='Workitem already has attachments')
-        src_1 = 'tests/test_image_1.png'
-        src_2 = 'tests/test_image_2.png'
-        dst = 'tests/test_image.png'
-        download = 'tests/test_image_result.png'
+        src_1 = 'test_image_1.png'
+        src_2 = 'test_image_2.png'
+        dst = 'test_image.png'
+        download = 'test_image_result.png'
         copyfile(src_1, dst)
 
         self.global_workitem.addAttachment(dst, 'Test image 1')
