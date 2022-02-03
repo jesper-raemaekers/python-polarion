@@ -1,7 +1,7 @@
 # python-polarion
-[![Build status](https://dev.azure.com/jraemaekers/Python%20Polarion/_apis/build/status/Python-Polarion%20branch)](https://dev.azure.com/jraemaekers/Python%20Polarion/_build/latest?definitionId=2)
-![Coverage](https://img.shields.io/azure-devops/coverage/jraemaekers/Python%20Polarion/2)
-![Test](https://img.shields.io/azure-devops/tests/jraemaekers/Python%20Polarion/2)
+[![Build status](https://dev.azure.com/jraemaekers/Python%20Polarion/_apis/build/status/Polarion-Python%20package-CI)](https://dev.azure.com/jraemaekers/Python%20Polarion/_build/latest?definitionId=5)
+![Coverage](https://img.shields.io/azure-devops/coverage/jraemaekers/Python%20Polarion/5)
+![Test](https://img.shields.io/azure-devops/tests/jraemaekers/Python%20Polarion/5)
 [![Documentation Status](https://readthedocs.org/projects/python-polarion/badge/?version=latest)](https://python-polarion.readthedocs.io/en/latest/?badge=latest)
 [![Downloads](https://pepy.tech/badge/polarion)](https://pepy.tech/project/polarion)
 

@@ -2,8 +2,45 @@ Changelog
 =========
 
 
-V0.2.1
+V0.3.0
 ------
+- Added option to specific repository location #46. [jesper.raemaekers]
+- Removed known issue of not being able to access live docs. [Florian
+  Fetz]
+- Added comment feature for testrun.py Fixed and added tests. [Florian
+  Fetz]
+- Documents now also support custom fields Moved common functions of
+  documents and work items to common base classes. [Florian Fetz]
+- Fixed unit test for getDocumentSpaces() [Florian Fetz]
+- Fixed tested document title. [Florian Fetz]
+- Added getParent() function. [Florian Fetz]
+- Fixed a merge error. [Florian Fetz]
+- Feat: Add function to delete work item. [Benjamin Lelevier]
+- Fixes Issue #34: Added a parameter to the Polarion object constructor
+  that allows bypassing TLS certificate verification. [Florian Fetz]
+- Added document comment functions. [jesper.raemaekers]
+- Delete method is now in document.py. [Florian Fetz]
+- Finished first go of document functionality Created documentation
+  Finished tests. [Florian Fetz]
+- Added function to create headings in documents First working tests of
+  document functionality. [Florian Fetz]
+- First documentation steps Consistent naming of work item in interface.
+  [Florian Fetz]
+- Cleanups: Several pep8 fixes, removed unused imports and packages in
+  requirements.txt. [Florian Fetz]
+- Added first unit test. [Florian Fetz]
+- Refactored create document functions Added functions to reuse and
+  update documents Some leftovers for renaming module -> document.
+  [Florian Fetz]
+- Renamed module to document. [Florian Fetz]
+- Added function to create a document and to add a work item to a
+  document. [Florian Fetz]
+- Initial support for document access. [jesper.raemaekers]
+
+
+V0.2.1 (2021-09-30)
+-------------------
+- Preparations for release 0.2.1. [jesper.raemaekers]
 - Updated readme. [jesper.raemaekers]
 - Added method for getting workitems in plan. [jesper.raemaekers]
 
