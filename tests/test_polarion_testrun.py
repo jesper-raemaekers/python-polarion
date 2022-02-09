@@ -99,3 +99,20 @@ class TestPolarionTestrun(unittest.TestCase):
                 self.assertEqual(
                     comment.text.content, comment_content, msg='Comment content not equal')
         self.assertTrue(found, 'Comment title not found in checking test run')
+
+    def test_add_testcase(self):
+        # create a new test case workitem
+        new_test_case = self.executing_project.createWorkitem('softwaretestcase')
+        num_of_test_records_before = len(self.executing_test_run.records)
+
+        # add the test case
+        self.executing_test_run.addTestcase(new_test_case)
+
+        # load again
+        checking_testrun = self.checking_project.getTestRun(self.executing_test_run.id)
+
+        self.assertEqual(num_of_test_records_before + 1, len(self.executing_test_run.records), msg='Length of records did not increase')
+        self.assertEqual(num_of_test_records_before + 1, len(checking_testrun.records),
+                         msg='Length of records did not increase')
+
+

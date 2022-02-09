@@ -1,7 +1,7 @@
 import copy
 import os
 import requests
-
+from zeep import xsd
 from .base.comments import Comments
 from .record import Record
 from .factory import Creator
@@ -144,6 +144,16 @@ class Testrun(Comments):
         file_name = os.path.split(file_path)[1]
         with open(file_path, "rb") as file_content:
             service.addAttachmentToTestRun(self.uri, file_name, title, file_content.read())
+        self._reloadFromPolarion()
+
+    def addTestcase(self, workitem):
+        """
+        Add a workitem to the test run. A test case cannot be added to a template.
+        :param workitem: Workitem object
+        """
+        service = self._polarion.getService('TestManagement')
+        new_record = self._polarion.TestRecordType(testCaseURI=workitem.uri)
+        service.addTestRecordToTestRun(self.uri, new_record)
         self._reloadFromPolarion()
 
     def updateAttachment(self, file_path, title):
