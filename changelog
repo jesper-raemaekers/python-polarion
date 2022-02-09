@@ -2,8 +2,15 @@ Changelog
 =========
 
 
-V0.3.0
+V0.3.1
 ------
+- Added support for added testcases to (non-template) test run. #48.
+  [jesper.raemaekers]
+
+
+V0.3.0 (2022-02-03)
+-------------------
+- Preparations for release 0.3.0. [jesper.raemaekers]
 - Added option to specific repository location #46. [jesper.raemaekers]
 - Removed known issue of not being able to access live docs. [Florian
   Fetz]
