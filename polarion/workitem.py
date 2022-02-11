@@ -64,6 +64,7 @@ class Workitem(CustomFields, Comments):
 
         elif polarion_workitem is not None:
             self._polarion_item = polarion_workitem
+            self._id = self._polarion_item.id
         else:
             raise Exception('No id, uri, polarion workitem or new workitem type specified!')
 
