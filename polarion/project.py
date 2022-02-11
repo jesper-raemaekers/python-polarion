@@ -97,6 +97,26 @@ class Project(object):
         service = self.polarion.getService('Tracker')
         return service.queryWorkItemsLimited(
             query, order, field_list, limit)
+    
+    def searchWorkitemInBaseline(self, baselineRevision, query='', sort='uri', field_list=None, limit=-1):
+        """Query for available workitems in a baseline. This will only query for the items.
+        If you also want the Workitems to be retrieved, used searchWorkitemFullItemInBaseline.
+
+        :param baselineRevision: The revision number of the baseline to search in
+        :param query: The query to use while searching
+        :param sort: Sort by
+        :param fieldList: list of fields to retrieve for each search result
+        :param limit: The limit of workitems, -1 for no limit
+        :return: The search results
+        :rtype: Workitem[] but only with the given fields set
+        """
+        if field_list is None:
+            field_list = ['id']
+        
+        query += f' AND project.id:{self.id}'
+        service = self.polarion.getService('Tracker')
+        return service.queryWorkItemsInBaselineLimited(
+            query, sort, baselineRevision, field_list, limit)
 
     def searchWorkitemFullItem(self, query='', order='Created', limit=-1):
         """Query for available workitems. This will query for the items and then fetch all result. May take a while for a big search with many results.
@@ -109,6 +129,23 @@ class Project(object):
         """
         return_list = []
         workitems = self.searchWorkitem(query, order, ['id'], limit)
+        for workitem in workitems:
+            return_list.append(
+                Workitem(self.polarion, self, workitem.id))
+        return return_list
+    
+    def searchWorkitemFullItemInBaseline(self, baselineRevision, query='', sort='uri', limit=-1):
+        """Query for available workitems in baseline. This will query for the items and then fetch all result. May take a while for a big search with many results.
+
+        :param baselineRevision: The revision number of the baseline to search in
+        :param query: The query to use while searching
+        :param sort: Sort by
+        :param limit: The limit of workitems, -1 for no limit
+        :return: The search results
+        :rtype: Workitem[]
+        """
+        return_list = []
+        workitems = self.searchWorkitemInBaseline(baselineRevision, query, sort, ['id'], limit)
         for workitem in workitems:
             return_list.append(
                 Workitem(self.polarion, self, workitem.id))
