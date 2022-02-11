@@ -98,7 +98,7 @@ class Project(object):
         return service.queryWorkItemsLimited(
             query, order, field_list, limit)
     
-    def searchWorkitemInBaseline(self, baselineRevision, query='', sort='uri', fieldList=['id'], limit=-1):
+    def searchWorkitemInBaseline(self, baselineRevision, query='', sort='uri', field_list=None, limit=-1):
         """Query for available workitems in a baseline. This will only query for the items.
         If you also want the Workitems to be retrieved, used searchWorkitemFullItemInBaseline.
 
@@ -110,10 +110,13 @@ class Project(object):
         :return: The search results
         :rtype: Workitem[] but only with the given fields set
         """
+        if field_list is None:
+            field_list = ['id']
+        
         query += f' AND project.id:{self.id}'
         service = self.polarion.getService('Tracker')
         return service.queryWorkItemsInBaselineLimited(
-            query, sort, baselineRevision, fieldList, limit)
+            query, sort, baselineRevision, field_list, limit)
 
     def searchWorkitemFullItem(self, query='', order='Created', limit=-1):
         """Query for available workitems. This will query for the items and then fetch all result. May take a while for a big search with many results.
