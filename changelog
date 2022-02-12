@@ -2,8 +2,23 @@ Changelog
 =========
 
 
-V0.3.1
+V0.3.2
 ------
+- Fixed missing _id property when creating workitem from plan #51.
+  [jesper.raemaekers]
+- Changed parameter value for consistency. [anjalizope]
+
+  To be consistent, changed fieldList parameter to be default None
+- Add functions to search in baseline. [anjalizope]
+
+  Added two functions to allow for searching for work items in a specific baseline:
+  - searchWorkitemInBaseline
+  - searchWorkitemFullItemInBaseline
+
+
+V0.3.1 (2022-02-09)
+-------------------
+- Preparations for release 0.3.1. [jesper.raemaekers]
 - Added support for added testcases to (non-template) test run. #48.
   [jesper.raemaekers]
 
