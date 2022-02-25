@@ -4,7 +4,7 @@ Polarion work items
 Usage
 --------------
 
-This chapter details some common operations
+This chapter details some common operations.
 
 Updating a field
 ^^^^^^^^^^^^^^^^
@@ -120,6 +120,21 @@ Test case workitem
 Some workitems are test cases and can contain test steps. Use :func:`~Workitem.hasTestSteps` to determine if there are test steps.
 
 Currently the :attr:`~Workitem._parsed_test_steps` holds the test steps.
+
+It is currently not possible to append the test steps. There is however a workaround available until it is implemented.
+
+.. code:: python
+
+    # getting the workitem and updating the test step
+    wi = project.getWorkitem('PYTH-1467')
+    wi._polarion_test_steps.steps.TestStep[0].values.Text[1].content = 'New description!'
+
+    # getting the test management service and saving the test steps
+    service = client.getService('TestManagement')
+    service.setTestSteps(wi.uri, wi._polarion_test_steps.steps.TestStep)
+
+    #reload workitem so it's in sync
+    wi._reloadFromPolarion()
 
 
 Attachments

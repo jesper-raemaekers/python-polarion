@@ -82,6 +82,9 @@ class Project(object):
     def searchWorkitem(self, query='', order='Created', field_list=None, limit=-1):
         """Query for available workitems. This will only query for the items.
         If you also want the Workitems to be retrieved, used searchWorkitemFullItem.
+
+        For retrieving custom field using field_list, use the following syntax:
+        field_list=['customFields.<key of custom field here>']
         
         :param query: The query to use while searching
         :param order: Order by
@@ -101,6 +104,9 @@ class Project(object):
     def searchWorkitemInBaseline(self, baselineRevision, query='', sort='uri', field_list=None, limit=-1):
         """Query for available workitems in a baseline. This will only query for the items.
         If you also want the Workitems to be retrieved, used searchWorkitemFullItemInBaseline.
+
+        For retrieving custom field using field_list, use the following syntax:
+        field_list=['customFields.<key of custom field here>']
 
         :param baselineRevision: The revision number of the baseline to search in
         :param query: The query to use while searching

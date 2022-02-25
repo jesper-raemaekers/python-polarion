@@ -20,6 +20,12 @@ accessing an existing test run:
 
     existing_test_run = self.checking_project.getTestRun('test-id')
 
+adding a new test case to an existing test run:
+
+.. code:: python
+
+    test_case = project.getWorkitem('workitem-id')
+    existing_test_run.addTestcase(test_case)
 
 Set the test run status:
 
