@@ -6,6 +6,16 @@ Usage
 
 This chapter details some common operations.
 
+
+Creating a new workitem
+^^^^^^^^^^^^^^^^^^^^^^^
+
+A new workitem can be created using :func:`~Project.createWorkitem`.
+
+.. code:: python
+
+    new_task = project.createWorkitem('changerequest')
+
 Updating a field
 ^^^^^^^^^^^^^^^^
 

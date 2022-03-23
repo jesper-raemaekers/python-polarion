@@ -1,6 +1,18 @@
 Polarion Plans
 ==============
 
+Creating a new plan
+-----------------------
+
+A new plan can be created using :func:`~Project.createPlan`. The template is project dependant, but default are 'iteration'
+and 'release'.
+
+.. code:: python
+
+    project.createPlan('New iteration plan!', 'new-plan-1', 'iteration')
+    project.createPlan('New release plan!', 'new-plan-2', 'release')
+
+
 Usage
 --------------
 
@@ -16,9 +28,13 @@ You can get an existing plan or create a new one:
 
     plan = project.getPlan('00002')
 
+
+The template is project dependant, but default are 'iteration' and 'release'.
+
 .. code:: python
 
     plan = project.createPlan('Test plan', '00002', 'iteration')
+    plan = project.createPlan('Test plan', '00003', 'release')
 
 
 In this test plan you can then add or remove workitems.

@@ -73,10 +73,26 @@ class Project(object):
         return Plan(self.polarion, self, id=id)
 
     def createPlan(self, new_plan_name, new_plan_id, new_plan_template, new_plan_parent=None):
+        """
+        Create a plan based on a template, plan name and plan ID.
+        :param new_plan_name: The new plan name
+        :param new_plan_id: The new plan ID
+        :param new_plan_template: The plan template to use. Defaults are 'release' and 'iteration'. But this depends on
+         the project configuration.
+        :param new_plan_parent: Optionally the parent plan
+        :return: A new plan
+        :rtype: Plan
+        """
         return Plan(self.polarion, self, new_plan_name=new_plan_name, new_plan_id=new_plan_id, new_plan_template=new_plan_template,
                     new_plan_parent=new_plan_parent)
 
     def createWorkitem(self, workitem_type: str):
+        """
+        Create a workitem based on the workitem type.
+        :param workitem_type: The new workitem type
+        :return: A new workitem
+        :rtype: Workitem
+        """
         return Workitem(self.polarion, self, new_workitem_type=workitem_type)
 
     def searchWorkitem(self, query='', order='Created', field_list=None, limit=-1):
