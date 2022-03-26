@@ -63,12 +63,13 @@ class Workitem(CustomFields, Comments):
             required_features = service.getInitialWorkflowActionForProjectAndType(self._project.id, self._polarion.EnumOptionIdType(id=new_workitem_type))
             if required_features.requiredFeatures is not None:
                 # if there are any, go and check if they are all supplied
-                if new_workitem_fields is not None and set(required_features.requiredFeatures.item) <= new_workitem_fields.keys():
-                    for new_field in new_workitem_fields:
-                        self._polarion_item[new_field] = new_workitem_fields[new_field]
-                else:
+                if new_workitem_fields is None or not set(required_features.requiredFeatures.item) <= new_workitem_fields.keys():
                     # let the user know with a better error
-                    raise Exception(f'New workitem required field: {list(new_workitem_fields.keys())} to be filled in using new_workitem_fields')
+                    raise Exception(f'New workitem required field: {required_features.requiredFeatures.item} to be filled in using new_workitem_fields')
+
+            if new_workitem_fields is not None:
+                for new_field in new_workitem_fields:
+                    self._polarion_item[new_field] = new_workitem_fields[new_field]
 
             # and create it
             new_uri = service.createWorkItem(self._polarion_item)
