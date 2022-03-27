@@ -17,6 +17,7 @@ Welcome to Polarion's documentation!
    testrecord
    document
    plan
+   utils
 
 
 
