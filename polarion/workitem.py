@@ -78,9 +78,14 @@ class Workitem(CustomFields, Comments):
                     setattr(self, key, value[key])
             self._polarion_test_steps = None
             try:
-                service_test = self._polarion.getService('TestManagement')
-                self._polarion_test_steps = service_test.getTestSteps(self.uri)
-            except Exception:
+                # get the custom fields
+                service = self._polarion.getService('Tracker')
+                custom_fields = service.getCustomFieldTypes(self.uri)
+                # check if any of the field has the test steps
+                if any(field.id == 'testSteps' for field in custom_fields):
+                    service_test = self._polarion.getService('TestManagement')
+                    self._polarion_test_steps = service_test.getTestSteps(self.uri)
+            except Exception as  e:
                 # fail silently as there are probably not test steps for this workitem
                 # todo: logging support
                 pass
