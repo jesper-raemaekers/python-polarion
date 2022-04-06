@@ -86,6 +86,35 @@ class Project(object):
         return Plan(self.polarion, self, new_plan_name=new_plan_name, new_plan_id=new_plan_id, new_plan_template=new_plan_template,
                     new_plan_parent=new_plan_parent)
 
+    def searchPlan(self, query='', order='Created', limit=-1):
+        """Query for available plans. This will return the polarion data structures.
+
+        :param query: The query to use while searching
+        :param order: Order by
+        :param limit: The limit of plans, -1 for no limit
+        :return: The search results
+        :rtype: dict[]
+        """
+        query += f' AND project.id:{self.id}'
+        service = self.polarion.getService('Planning')
+        return service.searchPlans(query, order, limit)
+
+    def searchPlanFullItem(self, query='', order='Created', limit=-1):
+        """Query for available plans. This will query for the plans and then fetch all result. May take a while for a big search with many results.
+
+        :param query: The query to use while searching
+        :param order: Order by
+        :param limit: The limit of plans, -1 for no limit
+        :return: The search results
+        :rtype: Plan[]
+        """
+        return_list = []
+        plans = self.searchPlan(query, order, limit)
+        for plan in plans:
+            return_list.append(Plan(self.polarion, self, polarion_record=plan))
+        return return_list
+
+
     def createWorkitem(self, workitem_type: str):
         """
         Create a workitem based on the workitem type.

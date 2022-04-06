@@ -80,6 +80,32 @@ class TestPolarionPlan(unittest.TestCase):
         self.assertEqual(self.checking_plan.startDate.day, start_date.day, msg='Date is not equal')
         self.assertEqual(self.checking_plan.startedOn.day, started_on_date.day, msg='Date is not equal')
 
+    def test_parent_children(self):
+        # get checking plan
+        self.checking_plan = self.executing_project.getPlan(self.executing_plan.id)
+
+        # check that there are no children
+        self.assertEqual(len(self.checking_plan.getChildren()), 0,
+                         msg='No children should be here')
+
+        # create a child and check that there are children.
+        child_a = self.executing_project.createPlan('Test plan' + datetime.now().strftime("%d-%m-%Y-%H-%M-%S-%f"),
+                                                 datetime.now().strftime("%d-%m-%Y-%H-%M-%S-%f"), 'iteration', new_plan_parent=self.executing_plan.id)
+
+
+        self.assertEqual(len(self.checking_plan.getChildren()), 1, msg='Added one child, but this is not in checking plan')
+        self.assertEqual(self.checking_plan.getChildren()[0].id, child_a.id, msg='Child id does not match')
+        self.assertEqual(child_a.getParent().id, self.executing_plan.id, msg='Parent id should match original parent')
+
+        # also check a sub child
+        sub_child = self.executing_project.createPlan('Test plan' + datetime.now().strftime("%d-%m-%Y-%H-%M-%S-%f"),
+                                                    datetime.now().strftime("%d-%m-%Y-%H-%M-%S-%f"), 'iteration',
+                                                    new_plan_parent=child_a)
+
+        self.assertEqual(child_a.getChildren()[0].id, sub_child.id, msg='Child id does not match')
+        self.assertEqual(sub_child.getParent().id, child_a.id, msg='Parent id should match original parent')
+
+
 
 
 

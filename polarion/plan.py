@@ -29,6 +29,9 @@ class Plan(object):
         self._id = id
 
         if new_plan_id is not None and new_plan_name is not None:
+            # get the ID from the plan if the ID if the plan is passed
+            if isinstance(new_plan_parent, Plan):
+                new_plan_parent = new_plan_parent.id
             service = self._polarion.getService('Planning')
             self._uri = service.createPlan(self._project.id, new_plan_name, new_plan_id, new_plan_parent, new_plan_template)
 
