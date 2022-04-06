@@ -168,6 +168,26 @@ class Plan(object):
             service.updatePlan(updated_plan)
             self._reloadFromPolarion()
 
+    def getParent(self):
+        """
+        Get the parent plan
+        :return: parent Plan
+        """
+        return Plan(self._polarion, self._project, self.parent)
+
+    def getChildren(self):
+        """
+        Get the child plans
+        :return: List of Plans, or empty list if there are no children.
+        """
+        search_results = self._project.searchPlanFullItem(f'parent.id:{self.id}')
+        children = []
+        for plan in search_results:
+            if plan.id != self.id:
+                children.append(plan)
+        return children
+
+
     def _reloadFromPolarion(self):
         service = self._polarion.getService('Planning')
         self._polarion_record = service.getPlanByUri(self._polarion_record.uri)
