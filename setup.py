@@ -22,7 +22,7 @@ setuptools.setup(
         "Operating System :: OS Independent",
         "Development Status :: 3 - Alpha"
     ],
-    install_requires=["zeep", "lxml"],
+    install_requires=["zeep", "lxml", "texttable"],
     packages=setuptools.find_packages(),
     python_requires='>=3.6',
 )
