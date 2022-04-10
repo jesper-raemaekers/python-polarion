@@ -16,6 +16,9 @@ A new workitem can be created using :func:`~Project.createWorkitem`.
 
     new_task = project.createWorkitem('changerequest')
 
+    # Add fields to the creation. Needed if there are required fields upon creation.
+    new_task = project..createWorkitem('task', new_workitem_fields={'title': 'New title'})
+
 Updating a field
 ^^^^^^^^^^^^^^^^
 

@@ -69,7 +69,10 @@ class Workitem(CustomFields, Comments):
 
             if new_workitem_fields is not None:
                 for new_field in new_workitem_fields:
-                    self._polarion_item[new_field] = new_workitem_fields[new_field]
+                    if new_field in self._polarion_item:
+                        self._polarion_item[new_field] = new_workitem_fields[new_field]
+                    else:
+                        raise Exception(f'{new_field} in new_workitem_fields is not recognised as a workitem field')
 
             # and create it
             new_uri = service.createWorkItem(self._polarion_item)
