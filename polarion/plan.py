@@ -29,6 +29,9 @@ class Plan(object):
         self._id = id
 
         if new_plan_id is not None and new_plan_name is not None:
+            # get the ID from the plan if the ID if the plan is passed
+            if isinstance(new_plan_parent, Plan):
+                new_plan_parent = new_plan_parent.id
             service = self._polarion.getService('Planning')
             self._uri = service.createPlan(self._project.id, new_plan_name, new_plan_id, new_plan_parent, new_plan_template)
 
@@ -164,6 +167,26 @@ class Plan(object):
             service = self._polarion.getService('Planning')
             service.updatePlan(updated_plan)
             self._reloadFromPolarion()
+
+    def getParent(self):
+        """
+        Get the parent plan
+        :return: parent Plan
+        """
+        return Plan(self._polarion, self._project, self.parent)
+
+    def getChildren(self):
+        """
+        Get the child plans
+        :return: List of Plans, or empty list if there are no children.
+        """
+        search_results = self._project.searchPlanFullItem(f'parent.id:{self.id}')
+        children = []
+        for plan in search_results:
+            if plan.id != self.id:
+                children.append(plan)
+        return children
+
 
     def _reloadFromPolarion(self):
         service = self._polarion.getService('Planning')
