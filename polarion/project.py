@@ -115,14 +115,14 @@ class Project(object):
         return return_list
 
 
-    def createWorkitem(self, workitem_type: str):
+    def createWorkitem(self, workitem_type: str, new_workitem_fields=None):
         """
         Create a workitem based on the workitem type.
         :param workitem_type: The new workitem type
         :return: A new workitem
         :rtype: Workitem
         """
-        return Workitem(self.polarion, self, new_workitem_type=workitem_type)
+        return Workitem(self.polarion, self, new_workitem_type=workitem_type, new_workitem_fields=new_workitem_fields)
 
     def searchWorkitem(self, query='', order='Created', field_list=None, limit=-1):
         """Query for available workitems. This will only query for the items.

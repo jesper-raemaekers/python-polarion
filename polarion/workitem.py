@@ -30,7 +30,7 @@ class Workitem(CustomFields, Comments):
         INTERNAL_REF = 'internal reference'
         EXTERNAL_REF = 'external reference'
 
-    def __init__(self, polarion, project, id=None, uri=None, new_workitem_type=None, polarion_workitem=None):
+    def __init__(self, polarion, project, id=None, uri=None, new_workitem_type=None, new_workitem_fields=None, polarion_workitem=None):
         super().__init__(polarion, project, id, uri)
         self._polarion = polarion
         self._project = project
@@ -54,9 +54,27 @@ class Workitem(CustomFields, Comments):
                 raise Exception(
                     f'Cannot find workitem {self._id} in project {self._project.id}')
         elif new_workitem_type is not None:
+            # construct empty workitem
             self._polarion_item = self._polarion.WorkItemType(
                 type=self._polarion.EnumOptionIdType(id=new_workitem_type))
             self._polarion_item.project = self._project.polarion_data
+
+            # get the required field for a new item
+            required_features = service.getInitialWorkflowActionForProjectAndType(self._project.id, self._polarion.EnumOptionIdType(id=new_workitem_type))
+            if required_features.requiredFeatures is not None:
+                # if there are any, go and check if they are all supplied
+                if new_workitem_fields is None or not set(required_features.requiredFeatures.item) <= new_workitem_fields.keys():
+                    # let the user know with a better error
+                    raise Exception(f'New workitem required field: {required_features.requiredFeatures.item} to be filled in using new_workitem_fields')
+
+            if new_workitem_fields is not None:
+                for new_field in new_workitem_fields:
+                    if new_field in self._polarion_item:
+                        self._polarion_item[new_field] = new_workitem_fields[new_field]
+                    else:
+                        raise Exception(f'{new_field} in new_workitem_fields is not recognised as a workitem field')
+
+            # and create it
             new_uri = service.createWorkItem(self._polarion_item)
             # reload from polarion
             self._polarion_item = service.getWorkItemByUri(new_uri)
