@@ -2,8 +2,33 @@ Changelog
 =========
 
 
-V0.3.2
+V0.4.0
 ------
+- Added test and documentation for HTML parser. [jesper.raemaekers]
+- HTML parser can now parse the tables. #54. [jesper.raemaekers]
+- Added HTML parser to get links from HTML code. #54.
+  [jesper.raemaekers]
+- Added function to strip HTML tags from text #54. [Jesper Raemaekers]
+- Adding the getParent and  getChildren method. #58. [jesper.raemaekers]
+- Added option to query plans and plans can now find their
+  parent/children. #58. [jesper.raemaekers]
+- When loading a work item it is now checked if there are test steps
+  available before requesting them from the server #57.
+  [jesper.raemaekers]
+- Created test and documentation for adding required fields upon
+  workitem creation. [Jesper Raemaekers]
+- Always add supplied new work item field #56. [Jesper Raemaekers]
+- Workitems can now be created with required fields (other than id and
+  author) #56. [jesper.raemaekers]
+- Added missing documention on the creation of workitems. #56.
+  [jesper.raemaekers]
+- Update the documentation and readme to include some information hidden
+  in closed issues. [jesper.raemaekers]
+
+
+V0.3.2 (2022-02-12)
+-------------------
+- Preparations for release 0.3.2. [jesper.raemaekers]
 - Fixed missing _id property when creating workitem from plan #51.
   [jesper.raemaekers]
 - Changed parameter value for consistency. [anjalizope]
