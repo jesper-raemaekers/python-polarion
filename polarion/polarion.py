@@ -20,15 +20,21 @@ class Polarion(object):
     :param static_service_list: Set to True when this class may not use a request to get the services list
     :param skip_cert_verification: Set to True to skip certification validation for TLS connection
     :param svn_repo_url: Set to the correct url when the SVN repo is not accessible via <host>/repo. For example http://example/repo_extern
-
+    :param proxy: Set to a proxy address to use a proxy
     """
 
-    def __init__(self, polarion_url, user, password, static_service_list=False, skip_cert_verification=False, svn_repo_url=None):
+    def __init__(self, polarion_url, user, password, static_service_list=False, skip_cert_verification=False,
+                 svn_repo_url=None, proxy=None):
         self.user = user
         self.password = password
         self.url = polarion_url
         self.skip_cert_verification = skip_cert_verification
         self.svn_repo_url = svn_repo_url
+        self.proxy = None
+        if proxy is not None:
+            self.proxy = {
+                'http': proxy,
+                'https': proxy}
 
         self.services = {}
 
@@ -81,6 +87,8 @@ class Polarion(object):
             self.history = HistoryPlugin()
             self.services['Session']['client'] = Client(
                 self.services['Session']['url'] + '?wsdl', plugins=[self.history], transport=self._getTransport())
+            if self.proxy is not None:
+                self.services['Session']['client'] .transport.session.proxies = self.proxy
             try:
                 self.sessionHeaderElement = None
                 self.services['Session']['client'].service.logIn(
@@ -110,6 +118,8 @@ class Polarion(object):
                         self.services[service]['url'] + '?wsdl', transport=self._getTransport())
                 self.services[service]['client'].set_default_soapheaders(
                     [self.sessionHeaderElement])
+                if self.proxy is not None:
+                    self.services[service]['client'].transport.session.proxies = self.proxy
             if service == 'Tracker':
                 if hasattr(self.services[service]['client'].service, 'addComment'):
                     # allow addComment to be send without title, needed for reply comments
