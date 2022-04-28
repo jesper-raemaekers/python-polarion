@@ -2,8 +2,21 @@ Changelog
 =========
 
 
-V0.4.0
+V0.4.1
 ------
+
+Fix
+~~~
+- `mock` and `patch` packages taken from `unittest` [schperplata]
+
+Other
+~~~~~
+- Attempt to pass cookies to other services #61. [jesper.raemaekers]
+
+
+V0.4.0 (2022-04-16)
+-------------------
+- Preparations for release 0.4.0. [jesper.raemaekers]
 - Added test and documentation for HTML parser. [jesper.raemaekers]
 - HTML parser can now parse the tables. #54. [jesper.raemaekers]
 - Added HTML parser to get links from HTML code. #54.
