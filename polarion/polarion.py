@@ -83,11 +83,13 @@ class Polarion(object):
                 self.services['Session']['url'] + '?wsdl', plugins=[self.history], transport=self._getTransport())
             try:
                 self.sessionHeaderElement = None
+                self.sessionCookieJar = None
                 self.services['Session']['client'].service.logIn(
                     self.user, self.password)
                 tree = self.history.last_received['envelope'].getroottree()
                 self.sessionHeaderElement = tree.find(
                     './/{http://ws.polarion.com/session}sessionID')
+                self.sessionCookieJar = self.services['Session']['client'].transport.session.cookies
             except Exception:
                 raise Exception(
                     f'Could not log in to Polarion for user {self.user}')
@@ -110,6 +112,7 @@ class Polarion(object):
                         self.services[service]['url'] + '?wsdl', transport=self._getTransport())
                 self.services[service]['client'].set_default_soapheaders(
                     [self.sessionHeaderElement])
+                self.services[service]['client'].transport.session.cookies = self.sessionCookieJar
             if service == 'Tracker':
                 if hasattr(self.services[service]['client'].service, 'addComment'):
                     # allow addComment to be send without title, needed for reply comments
