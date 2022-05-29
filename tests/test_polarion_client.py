@@ -4,7 +4,7 @@ from keys import polarion_user, polarion_password, polarion_url, polarion_projec
 from filecmp import cmp
 from shutil import copyfile
 from datetime import datetime
-import mock
+from unittest import mock
 
 
 class TestPolarionClient(unittest.TestCase):

@@ -5,7 +5,6 @@ from polarion.record import Record
 from keys import polarion_user, polarion_password, polarion_url, polarion_project_id
 from time import sleep
 from datetime import datetime
-import mock
 from polarion.factory import createFromUri
 from filecmp import cmp
 from shutil import copyfile

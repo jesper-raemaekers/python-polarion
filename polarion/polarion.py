@@ -91,11 +91,13 @@ class Polarion(object):
                 self.services['Session']['client'] .transport.session.proxies = self.proxy
             try:
                 self.sessionHeaderElement = None
+                self.sessionCookieJar = None
                 self.services['Session']['client'].service.logIn(
                     self.user, self.password)
                 tree = self.history.last_received['envelope'].getroottree()
                 self.sessionHeaderElement = tree.find(
                     './/{http://ws.polarion.com/session}sessionID')
+                self.sessionCookieJar = self.services['Session']['client'].transport.session.cookies
             except Exception:
                 raise Exception(
                     f'Could not log in to Polarion for user {self.user}')
@@ -120,6 +122,7 @@ class Polarion(object):
                     [self.sessionHeaderElement])
                 if self.proxy is not None:
                     self.services[service]['client'].transport.session.proxies = self.proxy
+                self.services[service]['client'].transport.session.cookies = self.sessionCookieJar
             if service == 'Tracker':
                 if hasattr(self.services[service]['client'].service, 'addComment'):
                     # allow addComment to be send without title, needed for reply comments
