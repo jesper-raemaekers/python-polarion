@@ -13,6 +13,15 @@ The class can be instantiated like this:
     pol = polarion.Polarion('http://example.com/polarion', 'user', 'password')
     print(pol) # Polarion client for http://example.com/polarion/ws/services with user <user>
 
+Proxy
+-----
+You can specify a proxy by providing an domain or ip with a port number.
+
+.. code:: python
+
+    pol = polarion.Polarion('http://example.com/polarion', 'user', 'password', proxy='ip:port')
+
+
 Self signed certificates
 ------------------------
 

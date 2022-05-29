@@ -20,7 +20,7 @@ class Polarion(object):
     :param static_service_list: Set to True when this class may not use a request to get the services list
     :param skip_cert_verification: Set to True to skip certification validation for TLS connection
     :param svn_repo_url: Set to the correct url when the SVN repo is not accessible via <host>/repo. For example http://example/repo_extern
-    :param proxy: Set to a proxy address to use a proxy
+    :param proxy: Set to a proxy address to use a proxy, use the format: proxy='ip:port'
     """
 
     def __init__(self, polarion_url, user, password, static_service_list=False, skip_cert_verification=False,
