@@ -30,7 +30,18 @@ class Workitem(CustomFields, Comments):
         INTERNAL_REF = 'internal reference'
         EXTERNAL_REF = 'external reference'
 
-    def __init__(self, polarion, project, id=None, uri=None, new_workitem_type=None, new_workitem_fields=None, polarion_workitem=None):
+    def __init__(self, polarion, project=None, id=None, uri=None, new_workitem_type=None, new_workitem_fields=None, polarion_workitem=None):
+        if not project:
+            if not uri and not polarion_workitem:
+                raise Exception('if no project is specified, I need an URI or polarion_workitem!')
+            if uri:
+                service = polarion.getService('Tracker')
+                polarion_workitem = service.getWorkItemByUri(uri)
+
+            polarion_project = polarion_workitem.project.id
+
+            project = polarion.getProject(polarion_project)
+
         super().__init__(polarion, project, id, uri)
         self._polarion = polarion
         self._project = project
@@ -39,7 +50,10 @@ class Workitem(CustomFields, Comments):
 
         service = self._polarion.getService('Tracker')
 
-        if self._uri:
+        if polarion_workitem is not None:
+            self._polarion_item = polarion_workitem
+            self._id = self._polarion_item.id
+        elif self._uri:
             try:
                 self._polarion_item = service.getWorkItemByUri(self._uri)
                 self._id = self._polarion_item.id
@@ -79,10 +93,6 @@ class Workitem(CustomFields, Comments):
             # reload from polarion
             self._polarion_item = service.getWorkItemByUri(new_uri)
             self._id = self._polarion_item.id
-
-        elif polarion_workitem is not None:
-            self._polarion_item = polarion_workitem
-            self._id = self._polarion_item.id
         else:
             raise Exception('No id, uri, polarion workitem or new workitem type specified!')
 
@@ -95,6 +105,15 @@ class Workitem(CustomFields, Comments):
                 for key in value:
                     setattr(self, key, value[key])
             self._polarion_test_steps = None
+            self._parsed_test_steps = None
+
+        else:
+            raise Exception(f'Workitem not retrieved from Polarion')
+
+    def _buildTestStepsFromPolarion(self):
+        self._parsed_test_steps = []
+
+        if self._polarion_item is not None and not self._polarion_item.unresolvable:
             try:
                 # get the custom fields
                 custom_fields = self.getAllowedCustomKeys()
@@ -106,7 +125,7 @@ class Workitem(CustomFields, Comments):
                 # fail silently as there are probably not test steps for this workitem
                 # todo: logging support
                 pass
-            self._parsed_test_steps = None
+
             if self._polarion_test_steps is not None:
                 if self._polarion_test_steps.keys is not None and self._polarion_test_steps.steps:
                     # oh god, parse the test steps...
@@ -359,8 +378,8 @@ class Workitem(CustomFields, Comments):
         :return: The content of the description, may contain HTML
         :rtype: string
         """
-        if self.description is not None:
-            return self.description.content
+        if self._polarion_item.description is not None:
+            return self._polarion_item.description.content
         return None
 
     def setDescription(self, description):
@@ -369,7 +388,7 @@ class Workitem(CustomFields, Comments):
 
         :param description: the description
         """
-        self.description = self._polarion.TextType(
+        self._polarion_item.description = self._polarion.TextType(
             content=description, type='text/html', contentLossy=False)
         self.save()
 
@@ -394,11 +413,17 @@ class Workitem(CustomFields, Comments):
         :return: True/False
         :rtype: boolean
         """
+        if self._parsed_test_steps is None:
+            self._buildTestStepsFromPolarion()
+
         if self._parsed_test_steps is not None:
             return len(self._parsed_test_steps) > 0
         return False
 
     def getTestSteps(self):
+        if self._parsed_test_steps is None:
+            self._buildTestStepsFromPolarion()
+
         return self._parsed_test_steps
 
     def addHyperlink(self, url, hyperlink_type: HyperlinkRoles):
@@ -555,6 +580,35 @@ class Workitem(CustomFields, Comments):
             service.updateWorkItem(updated_item)
             self._reloadFromPolarion()
 
+    class WorkItemIterator:
+
+        def __init__(self, polarion, linkedWorkItems):
+            self._polarion = polarion
+            self._linkedWorkItems = linkedWorkItems
+            self._index = 0
+
+        def __iter__(self):
+            return self
+
+        def __next__(self):
+
+            try:
+                obj = self._linkedWorkItems.LinkedWorkItem[self._index]
+                self._index += 1
+
+                role = obj.role.id
+                uri = obj.workItemURI
+
+                return role, uri
+            except IndexError:
+                raise StopIteration
+
+    def iterateLinkedWorkItems(self):
+        return Workitem.WorkItemIterator(self._polarion, self._polarion_item.linkedWorkItems)
+
+    def iterateLinkedWorkItemsDerived(self):
+        return Workitem.WorkItemIterator(self._polarion, self._polarion_item.linkedWorkItemsDerived)
+
     def _reloadFromPolarion(self):
         service = self._polarion.getService('Tracker')
         self._polarion_item = service.getWorkItemByUri(self._polarion_item.uri)
@@ -599,10 +653,10 @@ class Workitem(CustomFields, Comments):
         return True
 
     def __repr__(self):
-        return f'{self._id}: {self.title}'
+        return f'{self._id}: {self._polarion_item.title}'
 
     def __str__(self):
-        return f'{self._id}: {self.title}'
+        return self.__repr__()
 
 
 class WorkitemCreator(Creator):
