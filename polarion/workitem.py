@@ -97,10 +97,9 @@ class Workitem(CustomFields, Comments):
             self._polarion_test_steps = None
             try:
                 # get the custom fields
-                service = self._polarion.getService('Tracker')
-                custom_fields = service.getCustomFieldTypes(self.uri)
+                custom_fields = self.getAllowedCustomKeys()
                 # check if any of the field has the test steps
-                if any(field.id == 'testSteps' for field in custom_fields):
+                if any(field == 'testSteps' for field in custom_fields):
                     service_test = self._polarion.getService('TestManagement')
                     self._polarion_test_steps = service_test.getTestSteps(self.uri)
             except Exception as  e:
@@ -398,6 +397,9 @@ class Workitem(CustomFields, Comments):
         if self._parsed_test_steps is not None:
             return len(self._parsed_test_steps) > 0
         return False
+
+    def getTestSteps(self):
+        return self._parsed_test_steps
 
     def addHyperlink(self, url, hyperlink_type: HyperlinkRoles):
         """

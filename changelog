@@ -1,6 +1,12 @@
 Changelog
 =========
 
+master
+------
+
+- add function getTestSteps to Workitem
+- _buildWorkitemFromPolarion failed to retreive test steps
+
 
 V0.4.1
 ------

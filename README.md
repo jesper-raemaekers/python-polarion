@@ -22,8 +22,54 @@ Work with custom field in workitems and documents.
 
 # Installation
 
+## From PIP
+
 ```
 pip install polarion
+```
+
+## From this repository
+
+```
+git clone http://svn.dis.lan:3000/werner.pirkl/python-polarion.git
+python3 -m pip install -e python-polarion
+```
+
+# Username / Password
+
+In order not to check-in your username and password, please use dotenv:
+
+```
+pip install python-dotenv
+```
+
+Create a .env file where you run your code (next to the jupyter notebook for example)
+
+```
+username=<your username>
+password=<your password>
+```
+
+load the environment in a python script:
+
+```
+from dotenv import load_dotenv
+
+load_dotenv()
+```
+
+load the environment in jupyter:
+
+```
+%load_ext dotenv
+%dotenv
+```
+
+you can now retreive your username and password like that:
+
+```
+username = os.getenv('username')
+password = os.getenv('password')
 ```
 
 # Getting started
