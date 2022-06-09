@@ -199,7 +199,7 @@ class Project(object):
         workitems = self.searchWorkitemInBaseline(baselineRevision, query, sort, ['id'], limit)
         for workitem in workitems:
             return_list.append(
-                Workitem(self.polarion, self, workitem.id))
+                Workitem(self.polarion, self, uri=workitem.uri))
         return return_list
 
     def getTestRun(self, id: str):
