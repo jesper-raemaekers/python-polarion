@@ -41,7 +41,10 @@ class Project(object):
         service = self.polarion.getService('Project')
         project_users = service.getProjectUsers(self.id)
         for user in project_users:
-            users.append(User(self.polarion, user))
+            try:
+                users.append(User(self.polarion, user))
+            except Exception:
+                print (f"Could not retrieve {user['name']} from server")
         return users
 
     def findUser(self, name):
