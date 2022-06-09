@@ -371,6 +371,9 @@ class Workitem(CustomFields, Comments):
             self.status.id = status
             self.save()
 
+    def getStatus(self):
+        return self.status.id
+
     def getDescription(self):
         """
         Get a comment if available. The comment may contain HTML if edited in Polarion!
@@ -425,6 +428,15 @@ class Workitem(CustomFields, Comments):
             self._buildTestStepsFromPolarion()
 
         return self._parsed_test_steps
+
+    def getTestRuns(self, limit=-1):
+        if not self.hasTestSteps():
+            return None
+
+        client = self._polarion.getService('TestManagement')
+        polarion_test_runs = client.searchTestRunsWithFieldsLimited(self.id, 'Created', ['id'], limit)
+
+        return [test_run.uri for test_run in polarion_test_runs]
 
     def addHyperlink(self, url, hyperlink_type: HyperlinkRoles):
         """
@@ -622,6 +634,9 @@ class Workitem(CustomFields, Comments):
         except Exception:
             return False
         return self._compareType(a, b)
+
+    def __hash__(self):
+        return hash(self.id)
 
     def _compareType(self, a, b):
         basic_types = [int, float,
