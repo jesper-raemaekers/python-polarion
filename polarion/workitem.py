@@ -2,6 +2,7 @@ import copy
 import os
 from datetime import datetime, date
 from enum import Enum
+from copy import deepcopy
 
 from zeep import xsd
 
@@ -9,6 +10,65 @@ from .base.comments import Comments
 from .base.custom_fields import CustomFields
 from .factory import Creator
 from .user import User
+
+class TestTable(object):
+
+    def __init__(self, test_template: 'Workitem', clear_table=True):
+        """
+        Uses a Test Workitem template to spawn a Test Table that can be used with the setTestSteps function.
+        The constructor creates an empty table, and the methods in this class provide the means to construct a new
+        TestSteps Table.
+        :param test_template: Workitem to use as template for the new Test Table
+        :type test_template: Workitem
+        :param clear_table: Whether the test table is to be emptied after copy.
+        :type clear_table: bool
+        """
+        # get the custom fields
+        custom_fields = test_template.getAllowedCustomKeys()
+        # check if any of the field has the test steps
+        assert any(field == 'testSteps' for field in custom_fields)
+        service_test = test_template._polarion.getService('TestManagement')
+        teststeps_template = service_test.getTestSteps(test_template.uri)
+        self.value_template = deepcopy(teststeps_template.steps.TestStep[0])
+        self.columns = [col.id for col in teststeps_template.keys.EnumOptionId]
+        self.steps = deepcopy(teststeps_template.steps)
+        if clear_table:
+            self.steps.TestStep.clear()
+
+    def insert_teststep(self, position, *args):
+        """
+        Inserts a test step in the position indicated bu the `position` argument. The following parameters correspond to
+         the columns that are required by the Test Workitem.
+        :param position: Index where the step will be inserted. If the position is -1, then the step is appended.
+        :type position: int
+        :param *args: test columns that are expected by the Test Workitem.
+        :type *args: list of strings
+        :return: Nothing
+        :rtype: None
+        """
+        if len(args) != len(self.columns):
+            raise RuntimeError(f"The TestStep requires exactly {len(self.columns)} arguments.\n {self.columns}")
+        new_step = deepcopy(self.value_template)
+        for i, col in enumerate(self.columns):
+            if new_step.values.Text[i].type == 'text/html':
+                new_step.values.Text[i].content = str(args[i])  # This is crude but works
+            else:
+                raise NotImplementedError
+
+        if position == -1:  # Needed to support append_teststep
+            self.steps.TestStep.append(new_step)
+        else:
+            self.steps.TestStep.insert(position, new_step)
+
+    def append_teststep(self, *args):
+        self.insert_teststep(-1, *args)
+
+    def delete_teststep(self, position):
+        self.steps.TestStep.delete(position)
+
+    def replace_teststep(self, position, *args):
+        self.delete_teststep(position)
+        self.insert_teststep(position, *args)
 
 
 class Workitem(CustomFields, Comments):
@@ -428,6 +488,51 @@ class Workitem(CustomFields, Comments):
             self._buildTestStepsFromPolarion()
 
         return self._parsed_test_steps
+
+    def getRawTestSteps(self):
+        if self._polarion_item is not None and not self._polarion_item.unresolvable:
+            try:
+                # get the custom fields
+                custom_fields = self.getAllowedCustomKeys()
+                # check if any of the field has the test steps
+                if any(field == 'testSteps' for field in custom_fields):
+                    service_test = self._polarion.getService('TestManagement')
+                    return service_test.getTestSteps(self.uri)
+            except Exception as  e:
+                # fail silently as there are probably not test steps for this workitem
+                # todo: logging support
+                pass
+        return None
+
+    def setTestSteps(self, test_steps):
+        """
+
+        :param test_steps:
+        :type test_steps: TestTable or the TestStepArray directly obtained from getRawTestSteps
+        :return:
+        :rtype:
+        """
+        if isinstance(test_steps, TestTable):  # if the complete TestTable was passed, use only the needed part
+            test_steps = test_steps.steps
+
+        if self._polarion_test_steps is None:
+            self._buildTestStepsFromPolarion()
+
+        if self._polarion_test_steps is not None:
+            if self._polarion_test_steps.keys is not None:
+
+                # Sanity Checks here
+                # 1. The format is as expected
+                assert hasattr(test_steps, 'TestStep')
+                assert len(test_steps.TestStep) > 0
+                columns = [col.id for col in self._polarion_test_steps.keys.EnumOptionId]
+                assert len(test_steps.TestStep[0].values.Text) == len(columns)
+                for col in range(len(columns)):
+                    assert test_steps.TestStep[0].values.Text[col].type == 'text/html' and \
+                           isinstance(test_steps.TestStep[0].values.Text[col].content, str) and \
+                           test_steps.TestStep[0].values.Text[col].contentLossy is False
+                service_test = self._polarion.getService('TestManagement')
+                service_test.setTestSteps(self.uri, test_steps)
 
     def getTestRuns(self, limit=-1):
         if not self.hasTestSteps():
