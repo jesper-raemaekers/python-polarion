@@ -2,7 +2,6 @@ import copy
 import os
 from datetime import datetime, date
 from enum import Enum
-from copy import deepcopy
 
 from zeep import xsd
 
@@ -11,29 +10,39 @@ from .base.custom_fields import CustomFields
 from .factory import Creator
 from .user import User
 
+USE_CLONING = False  # TODO: Delete this once tests show that the procedure without clonning is working well.
+if USE_CLONING:
+    from copy import deepcopy
+
 class TestTable(object):
+    """
+    Uses a Test Workitem template to spawn a Test Table that can be used with the setTestSteps function.
+    The constructor creates an empty table, and the methods in this class provide the means to construct a new
+    TestSteps Table.
+    :param test_template: Workitem to use as template for the new Test Table
+    :type test_template: Workitem
+    :param clear_table: Whether the test table is to be emptied after copy.
+    :type clear_table: bool
+    """
 
     def __init__(self, test_template: 'Workitem', clear_table=True):
-        """
-        Uses a Test Workitem template to spawn a Test Table that can be used with the setTestSteps function.
-        The constructor creates an empty table, and the methods in this class provide the means to construct a new
-        TestSteps Table.
-        :param test_template: Workitem to use as template for the new Test Table
-        :type test_template: Workitem
-        :param clear_table: Whether the test table is to be emptied after copy.
-        :type clear_table: bool
-        """
         # get the custom fields
         custom_fields = test_template.getAllowedCustomKeys()
         # check if any of the field has the test steps
         assert any(field == 'testSteps' for field in custom_fields)
         service_test = test_template._polarion.getService('TestManagement')
         teststeps_template = service_test.getTestSteps(test_template.uri)
-        self.value_template = deepcopy(teststeps_template.steps.TestStep[0])
-        self.columns = [col.id for col in teststeps_template.keys.EnumOptionId]
-        self.steps = deepcopy(teststeps_template.steps)
-        if clear_table:
-            self.steps.TestStep.clear()
+        self.columns = (col.id for col in teststeps_template.keys.EnumOptionId)
+        if USE_CLONING:
+            self.value_template = deepcopy(teststeps_template.steps.TestStep[0])
+            self.steps = deepcopy(teststeps_template.steps)
+            if clear_table:
+                self.steps.TestStep.clear()
+        else:
+            self.steps = test_template._polarion.ArrayOfTestStepType()
+            self.step_type = test_template._polarion.TestStepType
+            self.array_of_text_type = test_template._polarion.ArrayOfTextType
+            self.text_type = test_template._polarion.TextType
 
     def insert_teststep(self, position, *args):
         """
@@ -48,12 +57,16 @@ class TestTable(object):
         """
         if len(args) != len(self.columns):
             raise RuntimeError(f"The TestStep requires exactly {len(self.columns)} arguments.\n {self.columns}")
-        new_step = deepcopy(self.value_template)
-        for i, col in enumerate(self.columns):
-            if new_step.values.Text[i].type == 'text/html':
-                new_step.values.Text[i].content = str(args[i])  # This is crude but works
-            else:
-                raise NotImplementedError
+        if USE_CLONING:
+            new_step = deepcopy(self.value_template)
+            for i, col in enumerate(self.columns):
+                if new_step.values.Text[i].type == 'text/html':
+                    new_step.values.Text[i].content = str(args[i])  # This is crude but works
+                else:
+                    raise NotImplementedError
+        else:
+            step_values = self.array_of_text_type([self.text_type('text/html', str(args[i]), False) for i, col in enumerate(self.columns)])
+            new_step = self.step_type(step_values)
 
         if position == -1:  # Needed to support append_teststep
             self.steps.TestStep.append(new_step)
