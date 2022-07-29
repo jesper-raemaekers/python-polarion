@@ -72,9 +72,8 @@ class Config:
         for attribute in Config.MANDATORY:
             if getattr(self, attribute) == None:
                 raise Exception(attribute + ' shall be set')
-        if getattr(self, Config.TOKEN)==None:
-            if getattr(self, Config.USERNAME)==None or getattr(self, Config.PASSWORD)==None:
-                raise Exception(f'Shall set either {Config.USERNAME} / {Config.PASSWORD} or {Config.TOKEN}')
+        if getattr(self, Config.TOKEN)==None and (getattr(self, Config.USERNAME)==None or getattr(self, Config.PASSWORD)==None):
+            raise Exception(f'Shall set either {Config.USERNAME} / {Config.PASSWORD} or {Config.TOKEN}')
 
     def generate_test_run_id(self):
         if getattr(self, Config.TESTRUN_ID) is None:
@@ -190,11 +189,10 @@ class Importer:
         test_cases=project.searchWorkitem(Importer.TEST_CASE_TYPE, field_list=['id', f'customFields.{Importer.TEST_CASE_ID_CUSTOM_FILED}'])
         test_cases_from_id={}
         for test_case in test_cases:
-            if hasattr(test_case,'customFields'):
-                if hasattr(test_case.customFields,'Custom'):
-                    for custom in test_case.customFields.Custom:
-                        if getattr(custom, 'key', None) == Importer.TEST_CASE_ID_CUSTOM_FILED and hasattr(custom,'value'):
-                            test_cases_from_id[custom.value]=test_case.id
+            if hasattr(test_case,'customFields') and hasattr(test_case.customFields,'Custom'):
+                for custom in test_case.customFields.Custom:
+                    if getattr(custom, 'key', None) == Importer.TEST_CASE_ID_CUSTOM_FILED and hasattr(custom,'value'):
+                        test_cases_from_id[custom.value]=test_case.id
 
         # Getting or creating test run
         if config.testrun_id is None:
@@ -208,9 +206,9 @@ class Importer:
         # Updating test run
         if config.testrun_comment is not None:
             comment='<html><body>'+config.testrun_comment+'</body></html>'
-            customField=test_run.getCustomField(Importer.TEST_RUN_COMMENT_CUSTOM_FIELD)
-            if customField is not None:
-                comment=customField.content
+            custom_field=test_run.getCustomField(Importer.TEST_RUN_COMMENT_CUSTOM_FIELD)
+            if custom_field is not None:
+                comment=custom_field.content
                 if comment is not None:
                     split=comment.split('</body>')
                     if len(split)==2:
