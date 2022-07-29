@@ -18,6 +18,7 @@ Welcome to Polarion's documentation!
    document
    plan
    utils
+   xml
 
 
 
