@@ -19,18 +19,18 @@ class Polarion(object):
     :param password: The password for that user
     :param token: The token to log with token. In this case, no need to set password
     :param static_service_list: Set to True when this class may not use a request to get the services list
-    :param skip_cert_verification: Set to True to skip certification validation for TLS connection
+    :param verify_certificate: Set to True/False to activate certification validation for TLS connection or provide string with link to certification chain (PEM & x264 encoded)
     :param svn_repo_url: Set to the correct url when the SVN repo is not accessible via <host>/repo. For example http://example/repo_extern
     :param proxy: Set to a proxy address to use a proxy, use the format: proxy='ip:port'
     """
 
-    def __init__(self, polarion_url, user, password=None, token=None, static_service_list=False, skip_cert_verification=False,
+    def __init__(self, polarion_url, user, password=None, token=None, static_service_list=False, verify_certificate=True,
                  svn_repo_url=None, proxy=None):
         self.user = user
         self.password = password
         self.token = token
         self.url = polarion_url
-        self.skip_cert_verification = skip_cert_verification
+        self.verify_certificate = verify_certificate
         self.svn_repo_url = svn_repo_url
         self.proxy = None
         if proxy is not None:
@@ -72,7 +72,7 @@ class Polarion(object):
         """
         Parse the list of services available in the overview
         """
-        service_overview = requests.get(self.url, verify=not self.skip_cert_verification)
+        service_overview = requests.get(self.url, verify=self.verify_certificate)
         service_base_url = self.url + '/'
         if service_overview.ok:
             services = re.findall(r"(\w+)WebService", service_overview.text)
@@ -162,7 +162,7 @@ class Polarion(object):
         Gets the zeep transport object
         """
         transport = Transport()
-        transport.session.verify = not self.skip_cert_verification
+        transport.session.verify = self.verify_certificate
         return transport
 
     def hasService(self, name: str):
