@@ -233,6 +233,15 @@ class Polarion(object):
             raise Exception(f'Could not download attachment from {url}. Got error {resp.status_code}: {resp.reason}.\n'
                             f'Trying with the default polarion login details yielded {resp_default.status_code}: {resp_default.reason}')
 
+    def beginTransaction(self):
+        self.services['Session']['client'].service.beginTransaction()
+
+    def endTransaction(self, rollback=False):
+        self.services['Session']['client'].service.endTransaction(rollback)
+
+    def exsistTransaction(self, rollback=False):
+        return self.services['Session']['client'].service.transactionExists()
+
     def __repr__(self):
         return f'Polarion client for {self.url} with user {self.user}'
 
