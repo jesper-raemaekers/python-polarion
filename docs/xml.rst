@@ -16,7 +16,7 @@ Import an xml file of results (see xml_junit.xsd for the standard format) into a
 .. code:: python
 
     import os
-    from polarion.xml import Config, Importer
+    from polarion.xml import Config, Importer, ResultExporter
 
     if __name__ == '__main__':
         import logging
@@ -33,8 +33,9 @@ Import an xml file of results (see xml_junit.xsd for the standard format) into a
             })
 
         testrun=Importer.from_xml(config)
-        if config.result is not None:
-            ResultExporter.save_json(config.result, testrun)
+
+        # if want to save the test_run as json, add:
+        ResultExporter.save_json("result.json", testrun)
 
 
 Export a test run as json
