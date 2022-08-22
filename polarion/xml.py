@@ -25,7 +25,7 @@ class Config:
         XML_FILE, URL, USERNAME, PASSWORD, TOKEN, 
         PROJECT_ID, TESTRUN_ID, TESTRUN_ID_GENERATOR,
         TESTRUN_TITLE, TESTRUN_TYPE, TESTRUN_COMMENT, SKIP_MISSING_TESTCASE]
-    MANDATORY = [URL, XML_FILE, PROJECT_ID]  # and also either user/password or token
+    MANDATORY = [XML_FILE, URL, PROJECT_ID]  # and also either user/password or token
     _classinitialised = False
 
     def __new__(cls, *args, **kwargs):
