@@ -94,7 +94,7 @@ class XmlParser:
     TEST_CASE='testcase'
 
     @classmethod
-    def parse_suites(cls, xml_file):
+    def parse_root(cls, xml_file):
         """
         Parse Xml file
         :return: List of cases for the file
@@ -104,6 +104,8 @@ class XmlParser:
         if root.tag == XmlParser.TEST_SUITES:
             for test_suite in root:
                 XmlParser._parse_suite(test_suite, { 'path': f'{xml_file}/{XmlParser.TEST_SUITES}' }, returned_cases)
+        elif root.tag == XmlParser.TEST_SUITE:
+            XmlParser._parse_suite(root, { 'path': f'{xml_file}/{XmlParser.TEST_SUITE}' }, returned_cases)
         else:
             raise Exception(f'Unmanaged root {root.tag} in {xml_file}')
         return returned_cases
@@ -181,7 +183,7 @@ class Importer:
         Import xml file having junit.xsd structure (see documentation)
         """
         logger.info(f'Parsing test file {config.xml_file}')
-        cases=XmlParser.parse_suites(config.xml_file)
+        cases=XmlParser.parse_root(config.xml_file)
 
         logger.info(f'Connection to polarion {config.url} on project {config.project_id}')
         polarion=Polarion(polarion_url=config.url, user=config.username, password=config.password, token=config.token)
