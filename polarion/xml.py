@@ -42,6 +42,8 @@ class Config:
             return 'New unit test run'
         elif attribute_name==Config.TESTRUN_TYPE:
             return 'xUnit Test Manual Upload'
+        elif attribute_name==Config.SKIP_MISSING_TESTCASE:
+            return False
         return None
 
     @classmethod
