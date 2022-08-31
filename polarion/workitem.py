@@ -101,10 +101,6 @@ class Workitem(CustomFields, Comments):
             # reload from polarion
             self._polarion_item = service.getWorkItemByUri(new_uri)
             self._id = self._polarion_item.id
-
-        elif polarion_workitem is not None:
-            self._polarion_item = polarion_workitem
-            self._id = self._polarion_item.id
         else:
             raise PolarionAccessError('No id, uri, polarion workitem or new workitem type specified!')
 
