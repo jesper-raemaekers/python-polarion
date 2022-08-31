@@ -10,9 +10,6 @@ from .base.custom_fields import CustomFields
 from .factory import Creator
 from .user import User
 
-USE_CLONING = False  # TODO: Delete this once tests show that the procedure without clonning is working well.
-if USE_CLONING:
-    from copy import deepcopy
 
 class TestTable(object):
     """
@@ -32,17 +29,11 @@ class TestTable(object):
         assert any(field == 'testSteps' for field in custom_fields)
         service_test = test_template._polarion.getService('TestManagement')
         teststeps_template = service_test.getTestSteps(test_template.uri)
-        self.columns = (col.id for col in teststeps_template.keys.EnumOptionId)
-        if USE_CLONING:
-            self.value_template = deepcopy(teststeps_template.steps.TestStep[0])
-            self.steps = deepcopy(teststeps_template.steps)
-            if clear_table:
-                self.steps.TestStep.clear()
-        else:
-            self.steps = test_template._polarion.ArrayOfTestStepType()
-            self.step_type = test_template._polarion.TestStepType
-            self.array_of_text_type = test_template._polarion.ArrayOfTextType
-            self.text_type = test_template._polarion.TextType
+        self.columns = [col.id for col in teststeps_template.keys.EnumOptionId]
+        self.steps = test_template._polarion.ArrayOfTestStepType()
+        self.step_type = test_template._polarion.TestStepType
+        self.array_of_text_type = test_template._polarion.ArrayOfTextType
+        self.text_type = test_template._polarion.TextType
 
     def insert_teststep(self, position, *args):
         """
@@ -57,16 +48,9 @@ class TestTable(object):
         """
         if len(args) != len(self.columns):
             raise RuntimeError(f"The TestStep requires exactly {len(self.columns)} arguments.\n {self.columns}")
-        if USE_CLONING:
-            new_step = deepcopy(self.value_template)
-            for i, col in enumerate(self.columns):
-                if new_step.values.Text[i].type == 'text/html':
-                    new_step.values.Text[i].content = str(args[i])  # This is crude but works
-                else:
-                    raise NotImplementedError
-        else:
-            step_values = self.array_of_text_type([self.text_type('text/html', str(args[i]), False) for i, col in enumerate(self.columns)])
-            new_step = self.step_type(step_values)
+
+        step_values = self.array_of_text_type([self.text_type('text/html', str(args[i]), False) for i, col in enumerate(self.columns)])
+        new_step = self.step_type(step_values)
 
         if position == -1:  # Needed to support append_teststep
             self.steps.TestStep.append(new_step)
@@ -454,8 +438,8 @@ class Workitem(CustomFields, Comments):
         :return: The content of the description, may contain HTML
         :rtype: string
         """
-        if self._polarion_item.description is not None:
-            return self._polarion_item.description.content
+        if self.description is not None:
+            return self.description.content
         return None
 
     def setDescription(self, description):
@@ -464,7 +448,7 @@ class Workitem(CustomFields, Comments):
 
         :param description: the description
         """
-        self._polarion_item.description = self._polarion.TextType(
+        self.description = self._polarion.TextType(
             content=description, type='text/html', contentLossy=False)
         self.save()
 
