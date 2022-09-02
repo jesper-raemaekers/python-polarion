@@ -119,9 +119,9 @@ class Testrun(Comments):
         :param file_name: The attachment file name
         :param file_path: File where to save the attachment
         """
-        bin = self.getAttachment(file_name)
+        binary = self.getAttachment(file_name)
         with open(file_path, "wb") as file:
-            file.write(bin)
+            file.write(binary)
 
     def deleteAttachment(self, file_name):
         """
