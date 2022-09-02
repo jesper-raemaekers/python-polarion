@@ -41,7 +41,10 @@ class Project(object):
         service = self.polarion.getService('Project')
         project_users = service.getProjectUsers(self.id)
         for user in project_users:
-            users.append(User(self.polarion, user))
+            try:
+                users.append(User(self.polarion, user))
+            except Exception:
+                print (f"Could not retrieve {user['name']} from server")
         return users
 
     def findUser(self, name):
@@ -199,7 +202,7 @@ class Project(object):
         workitems = self.searchWorkitemInBaseline(baselineRevision, query, sort, ['id'], limit)
         for workitem in workitems:
             return_list.append(
-                Workitem(self.polarion, self, workitem.id))
+                Workitem(self.polarion, self, uri=workitem.uri))
         return return_list
 
     def getTestRun(self, id: str):

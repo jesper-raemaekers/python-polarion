@@ -8,8 +8,22 @@ master
 - _buildWorkitemFromPolarion failed to retreive test steps
 
 
-V0.4.1
+V1.0.0
 ------
+- Update polarion_client.rst. [LionnelC]
+- #77 Add token login. [LionnelC]
+- Add exception handling to project.getUsers() [Axel Seibert]
+
+  keep getUsers from failing just because one user entry has the flag unresolvable set to True.
+- Fetch Workitem in baseline by uri. [the-working-rene]
+
+  fixes #74
+- Added proxy documentation #67. [jesper.raemaekers]
+- Proxy support #67. [jesper.raemaekers]
+
+
+V0.4.1 (2022-04-28)
+-------------------
 
 Fix
 ~~~
@@ -17,6 +31,8 @@ Fix
 
 Other
 ~~~~~
+- Preparations for release 0.4.1. [jesper.raemaekers]
+- Preparations for release 0.4.1. [jesper.raemaekers]
 - Attempt to pass cookies to other services #61. [jesper.raemaekers]
 
 
