@@ -709,8 +709,10 @@ class Workitem(CustomFields, Comments):
             try:
                 obj = self._linkedWorkItems.LinkedWorkItem[self._index]
                 self._index += 1
-
-                role = obj.role.id
+                try:
+                    role = obj.role.id
+                except AttributeError:
+                    role = 'NA'
                 uri = obj.workItemURI
 
                 return role, uri
