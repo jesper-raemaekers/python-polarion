@@ -718,6 +718,8 @@ class Workitem(CustomFields, Comments):
                 return role, uri
             except IndexError:
                 raise StopIteration
+            except AttributeError:
+                raise StopIteration
 
     def iterateLinkedWorkItems(self):
         return Workitem.WorkItemIterator(self._polarion, self._polarion_item.linkedWorkItems)
