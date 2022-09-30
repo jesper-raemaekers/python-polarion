@@ -35,3 +35,16 @@ class CustomFields(PolarionObject, ABC):
                 # custom field is not there, add it.
                 self.customFields.Custom.append(self._polarion.CustomType(key=key, value=value))
         self.save()
+
+    def getCustomField(self, key):
+        """
+        Get the custom field 'key' to the value
+        :param key: custom field key
+        :return: custom field value if exists, else None
+        """
+        if self.customFields is not None:
+            custom_field = next(
+                (custom_field for custom_field in self.customFields.Custom if custom_field["key"] == key), None)
+            if custom_field is not None:
+                return custom_field.value
+        return None

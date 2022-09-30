@@ -3,11 +3,12 @@ import os
 import requests
 from zeep import xsd
 from .base.comments import Comments
+from .base.custom_fields import CustomFields
 from .record import Record
 from .factory import Creator
 
 
-class Testrun(Comments):
+class Testrun(CustomFields, Comments):
     """
     Create a Polarion testrun object from uri or directly with Polarion content
 
@@ -36,6 +37,9 @@ class Testrun(Comments):
         self._original_polarion_test_run = copy.deepcopy(self._polarion_test_run)
         self._buildWorkitemFromPolarion()
 
+    def isCustomFieldAllowed(self, key):
+        return True
+        
     def _buildWorkitemFromPolarion(self):
         if self._polarion_test_run is not None and not self._polarion_test_run.unresolvable:
             for attr, value in self._polarion_test_run.__dict__.items():
