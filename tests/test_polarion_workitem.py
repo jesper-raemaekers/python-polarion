@@ -453,9 +453,43 @@ class TestPolarionWorkitem(unittest.TestCase):
         self.assertEqual(executed_workitem_1.resolution.id, 'incomplete', msg='Resolution not as set')
         self.assertEqual(checking_workitem_1.resolution.id, 'incomplete', msg='Resolution not as set')
 
+    def test_hyperlink(self):
+        # setup
+        url = 'https://github.com/jesper-raemaekers/python-polarion'
+        executed_workitem_1 = self.executing_project.createWorkitem('task')
 
+        # check if there is no hyperlink before starting
+        self.assertIsNone(executed_workitem_1.hyperlinks, msg='Workitem already has a hyperlink')
 
-        
+        # add a hyperlink and load checking workitem
+        executed_workitem_1.addHyperlink(url, executed_workitem_1.HyperlinkRoles.EXTERNAL_REF)
+        checking_workitem_1 = self.checking_project.getWorkitem(executed_workitem_1.id)
+
+        # checks
+        self.assertIsNotNone(executed_workitem_1.hyperlinks, msg='Workitem already has no hyperlink')
+        self.assertEqual('external reference', executed_workitem_1.hyperlinks.Hyperlink[0].role.id)
+        self.assertEqual('external reference', checking_workitem_1.hyperlinks.Hyperlink[0].role.id)
+        self.assertEqual(url, executed_workitem_1.hyperlinks.Hyperlink[0].uri)
+        self.assertEqual(url, checking_workitem_1.hyperlinks.Hyperlink[0].uri)
+
+        # remove hyperlink and load checking workitem
+        executed_workitem_1.removeHyperlink(url)
+        checking_workitem_1 = self.checking_project.getWorkitem(executed_workitem_1.id)
+
+        # checks
+        self.assertIsNone(executed_workitem_1.hyperlinks, msg='Workitem still has a hyperlink')
+        self.assertIsNone(checking_workitem_1.hyperlinks, msg='Workitem still has a hyperlink')
+
+        # add a hyperlink and load checking workitem
+        executed_workitem_1.addHyperlink(url, executed_workitem_1.HyperlinkRoles.INTERNAL_REF)
+        checking_workitem_1 = self.checking_project.getWorkitem(executed_workitem_1.id)
+
+        # checks
+        self.assertIsNotNone(executed_workitem_1.hyperlinks, msg='Workitem already has no hyperlink')
+        self.assertEqual('internal reference', executed_workitem_1.hyperlinks.Hyperlink[0].role.id)
+        self.assertEqual('internal reference', checking_workitem_1.hyperlinks.Hyperlink[0].role.id)
+        self.assertEqual(url, executed_workitem_1.hyperlinks.Hyperlink[0].uri)
+        self.assertEqual(url, checking_workitem_1.hyperlinks.Hyperlink[0].uri)
 
         
 

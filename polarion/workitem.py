@@ -410,6 +410,16 @@ class Workitem(CustomFields, Comments):
         service.addHyperlink(self.uri, url, {'id': hyperlink_type.value})
         self._reloadFromPolarion()
 
+    def removeHyperlink(self, url):
+        """
+        Removes the url from the workitem
+        @param url: url to remove
+        @return:
+        """
+        service = self._polarion.getService('Tracker')
+        service.removeHyperlink(self.uri, url)
+        self._reloadFromPolarion()
+
     def addLinkedItem(self, workitem, link_type):
         """
             Add a link to a workitem
