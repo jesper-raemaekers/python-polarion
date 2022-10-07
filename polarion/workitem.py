@@ -399,15 +399,17 @@ class Workitem(CustomFields, Comments):
             return len(self._parsed_test_steps) > 0
         return False
 
-    def addHyperlink(self, url, hyperlink_type: HyperlinkRoles):
+    def addHyperlink(self, url, hyperlink_type):
         """
         Adds a hyperlink to the workitem.
 
         :param url: The URL to add
-        :param hyperlink_type: Select internal or external hyperlink
+        :param hyperlink_type: Select internal or external hyperlink. Can be a string for custom link types.
         """
         service = self._polarion.getService('Tracker')
-        service.addHyperlink(self.uri, url, {'id': hyperlink_type.value})
+        if isinstance(hyperlink_type, Enum):  # convert Enum to str
+            hyperlink_type = hyperlink_type.value
+        service.addHyperlink(self.uri, url, {'id': hyperlink_type})
         self._reloadFromPolarion()
 
     def removeHyperlink(self, url):
