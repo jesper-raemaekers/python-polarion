@@ -96,13 +96,8 @@ class Workitem(CustomFields, Comments):
                     setattr(self, key, value[key])
             self._polarion_test_steps = None
             try:
-                # get the custom fields
-                service = self._polarion.getService('Tracker')
-                custom_fields = service.getCustomFieldTypes(self.uri)
-                # check if any of the field has the test steps
-                if any(field.id == 'testSteps' for field in custom_fields):
-                    service_test = self._polarion.getService('TestManagement')
-                    self._polarion_test_steps = service_test.getTestSteps(self.uri)
+                service_test = self._polarion.getService('TestManagement')
+                self._polarion_test_steps = service_test.getTestSteps(self.uri)
             except Exception as  e:
                 # fail silently as there are probably not test steps for this workitem
                 # todo: logging support
@@ -398,6 +393,76 @@ class Workitem(CustomFields, Comments):
         if self._parsed_test_steps is not None:
             return len(self._parsed_test_steps) > 0
         return False
+
+    def addTestStep(self, data=[]):
+        """
+        Add a test step to the current workitem IF the workitem can have test steps
+
+        :param data: An array of strings for each of the column values
+        :return: None
+        """
+        service_test = self._polarion.getService('TestManagement')
+
+        # create keys type if it does not exists
+        if self._polarion_test_steps.keys is None:
+            self._polarion_test_steps.keys = self._polarion.ArrayOfEnumOptionIdType()
+
+        # add column keys type if it does not exists
+        if len(self._polarion_test_steps.keys.EnumOptionId) == 0:
+            keys = service_test.getTestStepsConfiguration(self._project.id)
+            # make keys in right structure
+            for key in keys:
+                self._polarion_test_steps.keys.EnumOptionId.append(self._polarion.EnumOptionIdType(id=key.name))
+
+        # create steps type if it does not exists
+        if self._polarion_test_steps.steps is None:
+            self._polarion_test_steps.steps = self._polarion.ArrayOfTestStepType()
+
+        # fill column data if the length matches the configuration
+        if len(data) == len(self._polarion_test_steps.keys.EnumOptionId):
+            array_of_test_text = self._polarion.ArrayOfTextType()
+            for text in data:
+                array_of_test_text.Text.append(
+                    self._polarion.TextType(content=text, type='text/html', contentLossy=False))
+            new_test_step = self._polarion.TestStepType(values=array_of_test_text)
+            self._polarion_test_steps.steps.TestStep.append(new_test_step)
+            service_test.setTestSteps(self.uri, self._polarion_test_steps.steps)
+        else:
+            raise ValueError(f"Not the right amount of strings to fill test step. Got {len(data)} but needed {len(self._polarion_test_steps.keys.EnumOptionId)}.")
+
+    def removeTestStep(self, index):
+        """
+        Removes the test step at the specified index.
+
+        :param index: zero based test step
+        :return:
+        """
+        if self._polarion_test_steps.steps is not None and index < len(self._polarion_test_steps.steps.TestStep):
+            self._polarion_test_steps.steps.TestStep.pop(index)
+            service_test = self._polarion.getService('TestManagement')
+            service_test.setTestSteps(self.uri, self._polarion_test_steps.steps)
+
+    def addComment(self, title, comment, parent=None):
+        """
+        Adds a comment to the workitem.
+
+        :param title: Title of the comment (will be None for a reply)
+        :param comment: The comment, may contain html
+        :param parent: A parent comment, if none provided it's a root comment.
+        """
+        service = self._polarion.getService('Tracker')
+        if parent == None:
+            parent = self.uri
+        else:
+            # force title to be empty, not allowed for reply comments
+            title = None
+        content = {
+            'type': 'text/html',
+            'content': comment,
+            'contentLossy': False
+        }
+        service.addComment(parent, title, content)
+        self._reloadFromPolarion()
 
     def addHyperlink(self, url, hyperlink_type):
         """
