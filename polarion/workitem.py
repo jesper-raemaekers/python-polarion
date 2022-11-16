@@ -29,7 +29,10 @@ class TestTable(object):
         assert any(field == 'testSteps' for field in custom_fields)
         service_test = test_template._polarion.getService('TestManagement')
         teststeps_template = service_test.getTestSteps(test_template.uri)
-        self.columns = [col.id for col in teststeps_template.keys.EnumOptionId]
+        if teststeps_template.keys and len(teststeps_template.keys.EnumOptionId) == 3:
+            self.columns = [col.id for col in teststeps_template.keys.EnumOptionId]
+        else:
+            self.columns = ['instruction', 'description', 'expectedResult']
         self.steps = test_template._polarion.ArrayOfTestStepType()
         self.step_type = test_template._polarion.TestStepType
         self.array_of_text_type = test_template._polarion.ArrayOfTextType
@@ -523,7 +526,9 @@ class Workitem(CustomFields, Comments):
                 assert hasattr(test_steps, 'TestStep')
                 assert len(test_steps.TestStep) > 0
                 columns = [col.id for col in self._polarion_test_steps.keys.EnumOptionId]
-                assert len(test_steps.TestStep[0].values.Text) == len(columns)
+                if len(columns) == 2:
+                    self.columns = ['instruction', 'description', 'expectedResult']
+                # assert len(test_steps.TestStep[0].values.Text) == len(columns)
                 for col in range(len(columns)):
                     assert test_steps.TestStep[0].values.Text[col].type == 'text/html' and \
                            isinstance(test_steps.TestStep[0].values.Text[col].content, str) and \
@@ -548,7 +553,19 @@ class Workitem(CustomFields, Comments):
         :param hyperlink_type: Select internal or external hyperlink
         """
         service = self._polarion.getService('Tracker')
-        service.addHyperlink(self.uri, url, {'id': hyperlink_type.value})
+        if isinstance(hyperlink_type, Enum):  # convert Enum to str
+            hyperlink_type = hyperlink_type.value
+        service.addHyperlink(self.uri, url, {'id': hyperlink_type})
+        self._reloadFromPolarion()
+
+    def removeHyperlink(self, url):
+        """
+        Removes the url from the workitem
+        @param url: url to remove
+        @return:
+        """
+        service = self._polarion.getService('Tracker')
+        service.removeHyperlink(self.uri, url)
         self._reloadFromPolarion()
 
     def addLinkedItem(self, workitem, link_type):
@@ -705,7 +722,8 @@ class Workitem(CustomFields, Comments):
             return self
 
         def __next__(self):
-
+            if self._linkedWorkItems is None:
+                raise StopIteration
             try:
                 obj = self._linkedWorkItems.LinkedWorkItem[self._index]
                 self._index += 1
