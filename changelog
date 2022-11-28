@@ -2,8 +2,36 @@ Changelog
 =========
 
 
-V1.0.0
+V1.1.0
 ------
+- Make addHyperlink accept string for custom link type  #91.
+  [jesper.raemaekers]
+- Add removeHyperlink to workitem #88. [jesper.raemaekers]
+- Fix minor typo. [Adam J]
+
+  ```py
+  new_task = project..createWorkitem('task', new_workitem_fields={'title': 'New title'})
+  ```
+
+  should read
+  ```py
+  new_task = project.createWorkitem('task', new_workitem_fields={'title': 'New title'})
+  ```
+- #80 extends format: allow test_suite as xml root as an alternative
+  describes in xml_junit.xsd#12 (sorry I missed it before) [Lionnel
+  Chassagne]
+- Solving some debt raised by SonarQube. [Lionnel Chassagne]
+- #80 Adding import xml feature. [Lionnel Chassagne]
+- Added Not Tested result option to Test Cases. [adamszelig]
+- Fixed reserved name #81. [jesper.raemaekers]
+- Update lxml package for documentation. [jesper.raemaekers]
+- Added possibility to provide self signed certificate chain like for
+  requests & zeep. [newmesstuff]
+
+
+V1.0.0 (2022-07-21)
+-------------------
+- Preparations for release 1.0.0. [jesper.raemaekers]
 - Update polarion_client.rst. [LionnelC]
 - #77 Add token login. [LionnelC]
 - Add exception handling to project.getUsers() [Axel Seibert]
