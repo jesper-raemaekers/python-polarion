@@ -155,6 +155,13 @@ class Workitem(CustomFields, Comments):
 
         self._buildWorkitemFromPolarion()
 
+        self.url = None
+        try:
+            self.url = f'{polarion.polarion_url}/#/project/{self.project.id}/workitem?id={self.id}'
+
+        except:
+            pass
+
     def _buildWorkitemFromPolarion(self):
         if self._polarion_item is not None and not self._polarion_item.unresolvable:
             self._original_polarion = copy.deepcopy(self._polarion_item)
