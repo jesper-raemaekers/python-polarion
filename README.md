@@ -35,6 +35,9 @@ git clone http://svn.dis.lan:3000/werner.pirkl/python-polarion.git
 python3 -m pip install -e python-polarion
 ```
 
+If you have problems because libxml2 is not installing, get the wheel for your
+python version from: https://www.lfd.uci.edu/~gohlke/pythonlibs/#lxml
+
 # Username / Password
 
 In order not to check-in your username and password, please use dotenv:

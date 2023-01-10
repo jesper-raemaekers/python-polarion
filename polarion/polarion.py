@@ -6,6 +6,8 @@ from zeep import Client, Transport
 from zeep.plugins import HistoryPlugin
 
 from .project import Project
+import logging
+logger = logging.getLogger(__name__)
 
 _baseServiceUrl = 'ws/services'
 
@@ -106,7 +108,8 @@ class Polarion(object):
                 self.sessionHeaderElement = tree.find(
                     './/{http://ws.polarion.com/session}sessionID')
                 self.sessionCookieJar = self.services['Session']['client'].transport.session.cookies
-            except Exception:
+            except Exception as err:
+                logger.error(err)
                 raise Exception(
                     f'Could not log in to Polarion for user {self.user}')
             if self.sessionHeaderElement is not None:

@@ -22,6 +22,7 @@ class Record(object):
         PASSED = 'passed'
         FAILED = 'failed'
         BLOCKED = 'blocked'
+        NOTTESTED = 'not_tested'
 
     def __init__(self, polarion, test_run, polarion_record, index):
         self._polarion = polarion
