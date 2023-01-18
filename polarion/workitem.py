@@ -165,6 +165,15 @@ class Workitem(CustomFields, Comments):
         except:
             pass
 
+        self.document = None
+        try:
+            location_split = self.location.split('/')
+            self.document = f'{location_split.__getitem__(3)}/{location_split.__getitem__(4)}'
+        except:
+            pass
+
+        self.lastFinalized = None
+
     def _buildWorkitemFromPolarion(self):
         if self._polarion_item is not None and not self._polarion_item.unresolvable:
             self._original_polarion = copy.deepcopy(self._polarion_item)
@@ -717,6 +726,24 @@ class Workitem(CustomFields, Comments):
             service = self._polarion.getService('Tracker')
             service.updateWorkItem(updated_item)
             self._reloadFromPolarion()
+
+    def getLastFinalized(self):
+        if self.lastFinalized:
+            return self.lastFinalized
+
+        try:
+            history = self._polarion.generateHistory(self.uri, ignored_fields=[f for f in dir(self._polarion_item) if f not in ['status']])
+
+            for h in history[::-1]:
+                if h.diffs:
+                    for d in h.diffs.item:
+                        if d.fieldName == 'status' and d.after.id == 'finalized':
+                            self.lastFinalized = h.date
+                            return h.date
+        except:
+            pass
+
+        return None
 
     class WorkItemIterator:
 
