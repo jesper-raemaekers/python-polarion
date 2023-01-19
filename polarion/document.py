@@ -37,12 +37,6 @@ class Document(CustomFields):
 
         self._buildFromPolarion()
 
-        self.url = None
-        try:
-            self.url = f'{polarion.polarion_url}/#/project/{self._project.id}/wiki/{self.moduleFolder}/{self.id}'
-        except:
-            pass
-
     def _buildFromPolarion(self):
         if self._polarion_document is not None and self._polarion_document.unresolvable is False:
             self._original_polarion = copy.deepcopy(self._polarion_document)
