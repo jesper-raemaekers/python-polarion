@@ -29,10 +29,7 @@ class TestTable(object):
         assert any(field == 'testSteps' for field in custom_fields)
         service_test = test_template._polarion.getService('TestManagement')
         teststeps_template = service_test.getTestSteps(test_template.uri)
-        if teststeps_template.keys and len(teststeps_template.keys.EnumOptionId) == 3:
-            self.columns = [col.id for col in teststeps_template.keys.EnumOptionId]
-        else:
-            self.columns = ['instruction', 'description', 'expectedResult']
+        self.columns = [col.id for col in teststeps_template.keys.EnumOptionId]
         self.steps = test_template._polarion.ArrayOfTestStepType()
         self.step_type = test_template._polarion.TestStepType
         self.array_of_text_type = test_template._polarion.ArrayOfTextType
@@ -90,18 +87,7 @@ class Workitem(CustomFields, Comments):
         INTERNAL_REF = 'internal reference'
         EXTERNAL_REF = 'external reference'
 
-    def __init__(self, polarion, project=None, id=None, uri=None, new_workitem_type=None, new_workitem_fields=None, polarion_workitem=None):
-        if not project:
-            if not uri and not polarion_workitem:
-                raise Exception('if no project is specified, I need an URI or polarion_workitem!')
-            if uri:
-                service = polarion.getService('Tracker')
-                polarion_workitem = service.getWorkItemByUri(uri)
-
-            polarion_project = polarion_workitem.project.id
-
-            project = polarion.getProject(polarion_project)
-
+    def __init__(self, polarion, project, id=None, uri=None, new_workitem_type=None, new_workitem_fields=None, polarion_workitem=None):
         super().__init__(polarion, project, id, uri)
         self._polarion = polarion
         self._project = project
@@ -157,22 +143,6 @@ class Workitem(CustomFields, Comments):
             raise Exception('No id, uri, polarion workitem or new workitem type specified!')
 
         self._buildWorkitemFromPolarion()
-
-        self.url = None
-        try:
-            self.url = f'{polarion.polarion_url}/#/project/{self.project.id}/workitem?id={self.id}'
-
-        except:
-            pass
-
-        self.document = None
-        try:
-            location_split = self.location.split('/')
-            self.document = f'{location_split.__getitem__(3)}/{location_split.__getitem__(4)}'
-        except:
-            pass
-
-        self.lastFinalized = None
 
     def _buildWorkitemFromPolarion(self):
         if self._polarion_item is not None and not self._polarion_item.unresolvable:
@@ -542,9 +512,7 @@ class Workitem(CustomFields, Comments):
                 assert hasattr(test_steps, 'TestStep')
                 assert len(test_steps.TestStep) > 0
                 columns = [col.id for col in self._polarion_test_steps.keys.EnumOptionId]
-                if len(columns) == 2:
-                    self.columns = ['instruction', 'description', 'expectedResult']
-                # assert len(test_steps.TestStep[0].values.Text) == len(columns)
+                assert len(test_steps.TestStep[0].values.Text) == len(columns)
                 for col in range(len(columns)):
                     assert test_steps.TestStep[0].values.Text[col].type == 'text/html' and \
                            isinstance(test_steps.TestStep[0].values.Text[col].content, str) and \
@@ -561,12 +529,12 @@ class Workitem(CustomFields, Comments):
 
         return [test_run.uri for test_run in polarion_test_runs]
 
-    def addHyperlink(self, url, hyperlink_type: HyperlinkRoles):
+    def addHyperlink(self, url, hyperlink_type):
         """
         Adds a hyperlink to the workitem.
 
         :param url: The URL to add
-        :param hyperlink_type: Select internal or external hyperlink
+        :param hyperlink_type: Select internal or external hyperlink. Can be a string for custom link types.
         """
         service = self._polarion.getService('Tracker')
         if isinstance(hyperlink_type, Enum):  # convert Enum to str
@@ -727,24 +695,6 @@ class Workitem(CustomFields, Comments):
             service.updateWorkItem(updated_item)
             self._reloadFromPolarion()
 
-    def getLastFinalized(self):
-        if self.lastFinalized:
-            return self.lastFinalized
-
-        try:
-            history = self._polarion.generateHistory(self.uri, ignored_fields=[f for f in dir(self._polarion_item) if f not in ['status']])
-
-            for h in history[::-1]:
-                if h.diffs:
-                    for d in h.diffs.item:
-                        if d.fieldName == 'status' and d.after.id == 'finalized':
-                            self.lastFinalized = h.date
-                            return h.date
-        except:
-            pass
-
-        return None
-
     class WorkItemIterator:
 
         def __init__(self, polarion, linkedWorkItems):
@@ -769,8 +719,6 @@ class Workitem(CustomFields, Comments):
 
                 return role, uri
             except IndexError:
-                raise StopIteration
-            except AttributeError:
                 raise StopIteration
 
     def iterateLinkedWorkItems(self):

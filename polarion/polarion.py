@@ -31,7 +31,6 @@ class Polarion(object):
         self.user = user
         self.password = password
         self.token = token
-        self.polarion_url = polarion_url
         self.url = polarion_url
         self.verify_certificate = verify_certificate
         self.svn_repo_url = svn_repo_url
@@ -90,9 +89,8 @@ class Polarion(object):
         """
         if 'Session' in self.services:
             self.history = HistoryPlugin()
-            wsdl_uri = self.services['Session']['url'] + '?wsdl'
-            client = Client(wsdl_uri, plugins=[self.history], transport=self._getTransport())
-            self.services['Session']['client'] = client
+            self.services['Session']['client'] = Client(
+                self.services['Session']['url'] + '?wsdl', plugins=[self.history], transport=self._getTransport())
             if self.proxy is not None:
                 self.services['Session']['client'] .transport.session.proxies = self.proxy
             try:
