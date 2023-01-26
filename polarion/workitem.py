@@ -103,10 +103,6 @@ class Workitem(CustomFields, Comments):
             project = polarion.getProject(polarion_project)
 
         super().__init__(polarion, project, id, uri)
-        self._polarion = polarion
-        self._project = project
-        self._id = id
-        self._uri = uri
 
         service = self._polarion.getService('Tracker')
 
@@ -158,9 +154,21 @@ class Workitem(CustomFields, Comments):
 
         self._buildWorkitemFromPolarion()
 
+    def _buildWorkitemFromPolarion(self):
+        if self._polarion_item is not None and not self._polarion_item.unresolvable:
+            self._original_polarion = copy.deepcopy(self._polarion_item)
+            for attr, value in self._polarion_item.__dict__.items():
+                for key in value:
+                    setattr(self, key, value[key])
+            self._polarion_test_steps = None
+            self._parsed_test_steps = None
+
+        else:
+            raise Exception(f'Workitem not retrieved from Polarion')
+
         self.url = None
         try:
-            self.url = f'{polarion.polarion_url}/#/project/{self.project.id}/workitem?id={self.id}'
+            self.url = f'{self._polarion.polarion_url}/#/project/{self.project.id}/workitem?id={self.id}'
 
         except:
             pass
@@ -174,17 +182,16 @@ class Workitem(CustomFields, Comments):
 
         self.lastFinalized = None
 
-    def _buildWorkitemFromPolarion(self):
-        if self._polarion_item is not None and not self._polarion_item.unresolvable:
-            self._original_polarion = copy.deepcopy(self._polarion_item)
-            for attr, value in self._polarion_item.__dict__.items():
-                for key in value:
-                    setattr(self, key, value[key])
-            self._polarion_test_steps = None
-            self._parsed_test_steps = None
+    def reloadFromPolarion(self):
+        try:
+            service = self._polarion.getService('Tracker')
+            polarion_item = service.getWorkItemByUri(self._uri)
 
-        else:
-            raise Exception(f'Workitem not retrieved from Polarion')
+            self._polarion_item = polarion_item
+            self._buildWorkitemFromPolarion()
+
+        except Exception:
+                raise Exception(f'Cannot load workitem {self._uri}')
 
     def _buildTestStepsFromPolarion(self):
         self._parsed_test_steps = []
