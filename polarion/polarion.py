@@ -141,6 +141,10 @@ class Polarion(object):
                         'getModuleWorkItemUris').input.body.type._element[1].nillable = True
                     self.services[service]['client'].service.moveWorkItemToDocument._proxy._binding.get(
                         'moveWorkItemToDocument').input.body.type._element[2].nillable = True
+                    self.services[service]['client'].service.reuseDocument._proxy._binding.get(
+                        'reuseDocument').input.body.type._element[6].nillable = True
+                    self.services[service]['client'].service.reuseDocument._proxy._binding.get(
+                        'reuseDocument').input.body.type._element[7].nillable = True
             if service == 'Planning':
                 self.services[service]['client'].service.createPlan._proxy._binding.get(
                     'createPlan').input.body.type._element[3].nillable = True
