@@ -98,9 +98,9 @@ class Workitem(CustomFields, Comments):
             try:
                 # get the custom fields
                 service = self._polarion.getService('Tracker')
-                custom_fields = service.getCustomFieldTypes(self.uri)
+                custom_field = service.getCustomFieldType(self.uri, "Test Steps")
                 # check if any of the field has the test steps
-                if any(field.id == 'testSteps' for field in custom_fields):
+                if custom_field.id == 'Test Steps':
                     service_test = self._polarion.getService('TestManagement')
                     self._polarion_test_steps = service_test.getTestSteps(self.uri)
             except Exception as  e:
@@ -546,6 +546,44 @@ class Workitem(CustomFields, Comments):
         service = self._polarion.getService('Tracker')
         service.moveWorkItemToDocument(self.uri, document.uri, parent.uri if parent is not None else xsd.const.Nil, -1,
                                        False)
+
+    def addTestStep(self, *args):
+        """
+        Add a new test step to a test case work item
+        @param args: list of strings, one for each column
+        @return: None
+        """
+        service = self._polarion.getService('Tracker')
+        custom_field = service.getCustomFieldType(self.uri, "Test Steps")
+        # check test step custom field
+        if custom_field.id != 'Test Steps':
+            raise Exception('Cannot add test steps to work item that does not have the custom field')
+
+        # check correct argument length
+        if len(args) != len(self._polarion_test_steps.keys.EnumOptionId):
+            raise Exception(f'Incorrect number of argument. Test step requires {len(self._polarion_test_steps.keys[0].EnumOptionId)} arguments.')
+
+        # check for any steps, if not present create array here
+        if self._polarion_test_steps.steps is None:
+            self._polarion_test_steps.steps = self._polarion.ArrayOfTestStepType()
+
+        # prepare structure for Polarion
+        step_text = []
+        for arg in args:
+            step_text.append(self._polarion.TextType(content=arg, type='text/html', contentLossy=False))
+        step_array_text = self._polarion.ArrayOfTextType(step_text)
+        new_test_step = self._polarion.TestStepType(step_array_text)
+
+        # append the new step
+        self._polarion_test_steps.steps.TestStep.append(new_test_step)
+
+        # save it to the service
+        service = self._polarion.getService('TestManagement')
+        service.setTestSteps(self.uri, self._polarion_test_steps.steps.TestStep)
+
+        self._reloadFromPolarion()
+
+
 
     def save(self):
         """
