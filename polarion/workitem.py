@@ -371,13 +371,6 @@ class Workitem(CustomFields, Comments):
             self.status.id = status
             self.save()
 
-    def getStatus(self):
-        return self.status.id
-
-    def getType(self):
-        """Returns the type qualifier"""
-        return self.type.id
-
     def getDescription(self):
         """
         Get a comment if available. The comment may contain HTML if edited in Polarion!
@@ -461,7 +454,7 @@ class Workitem(CustomFields, Comments):
                 assert test_steps.TestStep[0].values.Text[col].type == 'text/html' and \
                        isinstance(test_steps.TestStep[0].values.Text[col].content, str) and \
                        test_steps.TestStep[0].values.Text[col].contentLossy is False
-                           
+
         service_test = self._polarion.getService('TestManagement')
         service_test.setTestSteps(self.uri, test_steps)
 
