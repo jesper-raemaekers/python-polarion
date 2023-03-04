@@ -8,21 +8,8 @@ V1.2.1 Nuno Brum
 - Added support to Folders
 - Added iteration support linked and backlinked workitems
 
-
-V1.2.1
+V1.2.0
 ------
-- Update test steps with update function. Improved error message. #101.
-  [jesper.raemaekers]
-- Added an example for retry mechanism from #104. [jesper.raemaekers]
-- :sparkles: feat(Polarion Session object): reuse request session object
-  for soap interface. [UWF4Y67]
-
-  Added possibility to add a request session to the Polarion class arguments.
-
-
-V1.2.0 (2023-03-04)
--------------------
-- Preparations for release 1.2.0. [jesper.raemaekers]
 - Add the option to reuse a document without linking to source project
   #99. [jesper.raemaekers]
 - Added method to remove test cases and tests for test step
