@@ -96,11 +96,8 @@ class Workitem(CustomFields, Comments):
                     setattr(self, key, value[key])
             self._polarion_test_steps = None
             try:
-                # get the custom fields
-                service = self._polarion.getService('Tracker')
-                custom_field = service.getCustomFieldType(self.uri, "Test Steps")
                 # check if any of the field has the test steps
-                if custom_field.id == 'Test Steps':
+                if self._hasTestStepField() is True:
                     service_test = self._polarion.getService('TestManagement')
                     self._polarion_test_steps = service_test.getTestSteps(self.uri)
             except Exception as  e:
@@ -553,11 +550,16 @@ class Workitem(CustomFields, Comments):
         @param args: list of strings, one for each column
         @return: None
         """
-        service = self._polarion.getService('Tracker')
-        custom_field = service.getCustomFieldType(self.uri, "Test Steps")
         # check test step custom field
-        if custom_field.id != 'Test Steps':
+        if self._hasTestStepField() is False:
             raise Exception('Cannot add test steps to work item that does not have the custom field')
+
+        # if the keys do not exist, add them now
+        if self._polarion_test_steps.keys is None:
+            keys = self._getConfiguredTestStepColumnIDs()
+            self._polarion_test_steps.keys = self._polarion.ArrayOfEnumOptionIdType()
+            for key in keys:
+                self._polarion_test_steps.keys.EnumOptionId.append(self._polarion.EnumOptionIdType(id=key))
 
         # check correct argument length
         if len(args) != len(self._polarion_test_steps.keys.EnumOptionId):
@@ -577,12 +579,117 @@ class Workitem(CustomFields, Comments):
         # append the new step
         self._polarion_test_steps.steps.TestStep.append(new_test_step)
 
+        # execute check for content being None after reload
+        self._testStepNoneCheck()
+
         # save it to the service
         service = self._polarion.getService('TestManagement')
         service.setTestSteps(self.uri, self._polarion_test_steps.steps.TestStep)
 
         self._reloadFromPolarion()
 
+    def removeTestStep(self, index: int):
+        """
+        Remove a test step at the specified index.
+        @param index: zero based index
+        @return: None
+        """
+        # check test step custom field
+        if self._hasTestStepField() is False:
+            raise Exception('Cannot remove test steps to work item that does not have the custom field')
+
+        if index >= len(self._polarion_test_steps.steps.TestStep):
+            raise ValueError(f'Index should be in range of test step length of {len(self._polarion_test_steps.steps.TestStep)}')
+
+        # remove from array
+        self._polarion_test_steps.steps.TestStep.pop(index)
+
+        # execute check for content being None after reload
+        self._testStepNoneCheck()
+
+        # save it to the service
+        service = self._polarion.getService('TestManagement')
+        service.setTestSteps(self.uri, self._polarion_test_steps.steps.TestStep)
+
+        self._reloadFromPolarion()
+
+    def getTestStepHeader(self):
+        """
+        Get the Header names for the test step header.
+        @return: List of strings containing the header names.
+        """
+        # check test step custom field
+        if self._hasTestStepField() is False:
+            raise Exception('Work item does not have test step custom field')
+
+        return self._getConfiguredTestStepColumns()
+
+    def getTestStepHeaderID(self):
+        """
+        Get the Header ID for the test step header.
+        @return: List of strings containing the header IDs.
+        """
+        if self._hasTestStepField() is False:
+            raise Exception('Work item does not have test step custom field')
+
+        return self._getConfiguredTestStepColumnIDs()
+
+    def getTestSteps(self):
+        """
+        Return a list of test steps.
+        @return: Array of test steps
+        """
+        if self._parsed_test_steps is None:
+            return []
+        else:
+            return self._parsed_test_steps
+
+
+    def _getConfiguredTestStepColumns(self):
+        """
+        Return a list of coulmn headers
+        @return: [str]
+        """
+        columns = []
+        service = self._polarion.getService('TestManagement')
+        config = service.getTestStepsConfiguration(self._project.id)
+        for col in config:
+            columns.append(col.name)
+        return columns
+
+    def _getConfiguredTestStepColumnIDs(self):
+        """
+        Return a list of column header IDs.
+        @return: [str]
+        """
+        columns = []
+        service = self._polarion.getService('TestManagement')
+        config = service.getTestStepsConfiguration(self._project.id)
+        for col in config:
+            columns.append(col.id)
+        return columns
+
+    def _testStepNoneCheck(self):
+        """
+        Sanity check on content of test steps when empty strings are use.
+        Sometimes they show up as None, which is not accepted by the API.
+        @return: None
+        """
+        for step_id, step in enumerate(self._polarion_test_steps.steps.TestStep):
+            for col_id, col in enumerate(self._polarion_test_steps.steps.TestStep[step_id].values.Text):
+                if self._polarion_test_steps.steps.TestStep[step_id].values.Text[col_id].content is None:
+                    self._polarion_test_steps.steps.TestStep[step_id].values.Text[col_id].content = ""
+
+    def _hasTestStepField(self):
+        """
+        Checks if the testSteps custom field is available for this workitem. If so it allows test steps to be added.
+        @return: True when test steps are available
+        """
+        service = self._polarion.getService('Tracker')
+        custom_fields = service.getCustomFieldKeys(self.uri)
+        if 'testSteps' in custom_fields:
+            return True
+        return False
 
 
     def save(self):
