@@ -510,8 +510,6 @@ class TestPolarionWorkitem(unittest.TestCase):
         self.assertEqual(url, executed_workitem_1.hyperlinks.Hyperlink[0].uri)
         self.assertEqual(url, checking_workitem_1.hyperlinks.Hyperlink[0].uri)
 
+        
 
-    def test_testcase_column_names(self):
-        executed_workitem_1 = self.executing_project.createWorkitem('testcase')
-        executed_workitem_2 = self.executing_project.createWorkitem('task')
 

@@ -139,6 +139,33 @@ class Workitem(CustomFields, Comments):
             for attr, value in self._polarion_item.__dict__.items():
                 for key in value:
                     setattr(self, key, value[key])
+            self._polarion_test_steps = None
+            try:
+                # get the custom fields
+                service = self._polarion.getService('Tracker')
+                custom_field = service.getCustomFieldType(self.uri, "Test Steps")
+                # check if any of the field has the test steps
+                if custom_field.id == 'Test Steps':
+                    service_test = self._polarion.getService('TestManagement')
+                    self._polarion_test_steps = service_test.getTestSteps(self.uri)
+            except Exception as  e:
+                # fail silently as there are probably not test steps for this workitem
+                # todo: logging support
+                pass
+            self._parsed_test_steps = None
+            if self._polarion_test_steps is not None:
+                if self._polarion_test_steps.keys is not None and self._polarion_test_steps.steps:
+                    # oh god, parse the test steps...
+                    columns = []
+                    self._parsed_test_steps = []
+                    for col in self._polarion_test_steps.keys.EnumOptionId:
+                        columns.append(col.id)
+                    # now parse the rows
+                    for row in self._polarion_test_steps.steps.TestStep:
+                        current_row = {}
+                        for col_id in range(len(row.values.Text)):
+                            current_row[columns[col_id]] = row.values.Text[col_id].content
+                        self._parsed_test_steps.append(current_row)
         else:
             raise PolarionAccessError(f'Workitem not retrieved from Polarion')
 
