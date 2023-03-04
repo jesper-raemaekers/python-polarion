@@ -510,6 +510,90 @@ class TestPolarionWorkitem(unittest.TestCase):
         self.assertEqual(url, executed_workitem_1.hyperlinks.Hyperlink[0].uri)
         self.assertEqual(url, checking_workitem_1.hyperlinks.Hyperlink[0].uri)
 
-        
+
+    def test_testcase_column_names(self):
+        executed_workitem_1 = self.executing_project.createWorkitem('testcase')
+        executed_workitem_2 = self.executing_project.createWorkitem('task')
+
+        # get column names
+        column_names = executed_workitem_1.getTestStepHeader()
+        # check names
+        self.assertIn('Step', column_names, msg='Column name Step not found')
+        self.assertIn('Step Description', column_names, msg='Column name Step Description not found')
+        self.assertIn('Expected Result', column_names, msg='Column name Expected Result not found')
+        self.assertIn('step', executed_workitem_1.getTestStepHeaderID())
+        self.assertIn('description', executed_workitem_1.getTestStepHeaderID())
+        self.assertIn('expectedResult', executed_workitem_1.getTestStepHeaderID())
+
+        # check for exception when called on a non test case workitem
+        with self.assertRaises(Exception) as ex:
+            column_names = executed_workitem_2.getTestStepHeader()
+        self.assertIn('Work item does not have test step custom field', str(ex.exception))
+
+        with self.assertRaises(Exception) as ex:
+            executed_workitem_2.getTestStepHeaderID()
+        self.assertIn('Work item does not have test step custom field',
+                      str(ex.exception))
+
+        # do it again but now with existing test case
+        executed_workitem_3 = self.executing_project.getWorkitem(executed_workitem_1.id)
+
+        # get column names
+        column_names = executed_workitem_3.getTestStepHeader()
+        # check names
+        self.assertIn('Step', column_names, msg='Column name Step not found')
+        self.assertIn('Step Description', column_names, msg='Column name Step Description not found')
+        self.assertIn('Expected Result', column_names, msg='Column name Expected Result not found')
+
+
+    def test_testcase_add_remove_steps(self):
+        executed_workitem_1 = self.executing_project.createWorkitem('testcase')
+        executed_workitem_2 = self.executing_project.createWorkitem('task')
+
+        # check for exception when called with too many argument
+        with self.assertRaises(Exception):
+            executed_workitem_1.addTestStep('','','','')
+
+        # check for exception when called with too little argument
+        with self.assertRaises(Exception):
+            executed_workitem_1.addTestStep('', '')
+
+        # check for exception when called on a non test case workitem
+        with self.assertRaises(Exception) as ex:
+            executed_workitem_2.addTestStep('','','')
+        self.assertIn('Cannot add test steps to work item that does not have the custom field', str(ex.exception))
+
+        # check length of returned test steps
+        self.assertEqual(0, len(executed_workitem_1.getTestSteps()),
+                         msg='Length of test steps is not 0 when creating a new item')
+
+        # add some test steps
+        for i in range(3):
+            executed_workitem_1.addTestStep(f'{i}', f'Test step {i}', '')
+
+        # check length again
+        self.assertEqual(3, len(executed_workitem_1.getTestSteps()),
+                         msg='Length of test steps is not 3')
+
+        # remove middle test step
+        executed_workitem_1.removeTestStep(1)
+
+        # check length to be 1 less
+        self.assertEqual(2, len(executed_workitem_1.getTestSteps()),
+                         msg='Length of test steps is not 2')
+
+        self.assertEqual('0', executed_workitem_1.getTestSteps()[0]['step'], msg='Test step 0 was not found anymore')
+        self.assertEqual('2', executed_workitem_1.getTestSteps()[1]['step'], msg='Test step 2 was not found anymore')
+
+        # try removing test step from task
+        with self.assertRaises(Exception) as ex:
+            executed_workitem_2.removeTestStep(0)
+        self.assertIn('Cannot remove test steps to work item that does not have the custom field', str(ex.exception))
+
+        # try removing a test step out of range
+        with self.assertRaises(Exception) as ex:
+            executed_workitem_1.removeTestStep(99)
+        self.assertIn('Index should be in range of test step length of', str(ex.exception))
+
 
 
