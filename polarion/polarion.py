@@ -27,7 +27,7 @@ class Polarion(object):
     """
 
     def __init__(self, polarion_url, user, password=None, token=None, static_service_list=False, verify_certificate=True,
-                 svn_repo_url=None, proxy=None):
+                 svn_repo_url=None, proxy=None, request_session=None):
         self.user = user
         self.password = password
         self.token = token
@@ -35,6 +35,7 @@ class Polarion(object):
         self.verify_certificate = verify_certificate
         self.svn_repo_url = svn_repo_url
         self.proxy = None
+        self.request_session = request_session
         if proxy is not None:
             self.proxy = {
                 'http': proxy,
@@ -171,7 +172,7 @@ class Polarion(object):
         """
         Gets the zeep transport object
         """
-        transport = Transport()
+        transport = Transport(session=self.request_session)
         transport.session.verify = self.verify_certificate
         return transport
 
