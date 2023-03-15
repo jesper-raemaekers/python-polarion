@@ -563,7 +563,7 @@ class Workitem(CustomFields, Comments):
 
         # check correct argument length
         if len(args) != len(self._polarion_test_steps.keys.EnumOptionId):
-            raise Exception(f'Incorrect number of argument. Test step requires {len(self._polarion_test_steps.keys[0].EnumOptionId)} arguments.')
+            raise Exception(f'Incorrect number of argument. Test step requires {len(self._polarion_test_steps.keys.EnumOptionId)} arguments.')
 
         # check for any steps, if not present create array here
         if self._polarion_test_steps.steps is None:
@@ -603,6 +603,44 @@ class Workitem(CustomFields, Comments):
 
         # remove from array
         self._polarion_test_steps.steps.TestStep.pop(index)
+
+        # execute check for content being None after reload
+        self._testStepNoneCheck()
+
+        # save it to the service
+        service = self._polarion.getService('TestManagement')
+        service.setTestSteps(self.uri, self._polarion_test_steps.steps.TestStep)
+
+        self._reloadFromPolarion()
+
+    def updateTestStep(self, index: int, *args):
+        """
+        Update a test step at the specified index.
+        @param index: zero based index
+        @param args: list of strings, one for each column
+        @return: None
+        """
+        # check test step custom field
+        if self._hasTestStepField() is False:
+            raise Exception('Cannot update test steps to work item that does not have the custom field')
+
+        if index >= len(self._polarion_test_steps.steps.TestStep):
+            raise ValueError(f'Index should be in range of test step length of {len(self._polarion_test_steps.steps.TestStep)}')
+
+            # check correct argument length
+        if len(args) != len(self._polarion_test_steps.keys.EnumOptionId):
+            raise Exception(
+                f'Incorrect number of argument. Test step requires {len(self._polarion_test_steps.keys.EnumOptionId)} arguments.')
+
+        # prepare structure for Polarion
+        step_text = []
+        for arg in args:
+            step_text.append(self._polarion.TextType(content=arg, type='text/html', contentLossy=False))
+        step_array_text = self._polarion.ArrayOfTextType(step_text)
+        new_test_step = self._polarion.TestStepType(step_array_text)
+
+        # do update
+        self._polarion_test_steps.steps.TestStep[index] = new_test_step
 
         # execute check for content being None after reload
         self._testStepNoneCheck()
