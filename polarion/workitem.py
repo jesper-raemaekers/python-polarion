@@ -681,6 +681,18 @@ class Workitem(CustomFields, Comments):
             return []
         else:
             return self._parsed_test_steps
+        
+    def getRevision(self) -> int:
+        """
+        Return the revision number of the work item.
+        @return: Integer with revision number 
+        """
+        service = self._polarion.getService('Tracker')
+        try:
+            history: list = service.getRevisions(self.uri)
+            return int(history[-1])
+        except:
+            raise Exception("Could not get Revision!")
 
 
     def _getConfiguredTestStepColumns(self):
