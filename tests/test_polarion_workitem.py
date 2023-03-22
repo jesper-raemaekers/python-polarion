@@ -511,8 +511,24 @@ class TestPolarionWorkitem(unittest.TestCase):
         self.assertEqual(url, checking_workitem_1.hyperlinks.Hyperlink[0].uri)
 
 
+    def test_testcase_column_names(self):
+        executed_workitem_1 = self.executing_project.createWorkitem('testcase')
+        executed_workitem_2 = self.executing_project.createWorkitem('task')
 
+        # get column names
+        column_names = executed_workitem_1.getTestStepHeader()
+        # check names
+        self.assertIn('Step', column_names, msg='Column name Step not found')
+        self.assertIn('Step Description', column_names, msg='Column name Step Description not found')
+        self.assertIn('Expected Result', column_names, msg='Column name Expected Result not found')
+        self.assertIn('step', executed_workitem_1.getTestStepHeaderID())
+        self.assertIn('description', executed_workitem_1.getTestStepHeaderID())
+        self.assertIn('expectedResult', executed_workitem_1.getTestStepHeaderID())
 
+        # check for exception when called on a non test case workitem
+        with self.assertRaises(Exception) as ex:
+            column_names = executed_workitem_2.getTestStepHeader()
+        self.assertIn('Work item does not have test step custom field', str(ex.exception))
 
         with self.assertRaises(Exception) as ex:
             executed_workitem_2.getTestStepHeaderID()
@@ -535,12 +551,14 @@ class TestPolarionWorkitem(unittest.TestCase):
         executed_workitem_2 = self.executing_project.createWorkitem('task')
 
         # check for exception when called with too many argument
-        with self.assertRaises(Exception):
+        with self.assertRaises(Exception) as ex:
             executed_workitem_1.addTestStep('','','','')
+        self.assertIn('Incorrect number of argument. Test step requires 3 arguments.', str(ex.exception))
 
         # check for exception when called with too little argument
-        with self.assertRaises(Exception):
+        with self.assertRaises(Exception) as ex:
             executed_workitem_1.addTestStep('', '')
+        self.assertIn('Incorrect number of argument. Test step requires 3 arguments.', str(ex.exception))
 
         # check for exception when called on a non test case workitem
         with self.assertRaises(Exception) as ex:
@@ -580,4 +598,51 @@ class TestPolarionWorkitem(unittest.TestCase):
         self.assertIn('Index should be in range of test step length of', str(ex.exception))
 
 
+    def test_testcase_update_steps(self):
+        executed_workitem_1 = self.executing_project.createWorkitem('testcase')
+        executed_workitem_2 = self.executing_project.createWorkitem('task')
 
+        # add some test steps
+        for i in range(3):
+            executed_workitem_1.addTestStep(f'{i}', f'Test step {i}', f'nothing here {i}')
+
+        # check that all values
+        for i in range(3):
+            self.assertEqual(f'{i}', executed_workitem_1.getTestSteps()[i]['step'], msg='Value in first column changes since creation')
+            self.assertEqual(f'Test step {i}', executed_workitem_1.getTestSteps()[i]['description'], msg='Value in second column changes since creation')
+            self.assertEqual(f'nothing here {i}', executed_workitem_1.getTestSteps()[i]['expectedResult'], msg='Value in third column changes since creation')
+
+        # check for exception when called with too many argument
+        with self.assertRaises(Exception) as ex:
+            executed_workitem_1.updateTestStep(0, '','','','')
+        self.assertIn('Incorrect number of argument. Test step requires 3 arguments.', str(ex.exception))
+
+        # check for exception when called with too little argument
+        with self.assertRaises(Exception) as ex:
+            executed_workitem_1.updateTestStep(0, '', '')
+        self.assertIn('Incorrect number of argument. Test step requires 3 arguments.', str(ex.exception))
+
+         # check for exception when index is not provided
+        with self.assertRaises(Exception) as ex:
+            executed_workitem_1.updateTestStep('', '', '')
+        self.assertIn('First argument of updateTestStep must be an integer.', str(ex.exception))
+
+        # check for exception when called on a non test case workitem
+        with self.assertRaises(Exception) as ex:
+            executed_workitem_2.updateTestStep(0, '','','')
+        self.assertIn('Cannot update test steps to work item that does not have the custom field', str(ex.exception))
+
+        # try removing a test step out of range
+        with self.assertRaises(Exception) as ex:
+            executed_workitem_1.updateTestStep(99, '', '', '')
+        self.assertIn('Index should be in range of test step length of', str(ex.exception))
+
+        # change all steps
+        for i in range(3):
+            executed_workitem_1.updateTestStep(i, f'{i + 10}', f'new {i + 20}', f'last {i + 20}')
+
+        # check again
+        for i in range(3):
+            self.assertEqual(f'{10 + i}', executed_workitem_1.getTestSteps()[i]['step'], msg='Value in first column did not change')
+            self.assertEqual(f'new {i + 20}', executed_workitem_1.getTestSteps()[i]['description'], msg='Value in second column did not change')
+            self.assertEqual(f'last {i + 20}', executed_workitem_1.getTestSteps()[i]['expectedResult'], msg='Value in third column did not change')
