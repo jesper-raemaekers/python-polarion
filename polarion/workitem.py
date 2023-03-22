@@ -625,7 +625,8 @@ class Workitem(CustomFields, Comments):
             raise Exception('Cannot update test steps to work item that does not have the custom field')
 
         # Verify validity of index
-        assert type(index) == int, "First argument of updateTestStep must be an integer."
+        if type(index) != int:
+            raise Exception('First argument of updateTestStep must be an integer.')
         if index >= len(self._polarion_test_steps.steps.TestStep):
             raise ValueError(f'Index should be in range of test step length of {len(self._polarion_test_steps.steps.TestStep)}')
 
