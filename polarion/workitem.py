@@ -624,6 +624,8 @@ class Workitem(CustomFields, Comments):
         if self._hasTestStepField() is False:
             raise Exception('Cannot update test steps to work item that does not have the custom field')
 
+        # Verify validity of index
+        assert type(index) == int, "First argument of updateTestStep must be an integer."
         if index >= len(self._polarion_test_steps.steps.TestStep):
             raise ValueError(f'Index should be in range of test step length of {len(self._polarion_test_steps.steps.TestStep)}')
 
@@ -681,11 +683,11 @@ class Workitem(CustomFields, Comments):
             return []
         else:
             return self._parsed_test_steps
-        
+
     def getRevision(self) -> int:
         """
         Return the revision number of the work item.
-        @return: Integer with revision number 
+        @return: Integer with revision number
         """
         service = self._polarion.getService('Tracker')
         try:
