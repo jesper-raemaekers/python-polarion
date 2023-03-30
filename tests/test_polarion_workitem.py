@@ -106,7 +106,7 @@ class TestPolarionWorkitem(unittest.TestCase):
     def test_add_comment_not_available(self):
         # create a local polarion service as we'll destroy the global one
         polarion = Polarion(
-            polarion_url, polarion_user, polarion_password)        
+            polarion_url, polarion_user, polarion_password)
 
         executing_project = polarion.getProject(
             polarion_project_id)
@@ -260,13 +260,13 @@ class TestPolarionWorkitem(unittest.TestCase):
 
     def test_workitem_creator(self):
         new_workitem = createFromUri(self.pol, self.executing_project, self.global_workitem.uri)
-        
+
         self.assertEqual(self.global_workitem, new_workitem,
                          msg='Workitems not identical')
 
     def test_workitem_author_creator(self):
         author = createFromUri(self.pol, self.executing_project, self.global_workitem.author.uri)
-        
+
         self.assertEqual(self.global_workitem.author.id, author.id,
                          msg='Authors not identical')
 
@@ -287,7 +287,7 @@ class TestPolarionWorkitem(unittest.TestCase):
         self.global_workitem.saveAttachmentAsFile(attachment_id, download)
 
         self.assertTrue(cmp(src_1, download), 'File downloaded from polarion not the same')
-        
+
         copyfile(src_2, dst)
 
         self.global_workitem.updateAttachment(attachment_id, dst, 'Test image 1')
@@ -300,7 +300,7 @@ class TestPolarionWorkitem(unittest.TestCase):
         self.global_workitem.deleteAttachment(attachment_id)
 
         self.assertFalse(self.global_workitem.hasAttachment(), msg='Workitem has attachments, but should not')
-    
+
     def test_set_status(self):
         executed_workitem = self.executing_project.createWorkitem('task')
 
@@ -314,7 +314,7 @@ class TestPolarionWorkitem(unittest.TestCase):
 
     def test_add_link(self):
         executed_workitem_1 = self.executing_project.createWorkitem('task')
-        executed_workitem_2 = self.executing_project.createWorkitem('task')        
+        executed_workitem_2 = self.executing_project.createWorkitem('task')
 
         self.assertIsNone(executed_workitem_1.linkedWorkItems, msg='Workitem already has a link')
         self.assertIsNone(executed_workitem_2.linkedWorkItems, msg='Workitem already has a link')
@@ -334,50 +334,50 @@ class TestPolarionWorkitem(unittest.TestCase):
 
     def test_remove_link(self):
         executed_workitem_1 = self.executing_project.createWorkitem('task')
-        executed_workitem_2 = self.executing_project.createWorkitem('task')      
-        
-        # test 1: create link and remove with role
-        executed_workitem_1.addLinkedItem(executed_workitem_2, 'relates_to') 
+        executed_workitem_2 = self.executing_project.createWorkitem('task')
 
-        checking_workitem_1 = self.checking_project.getWorkitem(executed_workitem_1.id) 
+        # test 1: create link and remove with role
+        executed_workitem_1.addLinkedItem(executed_workitem_2, 'relates_to')
+
+        checking_workitem_1 = self.checking_project.getWorkitem(executed_workitem_1.id)
 
         self.assertIsNotNone(executed_workitem_1.linkedWorkItems, msg='Workitem already has no link')
         self.assertIsNotNone(checking_workitem_1.linkedWorkItems, msg='Workitem already has no link')
 
         executed_workitem_1.removeLinkedItem(executed_workitem_2, 'relates_to')
 
-        checking_workitem_1 = self.checking_project.getWorkitem(executed_workitem_1.id) 
+        checking_workitem_1 = self.checking_project.getWorkitem(executed_workitem_1.id)
 
         self.assertIsNone(executed_workitem_1.linkedWorkItems, msg='Workitem already has link remaining')
         self.assertIsNone(checking_workitem_1.linkedWorkItems, msg='Workitem already has link remaining')
 
         # test 2: create link and remove without role
-        executed_workitem_1.addLinkedItem(executed_workitem_2, 'relates_to') 
+        executed_workitem_1.addLinkedItem(executed_workitem_2, 'relates_to')
 
-        checking_workitem_1 = self.checking_project.getWorkitem(executed_workitem_1.id) 
+        checking_workitem_1 = self.checking_project.getWorkitem(executed_workitem_1.id)
 
         self.assertIsNotNone(executed_workitem_1.linkedWorkItems, msg='Workitem already has no link')
         self.assertIsNotNone(checking_workitem_1.linkedWorkItems, msg='Workitem already has no link')
 
         executed_workitem_1.removeLinkedItem(executed_workitem_2)
 
-        checking_workitem_1 = self.checking_project.getWorkitem(executed_workitem_1.id) 
+        checking_workitem_1 = self.checking_project.getWorkitem(executed_workitem_1.id)
 
         self.assertIsNone(executed_workitem_1.linkedWorkItems, msg='Workitem already has link remaining')
         self.assertIsNone(checking_workitem_1.linkedWorkItems, msg='Workitem already has link remaining')
 
-        # test 3: create link and remove from derived item        
+        # test 3: create link and remove from derived item
 
-        executed_workitem_1.addLinkedItem(executed_workitem_2, 'relates_to') 
+        executed_workitem_1.addLinkedItem(executed_workitem_2, 'relates_to')
 
-        checking_workitem_1 = self.checking_project.getWorkitem(executed_workitem_1.id) 
+        checking_workitem_1 = self.checking_project.getWorkitem(executed_workitem_1.id)
 
         self.assertIsNotNone(executed_workitem_1.linkedWorkItems, msg='Workitem already has no link')
         self.assertIsNotNone(checking_workitem_1.linkedWorkItems, msg='Workitem already has no link')
 
         executed_workitem_2.removeLinkedItem(executed_workitem_1)
 
-        checking_workitem_1 = self.checking_project.getWorkitem(executed_workitem_1.id) 
+        checking_workitem_1 = self.checking_project.getWorkitem(executed_workitem_1.id)
 
         self.assertIsNone(executed_workitem_1.linkedWorkItems, msg='Workitem already has link remaining')
         self.assertIsNone(checking_workitem_1.linkedWorkItems, msg='Workitem already has link remaining')
@@ -389,7 +389,7 @@ class TestPolarionWorkitem(unittest.TestCase):
 
         executed_workitem_1.setCustomField(key='int_field', value=12)
 
-        checking_workitem_1 = self.checking_project.getWorkitem(executed_workitem_1.id) 
+        checking_workitem_1 = self.checking_project.getWorkitem(executed_workitem_1.id)
 
         self.assertIsNotNone(executed_workitem_1.customFields, msg='Workitem already does not have a custom field')
         self.assertEqual(12, executed_workitem_1.customFields.Custom[0].value, msg='value not the same as set')
@@ -398,14 +398,14 @@ class TestPolarionWorkitem(unittest.TestCase):
 
         executed_workitem_1.setCustomField(key='int_field', value=24)
 
-        checking_workitem_1 = self.checking_project.getWorkitem(executed_workitem_1.id) 
+        checking_workitem_1 = self.checking_project.getWorkitem(executed_workitem_1.id)
 
         self.assertEqual(24, executed_workitem_1.customFields.Custom[0].value, msg='value not the same as set')
         self.assertEqual(24, checking_workitem_1.customFields.Custom[0].value, msg='value not the same as set')
 
         executed_workitem_1.setCustomField(key='string_field', value='12')
 
-        checking_workitem_1 = self.checking_project.getWorkitem(executed_workitem_1.id) 
+        checking_workitem_1 = self.checking_project.getWorkitem(executed_workitem_1.id)
         self.assertEqual('12', executed_workitem_1.customFields.Custom[1].value, msg='value not the same as set')
         self.assertEqual('12', checking_workitem_1.customFields.Custom[1].value, msg='value not the same as set')
 
@@ -419,13 +419,13 @@ class TestPolarionWorkitem(unittest.TestCase):
 
         executed_workitem_1.addApprovee(testing_user_1)
 
-        checking_workitem_1 = self.checking_project.getWorkitem(executed_workitem_1.id) 
+        checking_workitem_1 = self.checking_project.getWorkitem(executed_workitem_1.id)
 
         self.assertEqual(executed_workitem_1.approvals.Approval[0].user.id, testing_user_1.id, msg='Approving user not equal to assign user')
         self.assertEqual(checking_workitem_1.approvals.Approval[0].user.id, testing_user_1.id, msg='Approving user not equal to assign user')
 
         executed_workitem_1.removeApprovee(testing_user_1)
-        checking_workitem_1 = self.checking_project.getWorkitem(executed_workitem_1.id) 
+        checking_workitem_1 = self.checking_project.getWorkitem(executed_workitem_1.id)
 
         self.assertIsNone(executed_workitem_1.approvals, msg='approvee not removed')
         self.assertIsNone(checking_workitem_1.approvals, msg='approvee not removed')
@@ -440,15 +440,15 @@ class TestPolarionWorkitem(unittest.TestCase):
         executed_workitem_1 = self.executing_project.createWorkitem('task')
 
         resolutions = executed_workitem_1.getResolutionEnum()
-        
+
         executed_workitem_1.setResolution('done')
-        checking_workitem_1 = self.checking_project.getWorkitem(executed_workitem_1.id) 
+        checking_workitem_1 = self.checking_project.getWorkitem(executed_workitem_1.id)
 
         self.assertEqual(executed_workitem_1.resolution.id, 'done', msg='Resolution not as set')
         self.assertEqual(checking_workitem_1.resolution.id, 'done', msg='Resolution not as set')
 
         executed_workitem_1.setResolution('incomplete')
-        checking_workitem_1 = self.checking_project.getWorkitem(executed_workitem_1.id) 
+        checking_workitem_1 = self.checking_project.getWorkitem(executed_workitem_1.id)
 
         self.assertEqual(executed_workitem_1.resolution.id, 'incomplete', msg='Resolution not as set')
         self.assertEqual(checking_workitem_1.resolution.id, 'incomplete', msg='Resolution not as set')
@@ -510,6 +510,139 @@ class TestPolarionWorkitem(unittest.TestCase):
         self.assertEqual(url, executed_workitem_1.hyperlinks.Hyperlink[0].uri)
         self.assertEqual(url, checking_workitem_1.hyperlinks.Hyperlink[0].uri)
 
-        
+
+    def test_testcase_column_names(self):
+        executed_workitem_1 = self.executing_project.createWorkitem('testcase')
+        executed_workitem_2 = self.executing_project.createWorkitem('task')
+
+        # get column names
+        column_names = executed_workitem_1.getTestStepHeader()
+        # check names
+        self.assertIn('Step', column_names, msg='Column name Step not found')
+        self.assertIn('Step Description', column_names, msg='Column name Step Description not found')
+        self.assertIn('Expected Result', column_names, msg='Column name Expected Result not found')
+        self.assertIn('step', executed_workitem_1.getTestStepHeaderID())
+        self.assertIn('description', executed_workitem_1.getTestStepHeaderID())
+        self.assertIn('expectedResult', executed_workitem_1.getTestStepHeaderID())
+
+        # check for exception when called on a non test case workitem
+        with self.assertRaises(Exception) as ex:
+            column_names = executed_workitem_2.getTestStepHeader()
+        self.assertIn('Work item does not have test step custom field', str(ex.exception))
+
+        with self.assertRaises(Exception) as ex:
+            executed_workitem_2.getTestStepHeaderID()
+        self.assertIn('Work item does not have test step custom field',
+                      str(ex.exception))
+
+        # do it again but now with existing test case
+        executed_workitem_3 = self.executing_project.getWorkitem(executed_workitem_1.id)
+
+        # get column names
+        column_names = executed_workitem_3.getTestStepHeader()
+        # check names
+        self.assertIn('Step', column_names, msg='Column name Step not found')
+        self.assertIn('Step Description', column_names, msg='Column name Step Description not found')
+        self.assertIn('Expected Result', column_names, msg='Column name Expected Result not found')
 
 
+    def test_testcase_add_remove_steps(self):
+        executed_workitem_1 = self.executing_project.createWorkitem('testcase')
+        executed_workitem_2 = self.executing_project.createWorkitem('task')
+
+        # check for exception when called with too many argument
+        with self.assertRaises(Exception) as ex:
+            executed_workitem_1.addTestStep('','','','')
+        self.assertIn('Incorrect number of argument. Test step requires 3 arguments.', str(ex.exception))
+
+        # check for exception when called with too little argument
+        with self.assertRaises(Exception) as ex:
+            executed_workitem_1.addTestStep('', '')
+        self.assertIn('Incorrect number of argument. Test step requires 3 arguments.', str(ex.exception))
+
+        # check for exception when called on a non test case workitem
+        with self.assertRaises(Exception) as ex:
+            executed_workitem_2.addTestStep('','','')
+        self.assertIn('Cannot add test steps to work item that does not have the custom field', str(ex.exception))
+
+        # check length of returned test steps
+        self.assertEqual(0, len(executed_workitem_1.getTestSteps()),
+                         msg='Length of test steps is not 0 when creating a new item')
+
+        # add some test steps
+        for i in range(3):
+            executed_workitem_1.addTestStep(f'{i}', f'Test step {i}', '')
+
+        # check length again
+        self.assertEqual(3, len(executed_workitem_1.getTestSteps()),
+                         msg='Length of test steps is not 3')
+
+        # remove middle test step
+        executed_workitem_1.removeTestStep(1)
+
+        # check length to be 1 less
+        self.assertEqual(2, len(executed_workitem_1.getTestSteps()),
+                         msg='Length of test steps is not 2')
+
+        self.assertEqual('0', executed_workitem_1.getTestSteps()[0]['step'], msg='Test step 0 was not found anymore')
+        self.assertEqual('2', executed_workitem_1.getTestSteps()[1]['step'], msg='Test step 2 was not found anymore')
+
+        # try removing test step from task
+        with self.assertRaises(Exception) as ex:
+            executed_workitem_2.removeTestStep(0)
+        self.assertIn('Cannot remove test steps to work item that does not have the custom field', str(ex.exception))
+
+        # try removing a test step out of range
+        with self.assertRaises(Exception) as ex:
+            executed_workitem_1.removeTestStep(99)
+        self.assertIn('Index should be in range of test step length of', str(ex.exception))
+
+
+    def test_testcase_update_steps(self):
+        executed_workitem_1 = self.executing_project.createWorkitem('testcase')
+        executed_workitem_2 = self.executing_project.createWorkitem('task')
+
+        # add some test steps
+        for i in range(3):
+            executed_workitem_1.addTestStep(f'{i}', f'Test step {i}', f'nothing here {i}')
+
+        # check that all values
+        for i in range(3):
+            self.assertEqual(f'{i}', executed_workitem_1.getTestSteps()[i]['step'], msg='Value in first column changes since creation')
+            self.assertEqual(f'Test step {i}', executed_workitem_1.getTestSteps()[i]['description'], msg='Value in second column changes since creation')
+            self.assertEqual(f'nothing here {i}', executed_workitem_1.getTestSteps()[i]['expectedResult'], msg='Value in third column changes since creation')
+
+        # check for exception when called with too many argument
+        with self.assertRaises(Exception) as ex:
+            executed_workitem_1.updateTestStep(0, '','','','')
+        self.assertIn('Incorrect number of argument. Test step requires 3 arguments.', str(ex.exception))
+
+        # check for exception when called with too little argument
+        with self.assertRaises(Exception) as ex:
+            executed_workitem_1.updateTestStep(0, '', '')
+        self.assertIn('Incorrect number of argument. Test step requires 3 arguments.', str(ex.exception))
+
+         # check for exception when index is not provided
+        with self.assertRaises(Exception) as ex:
+            executed_workitem_1.updateTestStep('', '', '')
+        self.assertIn('First argument of updateTestStep must be an integer.', str(ex.exception))
+
+        # check for exception when called on a non test case workitem
+        with self.assertRaises(Exception) as ex:
+            executed_workitem_2.updateTestStep(0, '','','')
+        self.assertIn('Cannot update test steps to work item that does not have the custom field', str(ex.exception))
+
+        # try removing a test step out of range
+        with self.assertRaises(Exception) as ex:
+            executed_workitem_1.updateTestStep(99, '', '', '')
+        self.assertIn('Index should be in range of test step length of', str(ex.exception))
+
+        # change all steps
+        for i in range(3):
+            executed_workitem_1.updateTestStep(i, f'{i + 10}', f'new {i + 20}', f'last {i + 20}')
+
+        # check again
+        for i in range(3):
+            self.assertEqual(f'{10 + i}', executed_workitem_1.getTestSteps()[i]['step'], msg='Value in first column did not change')
+            self.assertEqual(f'new {i + 20}', executed_workitem_1.getTestSteps()[i]['description'], msg='Value in second column did not change')
+            self.assertEqual(f'last {i + 20}', executed_workitem_1.getTestSteps()[i]['expectedResult'], msg='Value in third column did not change')

@@ -27,7 +27,7 @@ class Polarion(object):
     """
 
     def __init__(self, polarion_url, user, password=None, token=None, static_service_list=False, verify_certificate=True,
-                 svn_repo_url=None, proxy=None):
+                 svn_repo_url=None, proxy=None, request_session=None):
         self.user = user
         self.password = password
         self.token = token
@@ -35,6 +35,7 @@ class Polarion(object):
         self.verify_certificate = verify_certificate
         self.svn_repo_url = svn_repo_url
         self.proxy = None
+        self.request_session = request_session
         if proxy is not None:
             self.proxy = {
                 'http': proxy,
@@ -141,6 +142,10 @@ class Polarion(object):
                         'getModuleWorkItemUris').input.body.type._element[1].nillable = True
                     self.services[service]['client'].service.moveWorkItemToDocument._proxy._binding.get(
                         'moveWorkItemToDocument').input.body.type._element[2].nillable = True
+                    self.services[service]['client'].service.reuseDocument._proxy._binding.get(
+                        'reuseDocument').input.body.type._element[6].nillable = True
+                    self.services[service]['client'].service.reuseDocument._proxy._binding.get(
+                        'reuseDocument').input.body.type._element[7].nillable = True
             if service == 'Planning':
                 self.services[service]['client'].service.createPlan._proxy._binding.get(
                     'createPlan').input.body.type._element[3].nillable = True
@@ -150,6 +155,9 @@ class Polarion(object):
         self.EnumOptionIdType = self.getTypeFromService('TestManagement', 'ns3:EnumOptionId')
         self.TextType = self.getTypeFromService('TestManagement', 'ns1:Text')
         self.ArrayOfTestStepResultType = self.getTypeFromService('TestManagement', 'ns4:ArrayOfTestStepResult')
+        self.ArrayOfTestStepType = self.getTypeFromService('TestManagement', 'ns4:ArrayOfTestStep')
+        self.TestStepType = self.getTypeFromService('TestManagement', 'ns4:TestStep')
+        self.ArrayOfTextType = self.getTypeFromService('TestManagement', 'ns1:ArrayOfText')
         self.TestStepResultType = self.getTypeFromService('TestManagement', 'ns4:TestStepResult')
         self.TestRecordType = self.getTypeFromService('TestManagement', 'ns4:TestRecord')
         self.WorkItemType = self.getTypeFromService('Tracker', 'ns2:WorkItem')
@@ -164,7 +172,7 @@ class Polarion(object):
         """
         Gets the zeep transport object
         """
-        transport = Transport()
+        transport = Transport(session=self.request_session)
         transport.session.verify = self.verify_certificate
         return transport
 
