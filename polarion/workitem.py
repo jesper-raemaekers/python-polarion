@@ -152,7 +152,7 @@ class Workitem(CustomFields, Comments):
                 # fail silently as there are probably not test steps for this workitem
                 # todo: logging support
                 pass
-            self._parsed_test_steps = None
+
             if self._polarion_test_steps is not None:
                 if self._polarion_test_steps.keys is not None and self._polarion_test_steps.steps:
                     # oh god, parse the test steps...
