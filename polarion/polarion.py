@@ -184,6 +184,19 @@ class Polarion(object):
             return True
         return False
 
+    def getClient(self, name: str):
+        # request user info to see if we're still logged in
+        try:
+            _user = self.services['Project']['client'].service.getUser(self.user)
+        except Exception:
+            # if not, create a new session
+            self._createSession()
+
+        if name in self.services:
+            return self.services[name]['client']
+        else:
+            raise Exception('Service does not exsist')
+
     def getService(self, name: str):
         """
         Get a WSDL service client. The name can be 'Trakcer' or 'Session'
@@ -243,6 +256,19 @@ class Polarion(object):
             # if that also fails, tough luck.
             raise Exception(f'Could not download attachment from {url}. Got error {resp.status_code}: {resp.reason}.\n'
                             f'Trying with the default polarion login details yielded {resp_default.status_code}: {resp_default.reason}')
+
+    def generateHistory(self, uri, ignored_fields=None, field_order=None):
+
+        if not ignored_fields:
+            ignored_fields = ['title']
+
+        if not field_order:
+            field_order = ['id']
+
+        client = self.getClient('Tracker')
+
+        with client.settings(strict=False):
+            return client.service.generateHistory(uri, ignored_fields, field_order)
 
     def __repr__(self):
         return f'Polarion client for {self.url} with user {self.user}'
