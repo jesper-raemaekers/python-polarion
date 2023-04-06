@@ -501,6 +501,9 @@ class Workitem(CustomFields, Comments):
         if isinstance(test_steps, TestTable):  # if the complete TestTable was passed, use only the needed part
             test_steps = test_steps.steps
 
+        assert hasattr(test_steps, 'TestStep')
+        assert len(test_steps.TestStep) > 0
+
         if self._polarion_test_steps is None:
             self._buildTestStepsFromPolarion()
 
@@ -509,18 +512,15 @@ class Workitem(CustomFields, Comments):
 
                 # Sanity Checks here
                 # 1. The format is as expected
-                assert hasattr(test_steps, 'TestStep')
-                assert len(test_steps.TestStep) > 0
                 columns = [col.id for col in self._polarion_test_steps.keys.EnumOptionId]
-                if len(columns) == 2:
-                    self.columns = ['instruction', 'description', 'expectedResult']
-                # assert len(test_steps.TestStep[0].values.Text) == len(columns)
+                assert len(test_steps.TestStep[0].values.Text) == len(columns)
                 for col in range(len(columns)):
                     assert test_steps.TestStep[0].values.Text[col].type == 'text/html' and \
                            isinstance(test_steps.TestStep[0].values.Text[col].content, str) and \
                            test_steps.TestStep[0].values.Text[col].contentLossy is False
-                service_test = self._polarion.getService('TestManagement')
-                service_test.setTestSteps(self.uri, test_steps)
+                           
+        service_test = self._polarion.getService('TestManagement')
+        service_test.setTestSteps(self.uri, test_steps)
 
     def getTestRuns(self, limit=-1):
         if not self.hasTestSteps():
