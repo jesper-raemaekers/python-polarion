@@ -1,9 +1,12 @@
+from typing import List
+
 from .factory import createFromUri
 from .workitem import Workitem
 from .testrun import Testrun
 from .user import User
 from .plan import Plan
 from .document import Document
+from .folder import Folder
 
 
 class Project(object):
@@ -321,6 +324,25 @@ class Project(object):
         :return: Document
         """
         return Document(self.polarion, self, location=location)
+
+    def getRootFolders(self) -> List[Folder]:
+        """
+        Get all the Root Folders defined on a project
+        :return: The list of Folders
+        :rtype: list(Folder)
+        """
+        service = self.polarion.getService('Tracker')
+        return [Folder(folder) for folder in service.getRootFolders(self.id)]
+
+    def getChildFolders(self, child: Folder) -> List[Folder]:
+        """
+        :param child: Folder which to obtain Children
+        :type child: str
+        :return: The list of Folders
+        :rtype: list(Folder)
+        """
+        service = self.polarion.getService('Tracker')
+        return [Folder(folder) for folder in service.getChildFolders(self.id, child.name)]
 
     def __repr__(self):
         return f'Polarion project {self.name} prefix {self.tracker_prefix}'

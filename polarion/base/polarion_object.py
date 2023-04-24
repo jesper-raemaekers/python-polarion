@@ -10,3 +10,11 @@ class PolarionObject(object):
 
     def save(self):
         raise NotImplementedError
+
+    @property
+    def id(self):
+        return self._id
+
+    @property
+    def uri(self):
+        return self._uri

@@ -185,17 +185,7 @@ class Polarion(object):
         return False
 
     def getClient(self, name: str):
-        # request user info to see if we're still logged in
-        try:
-            _user = self.services['Project']['client'].service.getUser(self.user)
-        except Exception:
-            # if not, create a new session
-            self._createSession()
-
-        if name in self.services:
-            return self.services[name]['client']
-        else:
-            raise Exception('Service does not exsist')
+        return self.services['Project']['client']
 
     def getService(self, name: str):
         """
