@@ -6,7 +6,7 @@ from .testrun import Testrun
 from .user import User
 from .plan import Plan
 from .document import Document
-from .folder import Folder, FolderRoot
+from .folder import Folder
 
 
 class Project(object):
@@ -325,19 +325,6 @@ class Project(object):
         """
         return Document(self.polarion, self, location=location)
 
-    def getDocumentsOnFolder(self, location):
-        """
-        Get a list of all modules in a location.
-        :param location: Location of the modules.
-        :return: Module[]
-        """
-        modules = []
-        service = self.polarion.getService('Tracker')
-        uris = service.getModuleUris(self.id, location)
-        for uri in uris:
-            modules.append(Document(self.polarion, self, uri=uri))
-        return modules
-
     def getRootFolders(self) -> List[Folder]:
         """
         Get all the Root Folders defined on a project
@@ -356,12 +343,6 @@ class Project(object):
         """
         service = self.polarion.getService('Tracker')
         return [Folder(folder) for folder in service.getChildFolders(self.id, child.name)]
-
-    def getTree(self) -> FolderRoot:
-        service = self.polarion.getService('Tracker')
-        root = FolderRoot(self)
-        root.add_folder_list(service.getFolders(self.id))
-        return root
 
     def __repr__(self):
         return f'Polarion project {self.name} prefix {self.tracker_prefix}'
