@@ -11,10 +11,12 @@ class PolarionObject(object):
     def save(self):
         raise NotImplementedError
 
-    @property
-    def id(self):
-        return self._id
-
-    @property
-    def uri(self):
-        return self._uri
+    def __getattr__(self, name):
+        if name in self.__dict__:
+            return self.__dict__[name]
+        elif name == 'id':
+            return self._id
+        elif name == 'uri':
+            return self._uri
+        else:
+            raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{name}'")
