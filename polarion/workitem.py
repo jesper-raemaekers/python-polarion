@@ -398,6 +398,9 @@ class Workitem(CustomFields, Comments):
             self.status.id = status
             self.save()
 
+    def getStatus(self):
+        return self.status.id
+
     def getDescription(self):
         """
         Get a comment if available. The comment may contain HTML if edited in Polarion!
