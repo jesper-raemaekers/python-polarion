@@ -330,6 +330,10 @@ class Workitem(CustomFields, Comments):
     def getStatus(self):
         return self.status.id
 
+    def getType(self):
+        """Returns the type qualifier"""
+        return self.type.id
+
     def getDescription(self):
         """
         Get a comment if available. The comment may contain HTML if edited in Polarion!
