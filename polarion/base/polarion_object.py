@@ -19,4 +19,4 @@ class PolarionObject(object):
         elif name == 'uri':
             return self._uri
         else:
-            super().__getattribute__()
+            super().__getattribute__(name)
