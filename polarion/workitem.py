@@ -721,7 +721,7 @@ class Workitem(CustomFields, Comments):
         return self._compareType(a, b)
 
     def __hash__(self):
-        return hash(self.id)
+        return self.id
 
     def _compareType(self, a, b):
         basic_types = [int, float,
