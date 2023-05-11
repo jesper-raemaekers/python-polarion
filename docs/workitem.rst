@@ -139,13 +139,13 @@ A general example of working with test steps:
     wi = prj.getWorkitem('PYTH-515')
     print(wi.getTestStepHeader())
 
+    testSteps = wi.getTestSteps()
+
     for i in range(3):
-        wi.addTestStep(f'Step {i}', '', '')
+        testSteps.append_teststep(f'Step {i}', '', '')
 
+    wi.setTestSteps(testSteps)
     print(wi.getTestSteps())
-
-    wi.removeTestStep(0)
-
 
 
 Attachments
