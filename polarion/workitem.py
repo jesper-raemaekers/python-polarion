@@ -95,8 +95,8 @@ class Workitem(CustomFields, Comments):
             for attr, value in self._polarion_item.__dict__.items():
                 for key in value:
                     setattr(self, key, value[key])
-            self._polarion_item = polarion_item
-            self._buildWorkitemFromPolarion()
+        else:
+            raise Exception(f'Workitem not retrieved from Polarion')
 
     def getAuthor(self):
         """
