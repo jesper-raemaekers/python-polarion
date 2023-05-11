@@ -12,23 +12,24 @@ class TestTable(object):
     :type clear_table: bool
     """
 
-    def __init__(self, test_template: 'Workitem', clear_table=True):
+    def __init__(self, test_template: 'Workitem', clear_table=False):
         # get the custom fields
         raw_teststeps = test_template.getRawTestSteps()
         self.columns = [col.id for col in raw_teststeps.keys.EnumOptionId]
         if clear_table:
             self.steps = test_template._polarion.ArrayOfTestStepType()
         else:
-            self.steps = raw_teststeps
+            self.steps = raw_teststeps.steps
         self.step_type = test_template._polarion.TestStepType
         self.array_of_text_type = test_template._polarion.ArrayOfTextType
+        self.array_of_test_step_type = test_template._polarion.ArrayOfTestStepType
         self.text_type = test_template._polarion.TextType
 
     def __len__(self):
         return len(self.steps)
 
     def clear_teststeps(self):
-        self.steps = self.array_of_text_type()
+        self.steps = self.array_of_test_step_type()
 
     def insert_teststep(self, position, *args):
         """
