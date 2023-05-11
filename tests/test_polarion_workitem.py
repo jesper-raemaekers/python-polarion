@@ -106,7 +106,7 @@ class TestPolarionWorkitem(unittest.TestCase):
     def test_add_comment_not_available(self):
         # create a local polarion service as we'll destroy the global one
         polarion = Polarion(
-            polarion_url, polarion_user, polarion_password)        
+            polarion_url, polarion_user, polarion_password)
 
         executing_project = polarion.getProject(
             polarion_project_id)
@@ -260,13 +260,13 @@ class TestPolarionWorkitem(unittest.TestCase):
 
     def test_workitem_creator(self):
         new_workitem = createFromUri(self.pol, self.executing_project, self.global_workitem.uri)
-        
+
         self.assertEqual(self.global_workitem, new_workitem,
                          msg='Workitems not identical')
 
     def test_workitem_author_creator(self):
         author = createFromUri(self.pol, self.executing_project, self.global_workitem.author.uri)
-        
+
         self.assertEqual(self.global_workitem.author.id, author.id,
                          msg='Authors not identical')
 
@@ -287,7 +287,7 @@ class TestPolarionWorkitem(unittest.TestCase):
         self.global_workitem.saveAttachmentAsFile(attachment_id, download)
 
         self.assertTrue(cmp(src_1, download), 'File downloaded from polarion not the same')
-        
+
         copyfile(src_2, dst)
 
         self.global_workitem.updateAttachment(attachment_id, dst, 'Test image 1')
@@ -300,7 +300,7 @@ class TestPolarionWorkitem(unittest.TestCase):
         self.global_workitem.deleteAttachment(attachment_id)
 
         self.assertFalse(self.global_workitem.hasAttachment(), msg='Workitem has attachments, but should not')
-    
+
     def test_set_status(self):
         executed_workitem = self.executing_project.createWorkitem('task')
 
@@ -314,7 +314,7 @@ class TestPolarionWorkitem(unittest.TestCase):
 
     def test_add_link(self):
         executed_workitem_1 = self.executing_project.createWorkitem('task')
-        executed_workitem_2 = self.executing_project.createWorkitem('task')        
+        executed_workitem_2 = self.executing_project.createWorkitem('task')
 
         self.assertIsNone(executed_workitem_1.linkedWorkItems, msg='Workitem already has a link')
         self.assertIsNone(executed_workitem_2.linkedWorkItems, msg='Workitem already has a link')
@@ -334,50 +334,50 @@ class TestPolarionWorkitem(unittest.TestCase):
 
     def test_remove_link(self):
         executed_workitem_1 = self.executing_project.createWorkitem('task')
-        executed_workitem_2 = self.executing_project.createWorkitem('task')      
-        
-        # test 1: create link and remove with role
-        executed_workitem_1.addLinkedItem(executed_workitem_2, 'relates_to') 
+        executed_workitem_2 = self.executing_project.createWorkitem('task')
 
-        checking_workitem_1 = self.checking_project.getWorkitem(executed_workitem_1.id) 
+        # test 1: create link and remove with role
+        executed_workitem_1.addLinkedItem(executed_workitem_2, 'relates_to')
+
+        checking_workitem_1 = self.checking_project.getWorkitem(executed_workitem_1.id)
 
         self.assertIsNotNone(executed_workitem_1.linkedWorkItems, msg='Workitem already has no link')
         self.assertIsNotNone(checking_workitem_1.linkedWorkItems, msg='Workitem already has no link')
 
         executed_workitem_1.removeLinkedItem(executed_workitem_2, 'relates_to')
 
-        checking_workitem_1 = self.checking_project.getWorkitem(executed_workitem_1.id) 
+        checking_workitem_1 = self.checking_project.getWorkitem(executed_workitem_1.id)
 
         self.assertIsNone(executed_workitem_1.linkedWorkItems, msg='Workitem already has link remaining')
         self.assertIsNone(checking_workitem_1.linkedWorkItems, msg='Workitem already has link remaining')
 
         # test 2: create link and remove without role
-        executed_workitem_1.addLinkedItem(executed_workitem_2, 'relates_to') 
+        executed_workitem_1.addLinkedItem(executed_workitem_2, 'relates_to')
 
-        checking_workitem_1 = self.checking_project.getWorkitem(executed_workitem_1.id) 
+        checking_workitem_1 = self.checking_project.getWorkitem(executed_workitem_1.id)
 
         self.assertIsNotNone(executed_workitem_1.linkedWorkItems, msg='Workitem already has no link')
         self.assertIsNotNone(checking_workitem_1.linkedWorkItems, msg='Workitem already has no link')
 
         executed_workitem_1.removeLinkedItem(executed_workitem_2)
 
-        checking_workitem_1 = self.checking_project.getWorkitem(executed_workitem_1.id) 
+        checking_workitem_1 = self.checking_project.getWorkitem(executed_workitem_1.id)
 
         self.assertIsNone(executed_workitem_1.linkedWorkItems, msg='Workitem already has link remaining')
         self.assertIsNone(checking_workitem_1.linkedWorkItems, msg='Workitem already has link remaining')
 
-        # test 3: create link and remove from derived item        
+        # test 3: create link and remove from derived item
 
-        executed_workitem_1.addLinkedItem(executed_workitem_2, 'relates_to') 
+        executed_workitem_1.addLinkedItem(executed_workitem_2, 'relates_to')
 
-        checking_workitem_1 = self.checking_project.getWorkitem(executed_workitem_1.id) 
+        checking_workitem_1 = self.checking_project.getWorkitem(executed_workitem_1.id)
 
         self.assertIsNotNone(executed_workitem_1.linkedWorkItems, msg='Workitem already has no link')
         self.assertIsNotNone(checking_workitem_1.linkedWorkItems, msg='Workitem already has no link')
 
         executed_workitem_2.removeLinkedItem(executed_workitem_1)
 
-        checking_workitem_1 = self.checking_project.getWorkitem(executed_workitem_1.id) 
+        checking_workitem_1 = self.checking_project.getWorkitem(executed_workitem_1.id)
 
         self.assertIsNone(executed_workitem_1.linkedWorkItems, msg='Workitem already has link remaining')
         self.assertIsNone(checking_workitem_1.linkedWorkItems, msg='Workitem already has link remaining')
@@ -389,7 +389,7 @@ class TestPolarionWorkitem(unittest.TestCase):
 
         executed_workitem_1.setCustomField(key='int_field', value=12)
 
-        checking_workitem_1 = self.checking_project.getWorkitem(executed_workitem_1.id) 
+        checking_workitem_1 = self.checking_project.getWorkitem(executed_workitem_1.id)
 
         self.assertIsNotNone(executed_workitem_1.customFields, msg='Workitem already does not have a custom field')
         self.assertEqual(12, executed_workitem_1.customFields.Custom[0].value, msg='value not the same as set')
@@ -398,14 +398,14 @@ class TestPolarionWorkitem(unittest.TestCase):
 
         executed_workitem_1.setCustomField(key='int_field', value=24)
 
-        checking_workitem_1 = self.checking_project.getWorkitem(executed_workitem_1.id) 
+        checking_workitem_1 = self.checking_project.getWorkitem(executed_workitem_1.id)
 
         self.assertEqual(24, executed_workitem_1.customFields.Custom[0].value, msg='value not the same as set')
         self.assertEqual(24, checking_workitem_1.customFields.Custom[0].value, msg='value not the same as set')
 
         executed_workitem_1.setCustomField(key='string_field', value='12')
 
-        checking_workitem_1 = self.checking_project.getWorkitem(executed_workitem_1.id) 
+        checking_workitem_1 = self.checking_project.getWorkitem(executed_workitem_1.id)
         self.assertEqual('12', executed_workitem_1.customFields.Custom[1].value, msg='value not the same as set')
         self.assertEqual('12', checking_workitem_1.customFields.Custom[1].value, msg='value not the same as set')
 
@@ -419,13 +419,13 @@ class TestPolarionWorkitem(unittest.TestCase):
 
         executed_workitem_1.addApprovee(testing_user_1)
 
-        checking_workitem_1 = self.checking_project.getWorkitem(executed_workitem_1.id) 
+        checking_workitem_1 = self.checking_project.getWorkitem(executed_workitem_1.id)
 
         self.assertEqual(executed_workitem_1.approvals.Approval[0].user.id, testing_user_1.id, msg='Approving user not equal to assign user')
         self.assertEqual(checking_workitem_1.approvals.Approval[0].user.id, testing_user_1.id, msg='Approving user not equal to assign user')
 
         executed_workitem_1.removeApprovee(testing_user_1)
-        checking_workitem_1 = self.checking_project.getWorkitem(executed_workitem_1.id) 
+        checking_workitem_1 = self.checking_project.getWorkitem(executed_workitem_1.id)
 
         self.assertIsNone(executed_workitem_1.approvals, msg='approvee not removed')
         self.assertIsNone(checking_workitem_1.approvals, msg='approvee not removed')
@@ -440,15 +440,15 @@ class TestPolarionWorkitem(unittest.TestCase):
         executed_workitem_1 = self.executing_project.createWorkitem('task')
 
         resolutions = executed_workitem_1.getResolutionEnum()
-        
+
         executed_workitem_1.setResolution('done')
-        checking_workitem_1 = self.checking_project.getWorkitem(executed_workitem_1.id) 
+        checking_workitem_1 = self.checking_project.getWorkitem(executed_workitem_1.id)
 
         self.assertEqual(executed_workitem_1.resolution.id, 'done', msg='Resolution not as set')
         self.assertEqual(checking_workitem_1.resolution.id, 'done', msg='Resolution not as set')
 
         executed_workitem_1.setResolution('incomplete')
-        checking_workitem_1 = self.checking_project.getWorkitem(executed_workitem_1.id) 
+        checking_workitem_1 = self.checking_project.getWorkitem(executed_workitem_1.id)
 
         self.assertEqual(executed_workitem_1.resolution.id, 'incomplete', msg='Resolution not as set')
         self.assertEqual(checking_workitem_1.resolution.id, 'incomplete', msg='Resolution not as set')
@@ -510,6 +510,8 @@ class TestPolarionWorkitem(unittest.TestCase):
         self.assertEqual(url, executed_workitem_1.hyperlinks.Hyperlink[0].uri)
         self.assertEqual(url, checking_workitem_1.hyperlinks.Hyperlink[0].uri)
 
-        
 
+    def test_testcase_column_names(self):
+        executed_workitem_1 = self.executing_project.createWorkitem('testcase')
+        executed_workitem_2 = self.executing_project.createWorkitem('task')
 

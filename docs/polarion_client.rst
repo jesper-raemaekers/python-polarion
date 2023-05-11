@@ -51,6 +51,26 @@ If this is the case, pass the new location using svn_repo_url. This is used whil
 
     pol = polarion.Polarion('http://example.com/polarion', 'user', 'password', svn_repo_url='http://example.com/repo_location')
 
+Retry Mechanism
+---------------
+
+A custom retry strategy can be set by using the request_session parameter of the polarion constructor. See example below.
+
+.. code:: python
+    import requests
+    from requests.adapters import HTTPAdapter, Retry
+    from polarion import polarion
+
+    # example of a retry strategy
+    my_sess = requests.Session()
+    retries = Retry(total=5,
+                backoff_factor=0.1,
+                status_forcelist=[ 500, 502, 503, 504 ])  # only retry those status codes
+
+    my_sess.mount('http://', HTTPAdapter(max_retries=retries)) # for all http connections
+
+    pol = polarion.Polarion('http://example.com/polarion', 'user', 'password', request_session=my_sess)
+
 
 Services
 --------
