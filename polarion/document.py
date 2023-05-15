@@ -37,12 +37,6 @@ class Document(CustomFields):
 
         self._buildFromPolarion()
 
-        self.url = None
-        try:
-            self.url = f'{polarion.polarion_url}/#/project/{self._project.id}/wiki/{self.moduleFolder}/{self.id}'
-        except:
-            pass
-
     def _buildFromPolarion(self):
         if self._polarion_document is not None and self._polarion_document.unresolvable is False:
             self._original_polarion = copy.deepcopy(self._polarion_document)
@@ -148,11 +142,12 @@ class Document(CustomFields):
         :param target_location: Location of the target document
         :param target_name: The target document's name
         :param target_title: Title of the target document
-        :param link_role: Link role of the derived documents
+        :param link_role: Link role of the derived documents, None for no linking
         :param derived_fields: List of fields to be derived in the target document
         :return: The new document
         """
-        if derived_fields is None:
+        # only set these values when linking is required but field are not provided
+        if derived_fields is None and link_role is not None:
             derived_fields = ['title', 'description']
         service = self._polarion.getService('Tracker')
         new_uri = service.reuseDocument(self._uri, target_project_id, target_location, target_name, target_title, True,

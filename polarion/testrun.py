@@ -37,27 +37,6 @@ class Testrun(CustomFields, Comments):
         self._original_polarion_test_run = copy.deepcopy(self._polarion_test_run)
         self._buildWorkitemFromPolarion()
 
-        # extract the project part from url
-        s = self.uri
-
-        # Split the string by the '/' character
-        parts = s.split('/')
-
-        # Extract the last part of the string (which should contain the "L6")
-        last_part = parts[-1]
-
-        # Split the last part of the string by the '${' character
-        sub_parts = last_part.split('${')
-
-        # The first part of the sub_parts list should contain the "L6"
-        self._project = sub_parts[0]
-
-        self.url = None
-        try:
-            self.url = f'{polarion.polarion_url}/#/project/{self._project}/testrun?id={self.id}'
-        except:
-            pass
-
     def isCustomFieldAllowed(self, key):
         return True
         
