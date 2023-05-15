@@ -754,10 +754,11 @@ class Workitem(CustomFields, Comments):
 
     class WorkItemIterator:
 
-        def __init__(self, polarion, linkedWorkItems):
+        def __init__(self, polarion, linkedWorkItems, roles:list=None):
             self._polarion = polarion
             self._linkedWorkItems = linkedWorkItems
             self._index = 0
+            self._roles = roles
 
         def __iter__(self):
             return self
@@ -765,26 +766,35 @@ class Workitem(CustomFields, Comments):
         def __next__(self):
             if self._linkedWorkItems is None:
                 raise StopIteration
-            try:
-                obj = self._linkedWorkItems.LinkedWorkItem[self._index]
-                self._index += 1
-                try:
-                    role = obj.role.id
-                except AttributeError:
-                    role = 'NA'
-                uri = obj.workItemURI
 
-                return role, uri
+            try:
+                while True:
+                    if self._index < len(self._linkedWorkItems.LinkedWorkItem):
+                        obj = self._linkedWorkItems.LinkedWorkItem[self._index]
+                        self._index += 1
+
+                        try:
+                            role = obj.role.id
+                        except AttributeError:
+                            role = 'NA'
+
+                        uri = obj.workItemURI
+
+                        if not self._roles or role in self._roles:
+                            return role, uri
+                    else:
+                        raise StopIteration
+
             except IndexError:
                 raise StopIteration
             except AttributeError:
                 raise StopIteration
 
-    def iterateLinkedWorkItems(self):
-        return Workitem.WorkItemIterator(self._polarion, self._polarion_item.linkedWorkItems)
+    def iterateLinkedWorkItems(self, roles:list=None):
+        return Workitem.WorkItemIterator(self._polarion, self._polarion_item.linkedWorkItems, roles=roles)
 
-    def iterateLinkedWorkItemsDerived(self):
-        return Workitem.WorkItemIterator(self._polarion, self._polarion_item.linkedWorkItemsDerived)
+    def iterateLinkedWorkItemsDerived(self, roles:list=None):
+        return Workitem.WorkItemIterator(self._polarion, self._polarion_item.linkedWorkItemsDerived, roles=roles)
 
     def _reloadFromPolarion(self):
         service = self._polarion.getService('Tracker')
