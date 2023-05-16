@@ -46,8 +46,8 @@ class Workitem(CustomFields, Comments):
                 self._polarion_item = service.getWorkItemByUri(self._uri)
                 self._id = self._polarion_item.id
             except Exception:
-                raise Exception(
-                    f'Cannot find workitem {self.id} in project {self._project.id}')
+                raise Exception(f'Cannot find workitem by uri: {self._uri}')
+
         elif id is not None:
             try:
                 self._polarion_item = service.getWorkItemById(
