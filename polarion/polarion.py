@@ -31,6 +31,7 @@ class Polarion(object):
         self.user = user
         self.password = password
         self.token = token
+        self.polarion_url = polarion_url.rstrip('/')  # This will be needed to compose workitem URLs
         self.url = polarion_url
         self.verify_certificate = verify_certificate
         self.svn_repo_url = svn_repo_url

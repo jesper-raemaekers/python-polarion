@@ -44,11 +44,14 @@ class Workitem(CustomFields, Comments):
         if self._uri:
             try:
                 self._polarion_item = service.getWorkItemByUri(self._uri)
-                self._id = self._polarion_item.id
             except Exception:
+
                 raise Exception(f'Cannot find workitem by uri: {self._uri}')
 
+            self._id = self._polarion_item.id
         elif id is not None:
+            if self._project is None:
+                raise Exception(f'Provide a project when creating a workitem from an id')
             try:
                 self._polarion_item = service.getWorkItemById(
                     self._project.id, self.id)
@@ -56,6 +59,8 @@ class Workitem(CustomFields, Comments):
                 raise Exception(
                     f'Cannot find workitem {self.id} in project {self._project.id}')
         elif new_workitem_type is not None:
+            if self._project is None:
+                raise Exception(f'Provide a project when creating a workitem from an id')
             # construct empty workitem
             self._polarion_item = self._polarion.WorkItemType(
                 type=self._polarion.EnumOptionIdType(id=new_workitem_type))
@@ -88,7 +93,34 @@ class Workitem(CustomFields, Comments):
         else:
             raise Exception('No id, uri, polarion workitem or new workitem type specified!')
 
+        if self._project is None:  # If this is not given
+            # get the project from the uri
+            polarion_project_id = self._polarion_item.project.id
+            self._project = polarion.getProject(polarion_project_id)
+
         self._buildWorkitemFromPolarion()
+
+        self.lastFinalized = None  # Used to store the last finalized workitem revision
+
+    @property
+    def url(self):
+        """
+        Get the url for the workitem
+
+        :return: The url
+        :rtype: str
+        """
+        return f'{self._polarion.polarion_url}/#/project/{self._project.id}/workitem?id={self.id}'
+
+    @property
+    def document(self):
+        location_split = self.location.split('/')
+        try:
+            start = location_split.index('modules')
+            stop = location_split.index('workitems')
+        except ValueError:
+            return None
+        return '/'.join(location_split[start+1:stop])
 
     def _buildWorkitemFromPolarion(self):
         if self._polarion_item is not None and not self._polarion_item.unresolvable:
@@ -648,7 +680,6 @@ class Workitem(CustomFields, Comments):
             return True
         return False
 
-
     def save(self):
         """
         Update the workitem in polarion
@@ -666,6 +697,7 @@ class Workitem(CustomFields, Comments):
             service = self._polarion.getService('Tracker')
             service.updateWorkItem(updated_item)
             self._reloadFromPolarion()
+
 
     class WorkItemIterator:
 
