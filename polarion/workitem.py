@@ -462,7 +462,7 @@ class Workitem(CustomFields, Comments):
 
         return [test_run.uri for test_run in polarion_test_runs]
 
-    def addHyperlink(self, url, hyperlink_type):
+    def addHyperlink(self, url, hyperlink_type: HyperlinkRoles):
         """
         Adds a hyperlink to the workitem.
 
@@ -730,15 +730,23 @@ class Workitem(CustomFields, Comments):
             if self._linkedWorkItems is None:
                 raise StopIteration
             try:
-                obj = self._linkedWorkItems.LinkedWorkItem[self._index]
-                self._index += 1
-                try:
-                    role = obj.role.id
-                except AttributeError:
-                    role = 'NA'
-                uri = obj.workItemURI
+                while True:
+                    if self._index < len(self._linkedWorkItems.LinkedWorkItem):
+                        obj = self._linkedWorkItems.LinkedWorkItem[self._index]
+                        self._index += 1
 
-                return role, uri
+                        try:
+                            role = obj.role.id
+                        except AttributeError:
+                            role = 'NA'
+
+                        uri = obj.workItemURI
+
+                        if not self._roles or role in self._roles:
+                            return role, uri
+                    else:
+                        raise StopIteration
+
             except IndexError:
                 raise StopIteration
             except AttributeError:
