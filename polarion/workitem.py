@@ -378,8 +378,8 @@ class Workitem(CustomFields, Comments):
         """
         return self._hasTestStepField()
 
-    def getTestSteps(self) -> TestTable:
-        return TestTable(self)
+    def getTestSteps(self, clear_table=False) -> TestTable:
+        return TestTable(self, clear_table)
 
     def getRawTestSteps(self):
         if self._polarion_item is not None and not self._polarion_item.unresolvable:
@@ -598,14 +598,6 @@ class Workitem(CustomFields, Comments):
             raise Exception('Work item does not have test step custom field')
 
         return self._getConfiguredTestStepColumnIDs()
-
-    def getTestSteps(self) -> TestTable:
-        """
-        Return a list of test steps.
-        @return: Array of test steps
-        """
-        test_table = TestTable(self)
-        return test_table
 
     def getRevision(self) -> int:
         """
