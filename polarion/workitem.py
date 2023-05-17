@@ -5,70 +5,11 @@ from enum import Enum
 
 from zeep import xsd
 
+from .test_table import TestTable
 from .base.comments import Comments
 from .base.custom_fields import CustomFields
 from .factory import Creator
 from .user import User
-
-
-class TestTable(object):
-    """
-    Uses a Test Workitem template to spawn a Test Table that can be used with the setTestSteps function.
-    The constructor creates an empty table, and the methods in this class provide the means to construct a new
-    TestSteps Table.
-    :param test_template: Workitem to use as template for the new Test Table
-    :type test_template: Workitem
-    :param clear_table: Whether the test table is to be emptied after copy.
-    :type clear_table: bool
-    """
-
-    def __init__(self, test_template: 'Workitem', clear_table=True):
-        # get the custom fields
-        custom_fields = test_template.getAllowedCustomKeys()
-        # check if any of the field has the test steps
-        assert any(field == 'testSteps' for field in custom_fields)
-        service_test = test_template._polarion.getService('TestManagement')
-        teststeps_template = service_test.getTestSteps(test_template.uri)
-        if teststeps_template.keys and len(teststeps_template.keys.EnumOptionId) == 3:
-            self.columns = [col.id for col in teststeps_template.keys.EnumOptionId]
-        else:
-            self.columns = ['instruction', 'description', 'expectedResult']
-        self.steps = test_template._polarion.ArrayOfTestStepType()
-        self.step_type = test_template._polarion.TestStepType
-        self.array_of_text_type = test_template._polarion.ArrayOfTextType
-        self.text_type = test_template._polarion.TextType
-
-    def insert_teststep(self, position, *args):
-        """
-        Inserts a test step in the position indicated bu the `position` argument. The following parameters correspond to
-         the columns that are required by the Test Workitem.
-        :param position: Index where the step will be inserted. If the position is -1, then the step is appended.
-        :type position: int
-        :param *args: test columns that are expected by the Test Workitem.
-        :type *args: list of strings
-        :return: Nothing
-        :rtype: None
-        """
-        if len(args) != len(self.columns):
-            raise RuntimeError(f"The TestStep requires exactly {len(self.columns)} arguments.\n {self.columns}")
-
-        step_values = self.array_of_text_type([self.text_type('text/html', str(args[i]), False) for i, col in enumerate(self.columns)])
-        new_step = self.step_type(step_values)
-
-        if position == -1:  # Needed to support append_teststep
-            self.steps.TestStep.append(new_step)
-        else:
-            self.steps.TestStep.insert(position, new_step)
-
-    def append_teststep(self, *args):
-        self.insert_teststep(-1, *args)
-
-    def delete_teststep(self, position):
-        self.steps.TestStep.delete(position)
-
-    def replace_teststep(self, position, *args):
-        self.delete_teststep(position)
-        self.insert_teststep(position, *args)
 
 
 class Workitem(CustomFields, Comments):
@@ -90,44 +31,35 @@ class Workitem(CustomFields, Comments):
         INTERNAL_REF = 'internal reference'
         EXTERNAL_REF = 'external reference'
 
-    def __init__(self, polarion, project=None, id=None, uri=None, new_workitem_type=None, new_workitem_fields=None, polarion_workitem=None):
-        if not project:
-            if not uri and not polarion_workitem:
-                raise Exception('if no project is specified, I need an URI or polarion_workitem!')
-            if uri:
-                service = polarion.getService('Tracker')
-                polarion_workitem = service.getWorkItemByUri(uri)
-
-            polarion_project = polarion_workitem.project.id
-
-            project = polarion.getProject(polarion_project)
-
+    def __init__(self, polarion, project, id=None, uri=None, new_workitem_type=None, new_workitem_fields=None, polarion_workitem=None):
         super().__init__(polarion, project, id, uri)
         self._polarion = polarion
         self._project = project
-        self._id = id
-        self._uri = uri
+        # self._id = id  # This is already done by the super class
+        # self._uri = uri
 
         service = self._polarion.getService('Tracker')
 
-        if polarion_workitem is not None:
-            self._polarion_item = polarion_workitem
-            self._id = self._polarion_item.id
-        elif self._uri:
+        if self._uri:
             try:
                 self._polarion_item = service.getWorkItemByUri(self._uri)
-                self._id = self._polarion_item.id
             except Exception:
                 raise Exception(
-                    f'Cannot find workitem {self._id} in project {self._project.id}')
+                    f'Cannot find workitem {self._uri} within Polarion server {self._polarion.polarion_url}')
+
+            self._id = self._polarion_item.id
         elif id is not None:
+            if self._project is None:
+                raise Exception(f'Provide a project when creating a workitem from an id')
             try:
                 self._polarion_item = service.getWorkItemById(
-                    self._project.id, self._id)
+                    self._project.id, self.id)
             except Exception:
                 raise Exception(
-                    f'Cannot find workitem {self._id} in project {self._project.id}')
+                    f'Cannot find workitem {self.id} in project {self._project.id}')
         elif new_workitem_type is not None:
+            if self._project is None:
+                raise Exception(f'Provide a project when creating a workitem from an id')
             # construct empty workitem
             self._polarion_item = self._polarion.WorkItemType(
                 type=self._polarion.EnumOptionIdType(id=new_workitem_type))
@@ -153,26 +85,41 @@ class Workitem(CustomFields, Comments):
             # reload from polarion
             self._polarion_item = service.getWorkItemByUri(new_uri)
             self._id = self._polarion_item.id
+
+        elif polarion_workitem is not None:
+            self._polarion_item = polarion_workitem
+            self._id = self._polarion_item.id
         else:
             raise Exception('No id, uri, polarion workitem or new workitem type specified!')
 
+        if self._project is None:  # If this is not given
+            # get the project from the uri
+            polarion_project_id = self._polarion_item.project.id
+            self._project = polarion.getProject(polarion_project_id)
+
         self._buildWorkitemFromPolarion()
 
-        self.url = None
+        self.lastFinalized = None  # Used to store the last finalized workitem revision
+
+    @property
+    def url(self):
+        """
+        Get the url for the workitem
+
+        :return: The url
+        :rtype: str
+        """
+        return f'{self._polarion.polarion_url}/#/project/{self._project.id}/workitem?id={self.id}'
+
+    @property
+    def document(self):
+        location_split = self.location.split('/')
         try:
-            self.url = f'{polarion.polarion_url}/#/project/{self.project.id}/workitem?id={self.id}'
-
-        except:
-            pass
-
-        self.document = None
-        try:
-            location_split = self.location.split('/')
-            self.document = f'{location_split.__getitem__(3)}/{location_split.__getitem__(4)}'
-        except:
-            pass
-
-        self.lastFinalized = None
+            start = location_split.index('modules')
+            stop = location_split.index('workitems')
+        except ValueError:
+            return None
+        return '/'.join(location_split[start+1:stop])
 
     def _buildWorkitemFromPolarion(self):
         if self._polarion_item is not None and not self._polarion_item.unresolvable:
@@ -180,41 +127,6 @@ class Workitem(CustomFields, Comments):
             for attr, value in self._polarion_item.__dict__.items():
                 for key in value:
                     setattr(self, key, value[key])
-            self._polarion_test_steps = None
-            self._parsed_test_steps = None
-
-        else:
-            raise Exception(f'Workitem not retrieved from Polarion')
-
-    def _buildTestStepsFromPolarion(self):
-        self._parsed_test_steps = []
-
-        if self._polarion_item is not None and not self._polarion_item.unresolvable:
-            try:
-                # get the custom fields
-                custom_fields = self.getAllowedCustomKeys()
-                # check if any of the field has the test steps
-                if any(field == 'testSteps' for field in custom_fields):
-                    service_test = self._polarion.getService('TestManagement')
-                    self._polarion_test_steps = service_test.getTestSteps(self.uri)
-            except Exception as  e:
-                # fail silently as there are probably not test steps for this workitem
-                # todo: logging support
-                pass
-
-            if self._polarion_test_steps is not None:
-                if self._polarion_test_steps.keys is not None and self._polarion_test_steps.steps:
-                    # oh god, parse the test steps...
-                    columns = []
-                    self._parsed_test_steps = []
-                    for col in self._polarion_test_steps.keys.EnumOptionId:
-                        columns.append(col.id)
-                    # now parse the rows
-                    for row in self._polarion_test_steps.steps.TestStep:
-                        current_row = {}
-                        for col_id in range(len(row.values.Text)):
-                            current_row[columns[col_id]] = row.values.Text[col_id].content
-                        self._parsed_test_steps.append(current_row)
         else:
             raise Exception(f'Workitem not retrieved from Polarion')
 
@@ -450,6 +362,10 @@ class Workitem(CustomFields, Comments):
     def getStatus(self):
         return self.status.id
 
+    def getType(self):
+        """Returns the type qualifier"""
+        return self.type.id
+
     def getDescription(self):
         """
         Get a comment if available. The comment may contain HTML if edited in Polarion!
@@ -492,26 +408,16 @@ class Workitem(CustomFields, Comments):
         :return: True/False
         :rtype: boolean
         """
-        if self._parsed_test_steps is None:
-            self._buildTestStepsFromPolarion()
+        return self._hasTestStepField()
 
-        if self._parsed_test_steps is not None:
-            return len(self._parsed_test_steps) > 0
-        return False
-
-    def getTestSteps(self):
-        if self._parsed_test_steps is None:
-            self._buildTestStepsFromPolarion()
-
-        return self._parsed_test_steps
+    def getTestSteps(self, clear_table=False) -> TestTable:
+        return TestTable(self, clear_table)
 
     def getRawTestSteps(self):
         if self._polarion_item is not None and not self._polarion_item.unresolvable:
             try:
                 # get the custom fields
-                custom_fields = self.getAllowedCustomKeys()
-                # check if any of the field has the test steps
-                if any(field == 'testSteps' for field in custom_fields):
+                if self.hasTestSteps():
                     service_test = self._polarion.getService('TestManagement')
                     return service_test.getTestSteps(self.uri)
             except Exception as  e:
@@ -531,26 +437,21 @@ class Workitem(CustomFields, Comments):
         if isinstance(test_steps, TestTable):  # if the complete TestTable was passed, use only the needed part
             test_steps = test_steps.steps
 
-        if self._polarion_test_steps is None:
-            self._buildTestStepsFromPolarion()
+        assert hasattr(test_steps, 'TestStep')
+        assert len(test_steps.TestStep) > 0
 
-        if self._polarion_test_steps is not None:
-            if self._polarion_test_steps.keys is not None:
-
-                # Sanity Checks here
-                # 1. The format is as expected
-                assert hasattr(test_steps, 'TestStep')
-                assert len(test_steps.TestStep) > 0
-                columns = [col.id for col in self._polarion_test_steps.keys.EnumOptionId]
-                if len(columns) == 2:
-                    self.columns = ['instruction', 'description', 'expectedResult']
-                # assert len(test_steps.TestStep[0].values.Text) == len(columns)
-                for col in range(len(columns)):
-                    assert test_steps.TestStep[0].values.Text[col].type == 'text/html' and \
-                           isinstance(test_steps.TestStep[0].values.Text[col].content, str) and \
-                           test_steps.TestStep[0].values.Text[col].contentLossy is False
-                service_test = self._polarion.getService('TestManagement')
-                service_test.setTestSteps(self.uri, test_steps)
+        if self.hasTestSteps():
+            columns = self.getTestStepHeaderID()
+            # Sanity Checks here
+            # 1. The format is as expected
+            assert len(test_steps.TestStep[0].values.Text) == len(columns)
+            for col in range(len(columns)):
+                assert test_steps.TestStep[0].values.Text[col].type == 'text/html' and \
+                       isinstance(test_steps.TestStep[0].values.Text[col].content, str) and \
+                       test_steps.TestStep[0].values.Text[col].contentLossy is False
+                           
+        service_test = self._polarion.getService('TestManagement')
+        service_test.setTestSteps(self.uri, test_steps)
 
     def getTestRuns(self, limit=-1):
         if not self.hasTestSteps():
@@ -561,12 +462,12 @@ class Workitem(CustomFields, Comments):
 
         return [test_run.uri for test_run in polarion_test_runs]
 
-    def addHyperlink(self, url, hyperlink_type: HyperlinkRoles):
+    def addHyperlink(self, url, hyperlink_type):
         """
         Adds a hyperlink to the workitem.
 
         :param url: The URL to add
-        :param hyperlink_type: Select internal or external hyperlink
+        :param hyperlink_type: Select internal or external hyperlink. Can be a string for custom link types.
         """
         service = self._polarion.getService('Tracker')
         if isinstance(hyperlink_type, Enum):  # convert Enum to str
@@ -709,6 +610,75 @@ class Workitem(CustomFields, Comments):
         service.moveWorkItemToDocument(self.uri, document.uri, parent.uri if parent is not None else xsd.const.Nil, -1,
                                        False)
 
+    def getTestStepHeader(self):
+        """
+        Get the Header names for the test step header.
+        @return: List of strings containing the header names.
+        """
+        # check test step custom field
+        if self._hasTestStepField() is False:
+            raise Exception('Work item does not have test step custom field')
+
+        return self._getConfiguredTestStepColumns()
+
+    def getTestStepHeaderID(self):
+        """
+        Get the Header ID for the test step header.
+        @return: List of strings containing the header IDs.
+        """
+        if self._hasTestStepField() is False:
+            raise Exception('Work item does not have test step custom field')
+
+        return self._getConfiguredTestStepColumnIDs()
+
+    def getRevision(self) -> int:
+        """
+        Return the revision number of the work item.
+        @return: Integer with revision number
+        """
+        service = self._polarion.getService('Tracker')
+        try:
+            history: list = service.getRevisions(self.uri)
+            return int(history[-1])
+        except:
+            raise Exception("Could not get Revision!")
+
+
+    def _getConfiguredTestStepColumns(self):
+        """
+        Return a list of coulmn headers
+        @return: [str]
+        """
+        columns = []
+        service = self._polarion.getService('TestManagement')
+        config = service.getTestStepsConfiguration(self._project.id)
+        for col in config:
+            columns.append(col.name)
+        return columns
+
+    def _getConfiguredTestStepColumnIDs(self):
+        """
+        Return a list of column header IDs.
+        @return: [str]
+        """
+        columns = []
+        service = self._polarion.getService('TestManagement')
+        config = service.getTestStepsConfiguration(self._project.id)
+        for col in config:
+            columns.append(col.id)
+        return columns
+
+    def _hasTestStepField(self):
+        """
+        Checks if the testSteps custom field is available for this workitem. If so it allows test steps to be added.
+        @return: True when test steps are available
+        """
+        service = self._polarion.getService('Tracker')
+        custom_fields = service.getCustomFieldKeys(self.uri)
+        if 'testSteps' in custom_fields:
+            return True
+        return False
+
     def save(self):
         """
         Update the workitem in polarion
@@ -745,6 +715,7 @@ class Workitem(CustomFields, Comments):
 
         return None
 
+
     class WorkItemIterator:
 
         def __init__(self, polarion, linkedWorkItems):
@@ -770,8 +741,6 @@ class Workitem(CustomFields, Comments):
                 return role, uri
             except IndexError:
                 raise StopIteration
-            except AttributeError:
-                raise StopIteration
 
     def iterateLinkedWorkItems(self):
         return Workitem.WorkItemIterator(self._polarion, self._polarion_item.linkedWorkItems)
@@ -794,7 +763,7 @@ class Workitem(CustomFields, Comments):
         return self._compareType(a, b)
 
     def __hash__(self):
-        return hash(self.id)
+        return self.id
 
     def _compareType(self, a, b):
         basic_types = [int, float,
@@ -826,7 +795,7 @@ class Workitem(CustomFields, Comments):
         return True
 
     def __repr__(self):
-        return f'{self._id}: {self._polarion_item.title}'
+        return f'{self.id}: {self._polarion_item.title}'
 
     def __str__(self):
         return self.__repr__()

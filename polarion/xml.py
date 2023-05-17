@@ -152,7 +152,8 @@ class XmlParser:
                     text = []
                     for attrib in ['type', 'message']:
                         if attrib in elem.attrib.keys(): text.append(elem.attrib[attrib])
-                    text.append(elem.text)
+                    if elem.text is not None:
+                        text.append(elem.text)
                     case.update({ elem.tag: '\n'.join(text)})
             returned_cases.append(case)
         else:

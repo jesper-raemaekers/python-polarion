@@ -147,7 +147,8 @@ class Plan(object):
         workitems = []
         if self.records is not None:
             for workitem in self.records.PlanRecord:
-                workitems.append(Workitem(self._polarion, self._project, polarion_workitem=workitem.item))
+                if workitem.item.id is not None:
+                    workitems.append(Workitem(self._polarion, self._project, polarion_workitem=workitem.item))
         return workitems
 
     def save(self):

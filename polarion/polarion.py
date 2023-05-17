@@ -27,15 +27,16 @@ class Polarion(object):
     """
 
     def __init__(self, polarion_url, user, password=None, token=None, static_service_list=False, verify_certificate=True,
-                 svn_repo_url=None, proxy=None):
+                 svn_repo_url=None, proxy=None, request_session=None):
         self.user = user
         self.password = password
         self.token = token
-        self.polarion_url = polarion_url
+        self.polarion_url = polarion_url.rstrip('/')  # This will be needed to compose workitem URLs
         self.url = polarion_url
         self.verify_certificate = verify_certificate
         self.svn_repo_url = svn_repo_url
         self.proxy = None
+        self.request_session = request_session
         if proxy is not None:
             self.proxy = {
                 'http': proxy,
@@ -90,9 +91,8 @@ class Polarion(object):
         """
         if 'Session' in self.services:
             self.history = HistoryPlugin()
-            wsdl_uri = self.services['Session']['url'] + '?wsdl'
-            client = Client(wsdl_uri, plugins=[self.history], transport=self._getTransport())
-            self.services['Session']['client'] = client
+            self.services['Session']['client'] = Client(
+                self.services['Session']['url'] + '?wsdl', plugins=[self.history], transport=self._getTransport())
             if self.proxy is not None:
                 self.services['Session']['client'] .transport.session.proxies = self.proxy
             try:
@@ -143,6 +143,10 @@ class Polarion(object):
                         'getModuleWorkItemUris').input.body.type._element[1].nillable = True
                     self.services[service]['client'].service.moveWorkItemToDocument._proxy._binding.get(
                         'moveWorkItemToDocument').input.body.type._element[2].nillable = True
+                    self.services[service]['client'].service.reuseDocument._proxy._binding.get(
+                        'reuseDocument').input.body.type._element[6].nillable = True
+                    self.services[service]['client'].service.reuseDocument._proxy._binding.get(
+                        'reuseDocument').input.body.type._element[7].nillable = True
             if service == 'Planning':
                 self.services[service]['client'].service.createPlan._proxy._binding.get(
                     'createPlan').input.body.type._element[3].nillable = True
@@ -151,12 +155,12 @@ class Polarion(object):
         # TODO: check if the namespace is always the same
         self.EnumOptionIdType = self.getTypeFromService('TestManagement', 'ns3:EnumOptionId')
         self.TextType = self.getTypeFromService('TestManagement', 'ns1:Text')
-        self.ArrayOfTextType = self.getTypeFromService('TestManagement', 'ns1:ArrayOfText')
         self.ArrayOfTestStepResultType = self.getTypeFromService('TestManagement', 'ns4:ArrayOfTestStepResult')
-        self.TestStepResultType = self.getTypeFromService('TestManagement', 'ns4:TestStepResult')
-        self.TestRecordType = self.getTypeFromService('TestManagement', 'ns4:TestRecord')
         self.ArrayOfTestStepType = self.getTypeFromService('TestManagement', 'ns4:ArrayOfTestStep')
         self.TestStepType = self.getTypeFromService('TestManagement', 'ns4:TestStep')
+        self.ArrayOfTextType = self.getTypeFromService('TestManagement', 'ns1:ArrayOfText')
+        self.TestStepResultType = self.getTypeFromService('TestManagement', 'ns4:TestStepResult')
+        self.TestRecordType = self.getTypeFromService('TestManagement', 'ns4:TestRecord')
         self.WorkItemType = self.getTypeFromService('Tracker', 'ns2:WorkItem')
         self.LinkedWorkItemType = self.getTypeFromService('Tracker', 'ns2:LinkedWorkItem')
         self.LinkedWorkItemArrayType = self.getTypeFromService('Tracker', 'ns2:ArrayOfLinkedWorkItem')
@@ -169,7 +173,7 @@ class Polarion(object):
         """
         Gets the zeep transport object
         """
-        transport = Transport()
+        transport = Transport(session=self.request_session)
         transport.session.verify = self.verify_certificate
         return transport
 
@@ -182,17 +186,7 @@ class Polarion(object):
         return False
 
     def getClient(self, name: str):
-        # request user info to see if we're still logged in
-        try:
-            _user = self.services['Project']['client'].service.getUser(self.user)
-        except Exception:
-            # if not, create a new session
-            self._createSession()
-
-        if name in self.services:
-            return self.services[name]['client']
-        else:
-            raise Exception('Service does not exsist')
+        return self.services['Project']['client']
 
     def getService(self, name: str):
         """

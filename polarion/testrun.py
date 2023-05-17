@@ -37,6 +37,8 @@ class Testrun(CustomFields, Comments):
         self._original_polarion_test_run = copy.deepcopy(self._polarion_test_run)
         self._buildWorkitemFromPolarion()
 
+    @property
+    def url(self):
         # extract the project part from url
         s = self.uri
 
@@ -52,11 +54,12 @@ class Testrun(CustomFields, Comments):
         # The first part of the sub_parts list should contain the "L6"
         self._project = sub_parts[0]
 
-        self.url = None
+        url = None
         try:
-            self.url = f'{polarion.polarion_url}/#/project/{self._project}/testrun?id={self.id}'
+            url = f'{self.polarion.polarion_url}/#/project/{self._project}/testrun?id={self.id}'
         except:
             pass
+        return url
 
     def isCustomFieldAllowed(self, key):
         return True
