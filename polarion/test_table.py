@@ -15,7 +15,15 @@ class TestTable(object):
     def __init__(self, test_template: 'Workitem', clear_table=False):
         # get the custom fields
         raw_teststeps = test_template.getRawTestSteps()
-        self.columns = [col.id for col in raw_teststeps.keys.EnumOptionId]
+        # Check if the template has the required columns
+        if raw_teststeps is not None:
+            if raw_teststeps.keys is not None and raw_teststeps.steps:
+                self.columns = [col.id for col in raw_teststeps.keys.EnumOptionId]
+            else:
+                self.columns = test_template._getConfiguredTestStepColumnIDs()
+        else:
+            raise RuntimeError("This workitem doesn't have any Test Steps defined.")
+
         if clear_table:
             self.steps = test_template._polarion.ArrayOfTestStepType()
         else:
