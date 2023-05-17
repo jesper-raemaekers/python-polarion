@@ -31,7 +31,8 @@ class Workitem(CustomFields, Comments):
         INTERNAL_REF = 'internal reference'
         EXTERNAL_REF = 'external reference'
 
-    def __init__(self, polarion, project, id=None, uri=None, new_workitem_type=None, new_workitem_fields=None, polarion_workitem=None):
+    def __init__(self, polarion, project=None, id=None, uri=None, new_workitem_type=None, new_workitem_fields=None, polarion_workitem=None):
+
         super().__init__(polarion, project, id, uri)
         self._polarion = polarion
         self._project = project
