@@ -37,7 +37,6 @@ class Testrun(CustomFields, Comments):
         self._original_polarion_test_run = copy.deepcopy(self._polarion_test_run)
         self._buildWorkitemFromPolarion()
 
-
     @property
     def url(self):
         # extract the project part from url

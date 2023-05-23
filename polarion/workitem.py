@@ -45,8 +45,8 @@ class Workitem(CustomFields, Comments):
             try:
                 self._polarion_item = service.getWorkItemByUri(self._uri)
             except Exception:
-
-                raise Exception(f'Cannot find workitem by uri: {self._uri}')
+                raise Exception(
+                    f'Cannot find workitem {self._uri} within Polarion server {self._polarion.polarion_url}')
 
             self._id = self._polarion_item.id
         elif id is not None:
@@ -463,7 +463,7 @@ class Workitem(CustomFields, Comments):
 
         return [test_run.uri for test_run in polarion_test_runs]
 
-    def addHyperlink(self, url, hyperlink_type):
+    def addHyperlink(self, url, hyperlink_type: HyperlinkRoles):
         """
         Adds a hyperlink to the workitem.
 
@@ -698,10 +698,29 @@ class Workitem(CustomFields, Comments):
             service.updateWorkItem(updated_item)
             self._reloadFromPolarion()
 
+    def getLastFinalized(self):
+        if self.lastFinalized:
+            return self.lastFinalized
+
+        try:
+            history = self._polarion.generateHistory(self.uri, ignored_fields=[f for f in dir(self._polarion_item) if f not in ['status']])
+
+            for h in history[::-1]:
+                if h.diffs:
+                    for d in h.diffs.item:
+                        if d.fieldName == 'status' and d.after.id == 'finalized':
+                            self.lastFinalized = h.date
+                            return h.date
+        except:
+            pass
+
+        return None
+
 
     class WorkItemIterator:
+        """Workitem iterator for linked and backlinked workitems"""
 
-        def __init__(self, polarion, linkedWorkItems, roles:list=None):
+        def __init__(self, polarion, linkedWorkItems, roles: list = None):
             self._polarion = polarion
             self._linkedWorkItems = linkedWorkItems
             self._index = 0
@@ -713,7 +732,6 @@ class Workitem(CustomFields, Comments):
         def __next__(self):
             if self._linkedWorkItems is None:
                 raise StopIteration
-
             try:
                 while True:
                     if self._index < len(self._linkedWorkItems.LinkedWorkItem):
@@ -734,11 +752,13 @@ class Workitem(CustomFields, Comments):
 
             except IndexError:
                 raise StopIteration
+            except AttributeError:
+                raise StopIteration
 
-    def iterateLinkedWorkItems(self, roles:list=None):
+    def iterateLinkedWorkItems(self, roles: list = None):
         return Workitem.WorkItemIterator(self._polarion, self._polarion_item.linkedWorkItems, roles=roles)
 
-    def iterateLinkedWorkItemsDerived(self, roles:list=None):
+    def iterateLinkedWorkItemsDerived(self, roles: list = None):
         return Workitem.WorkItemIterator(self._polarion, self._polarion_item.linkedWorkItemsDerived, roles=roles)
 
     def _reloadFromPolarion(self):
