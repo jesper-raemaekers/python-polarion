@@ -2,6 +2,8 @@ import copy
 import os
 from datetime import datetime, date
 from enum import Enum
+from collections import namedtuple
+from typing import Iterable
 
 from zeep import xsd
 
@@ -10,6 +12,18 @@ from .base.comments import Comments
 from .base.custom_fields import CustomFields
 from .factory import Creator
 from .user import User
+
+LinkedWorkitem = namedtuple('LinkedWorkitem', ['role', 'uri'])
+
+
+class PolarionAccessError(Exception):
+    """Used for exceptions related to Polarion access"""
+    ...
+
+
+class PolarionWorkitemAttributeError(Exception):
+    """Used for exceptions related to Polarion workitem attributes"""
+    ...
 
 
 class Workitem(CustomFields, Comments):
@@ -45,22 +59,23 @@ class Workitem(CustomFields, Comments):
             try:
                 self._polarion_item = service.getWorkItemByUri(self._uri)
             except Exception:
-                raise Exception(
+                raise PolarionAccessError(
                     f'Cannot find workitem {self._uri} within Polarion server {self._polarion.polarion_url}')
 
             self._id = self._polarion_item.id
         elif id is not None:
             if self._project is None:
-                raise Exception(f'Provide a project when creating a workitem from an id')
+                raise PolarionAccessError(f'Provide a project when creating a workitem from an id')
             try:
                 self._polarion_item = service.getWorkItemById(
                     self._project.id, self.id)
-            except Exception:
-                raise Exception(
-                    f'Cannot find workitem {self.id} in project {self._project.id}')
+            except Exception as e:
+                raise PolarionAccessError(
+                    f'Cannot find workitem "{self.id}" in project "{self._project.id}"'
+                    f' on server "{self._polarion.polarion_url}"')
         elif new_workitem_type is not None:
             if self._project is None:
-                raise Exception(f'Provide a project when creating a workitem from an id')
+                raise PolarionAccessError(f'Provide a project when creating a workitem from an id')
             # construct empty workitem
             self._polarion_item = self._polarion.WorkItemType(
                 type=self._polarion.EnumOptionIdType(id=new_workitem_type))
@@ -72,14 +87,14 @@ class Workitem(CustomFields, Comments):
                 # if there are any, go and check if they are all supplied
                 if new_workitem_fields is None or not set(required_features.requiredFeatures.item) <= new_workitem_fields.keys():
                     # let the user know with a better error
-                    raise Exception(f'New workitem required field: {required_features.requiredFeatures.item} to be filled in using new_workitem_fields')
+                    raise PolarionWorkitemAttributeError(f'New workitem required field: {required_features.requiredFeatures.item} to be filled in using new_workitem_fields')
 
             if new_workitem_fields is not None:
                 for new_field in new_workitem_fields:
                     if new_field in self._polarion_item:
                         self._polarion_item[new_field] = new_workitem_fields[new_field]
                     else:
-                        raise Exception(f'{new_field} in new_workitem_fields is not recognised as a workitem field')
+                        raise PolarionWorkitemAttributeError(f'{new_field} in new_workitem_fields is not recognised as a workitem field')
 
             # and create it
             new_uri = service.createWorkItem(self._polarion_item)
@@ -91,7 +106,7 @@ class Workitem(CustomFields, Comments):
             self._polarion_item = polarion_workitem
             self._id = self._polarion_item.id
         else:
-            raise Exception('No id, uri, polarion workitem or new workitem type specified!')
+            raise PolarionAccessError('No id, uri, polarion workitem or new workitem type specified!')
 
         if self._project is None:  # If this is not given
             # get the project from the uri
@@ -129,7 +144,7 @@ class Workitem(CustomFields, Comments):
                 for key in value:
                     setattr(self, key, value[key])
         else:
-            raise Exception(f'Workitem not retrieved from Polarion')
+            raise PolarionAccessError(f'Workitem not retrieved from Polarion')
 
     def getAuthor(self):
         """
@@ -618,7 +633,7 @@ class Workitem(CustomFields, Comments):
         """
         # check test step custom field
         if self._hasTestStepField() is False:
-            raise Exception('Work item does not have test step custom field')
+            raise PolarionWorkitemAttributeError('Work item does not have test step custom field')
 
         return self._getConfiguredTestStepColumns()
 
@@ -628,7 +643,7 @@ class Workitem(CustomFields, Comments):
         @return: List of strings containing the header IDs.
         """
         if self._hasTestStepField() is False:
-            raise Exception('Work item does not have test step custom field')
+            raise PolarionWorkitemAttributeError('Work item does not have test step custom field')
 
         return self._getConfiguredTestStepColumnIDs()
 
@@ -642,7 +657,7 @@ class Workitem(CustomFields, Comments):
             history: list = service.getRevisions(self.uri)
             return int(history[-1])
         except:
-            raise Exception("Could not get Revision!")
+            raise PolarionWorkitemAttributeError("Could not get Revision!")
 
 
     def _getConfiguredTestStepColumns(self):
@@ -720,16 +735,25 @@ class Workitem(CustomFields, Comments):
     class WorkItemIterator:
         """Workitem iterator for linked and backlinked workitems"""
 
-        def __init__(self, polarion, linkedWorkItems, roles: list = None):
+        def __init__(self, polarion, linkedWorkItems, roles: Iterable = None):
             self._polarion = polarion
             self._linkedWorkItems = linkedWorkItems
             self._index = 0
-            self._roles = roles
+            self._disallowed_roles = []
+            if roles is not None:
+                self._allowed_roles = []
+                for role in roles:
+                    if role.startswith('~'):
+                        self._disallowed_roles.append(role[1:])
+                    else:
+                        self._allowed_roles.append(role)
+            else:
+                self._allowed_roles = None
 
         def __iter__(self):
             return self
 
-        def __next__(self):
+        def __next__(self) -> LinkedWorkitem:
             if self._linkedWorkItems is None:
                 raise StopIteration
             try:
@@ -745,8 +769,9 @@ class Workitem(CustomFields, Comments):
 
                         uri = obj.workItemURI
 
-                        if not self._roles or role in self._roles:
-                            return role, uri
+                        if role not in self._disallowed_roles and \
+                                self._allowed_roles is None or role in self._allowed_roles:
+                            return LinkedWorkitem(role, uri)
                     else:
                         raise StopIteration
 
@@ -755,10 +780,10 @@ class Workitem(CustomFields, Comments):
             except AttributeError:
                 raise StopIteration
 
-    def iterateLinkedWorkItems(self, roles: list = None):
+    def iterateLinkedWorkItems(self, roles: Iterable = None) -> WorkItemIterator:
         return Workitem.WorkItemIterator(self._polarion, self._polarion_item.linkedWorkItems, roles=roles)
 
-    def iterateLinkedWorkItemsDerived(self, roles: list = None):
+    def iterateLinkedWorkItemsDerived(self, roles: Iterable = None) -> WorkItemIterator:
         return Workitem.WorkItemIterator(self._polarion, self._polarion_item.linkedWorkItemsDerived, roles=roles)
 
     def _reloadFromPolarion(self):
