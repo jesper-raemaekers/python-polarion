@@ -739,16 +739,19 @@ class Workitem(CustomFields, Comments):
             self._polarion = polarion
             self._linkedWorkItems = linkedWorkItems
             self._index = 0
-            self._disallowed_roles = []
+            self._disallowed_roles = None
+            self._allowed_roles = None
             if roles is not None:
-                self._allowed_roles = []
+                roles = (roles,) if isinstance(roles, str) else roles
                 for role in roles:
                     if role.startswith('~'):
+                        if self._disallowed_roles is None:
+                            self._disallowed_roles = []
                         self._disallowed_roles.append(role[1:])
                     else:
+                        if self._allowed_roles is None:
+                            self._allowed_roles = []
                         self._allowed_roles.append(role)
-            else:
-                self._allowed_roles = None
 
         def __iter__(self):
             return self
@@ -769,8 +772,8 @@ class Workitem(CustomFields, Comments):
 
                         uri = obj.workItemURI
 
-                        if role not in self._disallowed_roles and \
-                                self._allowed_roles is None or role in self._allowed_roles:
+                        if (self._disallowed_roles is None or role not in self._disallowed_roles) and \
+                           (self._allowed_roles is None or role in self._allowed_roles):
                             return LinkedWorkitem(role, uri)
                     else:
                         raise StopIteration
