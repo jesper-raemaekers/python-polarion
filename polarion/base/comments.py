@@ -5,7 +5,7 @@ from polarion.base.polarion_object import PolarionObject
 
 class Comments(PolarionObject, ABC):
 
-    def addComment(self, title, comment, parent=None):
+    def addComment(self, title, comment, parent=None, type='html'):
         """
         Adds a comment to the workitem.
 
@@ -16,6 +16,8 @@ class Comments(PolarionObject, ABC):
         :param parent: A parent comment, if none provided it's a root comment.
         """
         service = self._polarion.getService('Tracker')
+        if type not in ['html', 'plain']:
+            raise Exception('Type must be either html or plain.')
         if hasattr(service, 'addComment'):
             if parent is None:
                 parent = self.uri
@@ -23,7 +25,7 @@ class Comments(PolarionObject, ABC):
                 # force title to be empty, not allowed for reply comments
                 title = None
             content = {
-                'type': 'text/html',
+                'type': f'text/{type}',
                 'content': comment,
                 'contentLossy': False
             }
