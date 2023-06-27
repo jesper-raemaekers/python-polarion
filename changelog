@@ -1,12 +1,18 @@
 Changelog
 =========
 
+V1.2.2 Nuno Brum
+----------------
+- Fix on the TestTable initialization when receiving an empty Test Steps Table
+
 V1.2.1 Nuno Brum
 ----------------
 - Changed the Test Steps handling to be made through a dedicated TestTable object, which minimizes the number of
   commits to the server.
 - Added support to Folders
 - Added iteration support linked and backlinked workitems
+
+=======
 
 V1.2.1
 ------
