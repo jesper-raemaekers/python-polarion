@@ -24,7 +24,7 @@ class TestTable(object):
         else:
             raise RuntimeError("This workitem doesn't have any Test Steps defined.")
 
-        if clear_table:
+        if clear_table or raw_teststeps.steps is None:
             self.steps = test_template._polarion.ArrayOfTestStepType()
         else:
             self.steps = raw_teststeps.steps
@@ -34,7 +34,10 @@ class TestTable(object):
         self.text_type = test_template._polarion.TextType
 
     def __len__(self):
-        return len(self.steps)
+        return len(self.steps.TestStep)
+
+    def __getitem__(self, item):
+        return self.steps.TestStep[item]
 
     def clear_teststeps(self):
         self.steps = self.array_of_test_step_type()
