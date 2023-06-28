@@ -115,8 +115,6 @@ class Workitem(CustomFields, Comments):
 
         self._buildWorkitemFromPolarion()
 
-        self.lastFinalized = None  # Used to store the last finalized workitem revision
-
     @property
     def url(self):
         """
@@ -381,6 +379,12 @@ class Workitem(CustomFields, Comments):
     def getType(self):
         """Returns the type qualifier"""
         return self.type.id
+
+    def getTitle(self):
+        """
+        :returns the title of the workitem
+        :rtype: str"""
+        return self.title
 
     def getDescription(self):
         """
@@ -647,7 +651,7 @@ class Workitem(CustomFields, Comments):
 
         return self._getConfiguredTestStepColumnIDs()
 
-    def getRevision(self) -> int:
+    def getLastRevisionNumber(self) -> int:
         """
         Return the revision number of the work item.
         @return: Integer with revision number
@@ -658,7 +662,6 @@ class Workitem(CustomFields, Comments):
             return int(history[-1])
         except:
             raise PolarionWorkitemAttributeError("Could not get Revision!")
-
 
     def _getConfiguredTestStepColumns(self):
         """
@@ -714,8 +717,8 @@ class Workitem(CustomFields, Comments):
             self._reloadFromPolarion()
 
     def getLastFinalized(self):
-        if self.lastFinalized:
-            return self.lastFinalized
+        if hasattr(self, 'lastFinalized'):
+            return getattr(self, 'lastFinalized')
 
         try:
             history = self._polarion.generateHistory(self.uri, ignored_fields=[f for f in dir(self._polarion_item) if f not in ['status']])
@@ -724,7 +727,7 @@ class Workitem(CustomFields, Comments):
                 if h.diffs:
                     for d in h.diffs.item:
                         if d.fieldName == 'status' and d.after.id == 'finalized':
-                            self.lastFinalized = h.date
+                            setattr(self, 'lastFinalized', h.date)
                             return h.date
         except:
             pass

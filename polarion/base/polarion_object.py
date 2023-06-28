@@ -18,5 +18,9 @@ class PolarionObject(object):
             return self._id
         elif name == 'uri':
             return self._uri
+        elif name == 'project':
+            return self._project
+        elif name == 'polarion':
+            return self._polarion
         else:
             super().__getattribute__(name)
