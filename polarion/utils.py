@@ -123,7 +123,16 @@ class DescriptionParser(HTMLParser, ABC):
         """
         self._data += attributes['data-source']
 
-
+def save_bytes_as_pdf(input_bytes, filename):
+    """
+    Saves bytes returned by exportDocumentToPDF as a pdf.
+    :param input_bytes: <'bytes'> object
+    :param filename: <'str'> path to save location
+    """
+    if not filename.endswith('.pdf'):
+        filename += '.pdf'
+    with open(filename, 'wb') as f:
+        f.write(input_bytes)
 
 def strip_html(raw_html):
     """
