@@ -1,6 +1,7 @@
 import copy
 
 from zeep import xsd
+from zeep.helpers import serialize_object
 
 from .base.custom_fields import CustomFields
 from .factory import createFromUri, Creator
@@ -48,6 +49,17 @@ class Document(CustomFields):
         service = self._polarion.getService('Tracker')
         self._polarion_document = service.getModuleByUri(self._uri)
         self._buildFromPolarion()
+
+    def exportDocumentToPDF(self):
+        """
+        Download a PDF export of the document.
+        :return: bytes
+        """
+        service = self._polarion.getService('Tracker')
+        pdf_props_obj = self._polarion.PdfProperties('A4', 'Portrait', True, True, True)
+        serialized_pdf_props = serialize_object(pdf_props_obj)
+        pdf = service.exportDocumentToPDF(self._uri, serialized_pdf_props)
+        return pdf
 
     def getWorkitemUris(self):
         """

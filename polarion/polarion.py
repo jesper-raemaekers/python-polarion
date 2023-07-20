@@ -167,6 +167,7 @@ class Polarion(object):
         self.CustomType = self.getTypeFromService('Tracker', 'ns2:Custom')
         self.ArrayOfEnumOptionIdType = self.getTypeFromService('Tracker', 'ns2:ArrayOfEnumOptionId')
         self.ArrayOfSubterraURIType = self.getTypeFromService('Tracker', 'ns1:ArrayOfSubterraURI')
+        self.PdfProperties = self.getTypeFromService('Tracker', 'ns2:PdfProperties')
 
     def _getTransport(self):
         """
