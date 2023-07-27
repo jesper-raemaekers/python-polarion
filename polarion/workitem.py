@@ -553,6 +553,16 @@ class Workitem(CustomFields, Comments):
             return True
         return False
 
+    def getAttachments(self):
+        """
+        Returns a list of attachments
+        :return:
+        :rtype:
+        """
+        if self.attachments is not None:
+            return self.attachments.Attachment
+        return []
+
     def getAttachment(self, id):
         """
         Get the attachment data
@@ -598,6 +608,19 @@ class Workitem(CustomFields, Comments):
             service.createAttachment(self.uri, file_name, title, file_content.read())
         self._reloadFromPolarion()
 
+    def addAttachmentData(self, data, title, file_name):
+        """
+        Upload an attachment
+
+        :param id: The attachment id
+        :param data: binary data of the attachment
+        :param title: The title of the attachment
+        :param file_name: The name of the file
+        """
+        service = self._polarion.getService('Tracker')
+        service.createAttachment(self.uri, file_name, title, data)
+        self._reloadFromPolarion()
+
     def updateAttachment(self, id, file_path, title):
         """
         Upload an attachment
@@ -610,6 +633,19 @@ class Workitem(CustomFields, Comments):
         file_name = os.path.split(file_path)[1]
         with open(file_path, "rb") as file_content:
             service.updateAttachment(self.uri, id, file_name, title, file_content.read())
+        self._reloadFromPolarion()
+
+    def updateAttachmentData(self, id, data, title, file_name):
+        """
+        Upload an attachment
+
+        :param id: The attachment id
+        :param data: Data to upload
+        :param file_name: The name of the file
+        :param title: The title of the attachment
+        """
+        service = self._polarion.getService('Tracker')
+        service.updateAttachment(self.uri, id, file_name, title, data)
         self._reloadFromPolarion()
 
     def delete(self):
