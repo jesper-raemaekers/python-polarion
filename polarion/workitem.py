@@ -456,6 +456,31 @@ class Workitem(CustomFields, Comments):
         self._reloadFromPolarion()
         workitem._reloadFromPolarion()
 
+    def getLinkedItemWithRoles(self):
+        """
+        Get linked workitems both linked and back linked item will show up. Will include link roles.
+
+        @return: Array of tuple ('link type', Workitem)
+        """
+        linked_items = []
+        service = self._polarion.getService('Tracker')
+        if self.linkedWorkItems is not None:
+            for linked_item in self.linkedWorkItems.LinkedWorkItem:
+                linked_items.append((linked_item.role.id, Workitem(self._polarion, self._project, uri=linked_item.workItemURI)))
+        if self.linkedWorkItemsDerived is not None:
+            for linked_item in self.linkedWorkItemsDerived.LinkedWorkItem:
+                linked_items.append((linked_item.role.id, Workitem(self._polarion, self._project, uri=linked_item.workItemURI)))
+        return linked_items
+
+    def getLinkedItem(self):
+        """
+        Get linked workitems both linked and back linked item will show up.
+
+        @return: Array of  Workitem
+        @return:
+        """
+        return [item[1] for item in self.getLinkedItemWithRoles()]
+
     def hasAttachment(self):
         """
         Checks if the workitem has attachments
