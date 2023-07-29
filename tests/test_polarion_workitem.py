@@ -646,3 +646,34 @@ class TestPolarionWorkitem(unittest.TestCase):
             self.assertEqual(f'{10 + i}', executed_workitem_1.getTestSteps()[i]['step'], msg='Value in first column did not change')
             self.assertEqual(f'new {i + 20}', executed_workitem_1.getTestSteps()[i]['description'], msg='Value in second column did not change')
             self.assertEqual(f'last {i + 20}', executed_workitem_1.getTestSteps()[i]['expectedResult'], msg='Value in third column did not change')
+
+    def test_get_linked_items(self):
+        executed_workitem_1 = self.executing_project.createWorkitem('task')
+        executed_workitem_2 = self.executing_project.createWorkitem('task')
+
+        # check empty linked items
+        self.assertEqual(0, len(executed_workitem_1.getLinkedItemWithRoles()), msg='Linked workitem not 0 in length')
+        self.assertEqual(0, len(executed_workitem_1.getLinkedItem()), msg='Linked workitem not 0 in length')
+
+        # add link
+        executed_workitem_1.addLinkedItem(executed_workitem_2, 'follow_up')
+
+        # check non empty linked items
+        self.assertEqual(1, len(executed_workitem_1.getLinkedItemWithRoles()), msg='Linked workitem not 1 in length')
+        self.assertEqual(1, len(executed_workitem_1.getLinkedItem()), msg='Linked workitem not 1 in length')
+        self.assertEqual(1, len(executed_workitem_2.getLinkedItemWithRoles()), msg='Linked workitem not 1 in length')
+        self.assertEqual(1, len(executed_workitem_2.getLinkedItem()), msg='Linked workitem not 1 in length')
+
+        self.assertEqual(executed_workitem_2, executed_workitem_1.getLinkedItemWithRoles()[0][1],
+                         msg='Check workitem')
+        self.assertEqual('follow_up', executed_workitem_1.getLinkedItemWithRoles()[0][0],
+                         msg='Check link type')
+        self.assertEqual(executed_workitem_2, executed_workitem_1.getLinkedItem()[0],
+                         msg='Check workitem')
+
+        self.assertEqual(executed_workitem_1, executed_workitem_2.getLinkedItemWithRoles()[0][1],
+                         msg='Check workitem')
+        self.assertEqual('follow_up', executed_workitem_2.getLinkedItemWithRoles()[0][0],
+                         msg='Check link type')
+        self.assertEqual(executed_workitem_1, executed_workitem_2.getLinkedItem()[0],
+                         msg='Check workitem')

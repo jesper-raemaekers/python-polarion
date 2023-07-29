@@ -176,6 +176,13 @@ Workitems can be linked together using :func:`~Workitem.addLinkedItem`. In this 
 
     new_workitem_2.addLinkedItem(new_workitem_1, 'relates_to')
 
+Links can be retrieved either with or without link roles:
+
+.. code:: python
+
+    print(workitem_1.getLinkedItem()) # [PYTH-540: None]
+    print(workitem_1.getLinkedItemWithRoles()) # [('follow_up', PYTH-540: None)]
+
 
 Custom fields
 ^^^^^^^^^^^^^
