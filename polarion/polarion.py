@@ -150,6 +150,10 @@ class Polarion(object):
                 self.services[service]['client'].service.createPlan._proxy._binding.get(
                     'createPlan').input.body.type._element[3].nillable = True
 
+            if service == 'TestManagement':
+                self.services[service]['client'].service.setTestSteps._proxy._binding.get(
+                    'setTestSteps').input.body.type._element[1].min_occurs = 0
+
     def _getTypes(self):
         # TODO: check if the namespace is always the same
         self.EnumOptionIdType = self.getTypeFromService('TestManagement', 'ns3:EnumOptionId')
