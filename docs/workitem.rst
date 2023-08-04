@@ -223,6 +223,20 @@ The workitem class implements the __eq__ method allowing it to be compared.
     if workitem1 == workitem2:
     #...
 
+Context Manager
+^^^^^^^^^^^^^^^
+
+It is possible to use the context manager with a workitem.
+This is useful, when updating many attributes of it.
+Execution speed increases, because the workitem is only updated / saved once, when exiting the context manager.
+
+.. code:: python
+
+    with workitem as wi:
+        wi.addAttachment(path_to_file, 'file title')
+        wi.addComment('comment')
+        # any many more
+
 
 List of available attributes
 ----------------------------
