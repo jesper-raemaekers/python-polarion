@@ -36,6 +36,7 @@ class Workitem(CustomFields, Comments):
         self._project = project
         self._id = id
         self._uri = uri
+        self._postpone_save = False
 
         service = self._polarion.getService('Tracker')
 
@@ -87,6 +88,14 @@ class Workitem(CustomFields, Comments):
             raise Exception('No id, uri, polarion workitem or new workitem type specified!')
 
         self._buildWorkitemFromPolarion()
+
+    def __enter__(self):
+        self._postpone_save = True
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self._postpone_save = False
+        self.save()
 
     def _buildWorkitemFromPolarion(self):
         if self._polarion_item is not None and not self._polarion_item.unresolvable:
@@ -774,6 +783,8 @@ class Workitem(CustomFields, Comments):
         """
         Update the workitem in polarion
         """
+        if self._postpone_save:
+            return
         updated_item = {}
 
         for attr, value in self._polarion_item.__dict__.items():
