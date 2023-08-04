@@ -30,16 +30,16 @@ class Record(object):
         self._polarion_record = polarion_record
         self._index = index
 
-        self._skip_save = False
+        self._postpone_save = False
 
         self._buildWorkitemFromPolarion()
 
     def __enter__(self):
-        self._skip_save = True
+        self._postpone_save = True
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        self._skip_save = False
+        self._postpone_save = False
         self.save()
 
     def _buildWorkitemFromPolarion(self):
@@ -301,7 +301,7 @@ class Record(object):
         """
         Saves the current test record
         """
-        if self._skip_save:
+        if self._postpone_save:
             return
 
         new_item = {}
