@@ -171,7 +171,23 @@ class Polarion(object):
         self.CustomType = self.getTypeFromService('Tracker', 'ns2:Custom')
         self.ArrayOfEnumOptionIdType = self.getTypeFromService('Tracker', 'ns2:ArrayOfEnumOptionId')
         self.ArrayOfSubterraURIType = self.getTypeFromService('Tracker', 'ns1:ArrayOfSubterraURI')
-        self.PdfProperties = self.getTypeFromService('Tracker', 'ns2:PdfProperties')
+        self._PdfProperties = None
+        try:
+            self._PdfProperties = self.getTypeFromService('Tracker', 'ns2:PdfProperties')
+        except:
+            # fail silently if current polarion version does not have PDF properties
+            pass
+
+    @property
+    def PdfProperties(self):
+        """
+        Get PDF properties object but only is it exist.
+        If is was not able to get it from Polarion, fail with a exception only when using this feature
+        @return: PdfProperties
+        """
+        if self._PdfProperties is None:
+            raise Exception(f'PDF not supported in this Polarion version')
+        return self._PdfProperties
 
     def _getTransport(self):
         """
