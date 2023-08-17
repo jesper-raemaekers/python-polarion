@@ -30,7 +30,17 @@ class Record(object):
         self._polarion_record = polarion_record
         self._index = index
 
+        self._postpone_save = False
+
         self._buildWorkitemFromPolarion()
+
+    def __enter__(self):
+        self._postpone_save = True
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self._postpone_save = False
+        self.save()
 
     def _buildWorkitemFromPolarion(self):
         # parse all polarion attributes to this class
@@ -291,6 +301,9 @@ class Record(object):
         """
         Saves the current test record
         """
+        if self._postpone_save:
+            return
+
         new_item = {}
         for attr, value in self.__dict__.items():
             if not attr.startswith('_'):
