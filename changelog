@@ -42,7 +42,7 @@ V1.1.0 (2022-10-07)
 - Fix minor typo. [Adam J]
 
   ```py
-  new_task = project..createWorkitem('task', new_workitem_fields={'title': 'New title'})
+  new_task = project.createWorkitem('task', new_workitem_fields={'title': 'New title'})
   ```
 
   should read
