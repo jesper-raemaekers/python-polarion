@@ -3,6 +3,16 @@ from abc import ABC
 from polarion.base.polarion_object import PolarionObject
 
 
+class PolarionAccessError(Exception):
+    """Used for exceptions related to Polarion access"""
+    ...
+
+
+class PolarionWorkitemAttributeError(Exception):
+    """Used for exceptions related to Polarion workitem attributes"""
+    ...
+
+
 class CustomFields(PolarionObject, ABC):
     def __init__(self, polarion, project, _id=None, uri=None):
         super().__init__(polarion, project, _id, uri)
@@ -19,7 +29,7 @@ class CustomFields(PolarionObject, ABC):
         :return: None
         """
         if not self.isCustomFieldAllowed(key):
-            raise Exception(f"key {key} is not allowed for this workitem")
+            raise PolarionWorkitemAttributeError(f"key {key} is not allowed for this workitem")
 
         if self.customFields is None:
             # nothing exists, create a custom field structure

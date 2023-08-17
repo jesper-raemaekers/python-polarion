@@ -9,21 +9,11 @@ from zeep import xsd
 
 from .test_table import TestTable
 from .base.comments import Comments
-from .base.custom_fields import CustomFields
+from .base.custom_fields import CustomFields, PolarionAccessError, PolarionWorkitemAttributeError
 from .factory import Creator
 from .user import User
 
 LinkedWorkitem = namedtuple('LinkedWorkitem', ['role', 'uri'])
-
-
-class PolarionAccessError(Exception):
-    """Used for exceptions related to Polarion access"""
-    ...
-
-
-class PolarionWorkitemAttributeError(Exception):
-    """Used for exceptions related to Polarion workitem attributes"""
-    ...
 
 
 class Workitem(CustomFields, Comments):

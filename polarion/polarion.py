@@ -206,17 +206,18 @@ class Polarion(object):
 
     def getTypeFromService(self, name: str, type_name):
         """
+        Internal function to obtain object types from Polarion Services
         """
         if name in self.services:
             return self.services[name]['client'].get_type(type_name)
         else:
             raise Exception('Service does not exsist')
 
-    def getProject(self, project_id):
+    def getProject(self, project_id) -> Project:
         """Get a Polarion project
 
         :param project_id: The ID of the project.
-        :return: The request project
+        :return: The request project.
         :rtype: Project
         """
         return Project(self, project_id)
