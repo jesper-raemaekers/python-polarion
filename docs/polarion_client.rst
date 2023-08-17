@@ -39,7 +39,7 @@ You can skip certificate verification by passed an additional argument.
 
 .. code:: python
 
-    pol = polarion.Polarion('http://example.com/polarion', 'user', 'password', skip_cert_verification=False)
+    pol = polarion.Polarion('http://example.com/polarion', 'user', 'password', verify_certificate=False)
 
 SVN repository location
 -----------------------
