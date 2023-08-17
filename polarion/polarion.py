@@ -151,6 +151,10 @@ class Polarion(object):
                 self.services[service]['client'].service.createPlan._proxy._binding.get(
                     'createPlan').input.body.type._element[3].nillable = True
 
+            if service == 'TestManagement':
+                self.services[service]['client'].service.setTestSteps._proxy._binding.get(
+                    'setTestSteps').input.body.type._element[1].min_occurs = 0
+
     def _getTypes(self):
         # TODO: check if the namespace is always the same
         self.EnumOptionIdType = self.getTypeFromService('TestManagement', 'ns3:EnumOptionId')
@@ -168,6 +172,7 @@ class Polarion(object):
         self.CustomType = self.getTypeFromService('Tracker', 'ns2:Custom')
         self.ArrayOfEnumOptionIdType = self.getTypeFromService('Tracker', 'ns2:ArrayOfEnumOptionId')
         self.ArrayOfSubterraURIType = self.getTypeFromService('Tracker', 'ns1:ArrayOfSubterraURI')
+        self.PdfProperties = self.getTypeFromService('Tracker', 'ns2:PdfProperties')
 
     def _getTransport(self):
         """

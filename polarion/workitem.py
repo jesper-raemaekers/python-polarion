@@ -52,6 +52,7 @@ class Workitem(CustomFields, Comments):
         self._project = project
         # self._id = id  # This is already done by the super class
         # self._uri = uri
+        self._postpone_save = False
 
         service = self._polarion.getService('Tracker')
 
@@ -136,6 +137,13 @@ class Workitem(CustomFields, Comments):
         except ValueError:
             return None
         return '/'.join(location_split[start+1:stop])
+    def __enter__(self):
+        self._postpone_save = True
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self._postpone_save = False
+        self.save()
 
     def _buildWorkitemFromPolarion(self):
         if self._polarion_item is not None and not self._polarion_item.unresolvable:
@@ -375,10 +383,10 @@ class Workitem(CustomFields, Comments):
             self.status.id = status
             self.save()
 
-    def getStatus(self):
+    def getStatusId(self):
         return self.status.id
 
-    def getType(self):
+    def getTypeId(self):
         """Returns the type qualifier"""
         return self.type.id
 
@@ -538,6 +546,31 @@ class Workitem(CustomFields, Comments):
         self._reloadFromPolarion()
         workitem._reloadFromPolarion()
 
+    def getLinkedItemWithRoles(self):
+        """
+        Get linked workitems both linked and back linked item will show up. Will include link roles.
+
+        @return: Array of tuple ('link type', Workitem)
+        """
+        linked_items = []
+        service = self._polarion.getService('Tracker')
+        if self.linkedWorkItems is not None:
+            for linked_item in self.linkedWorkItems.LinkedWorkItem:
+                linked_items.append((linked_item.role.id, Workitem(self._polarion, self._project, uri=linked_item.workItemURI)))
+        if self.linkedWorkItemsDerived is not None:
+            for linked_item in self.linkedWorkItemsDerived.LinkedWorkItem:
+                linked_items.append((linked_item.role.id, Workitem(self._polarion, self._project, uri=linked_item.workItemURI)))
+        return linked_items
+
+    def getLinkedItem(self):
+        """
+        Get linked workitems both linked and back linked item will show up.
+
+        @return: Array of  Workitem
+        @return:
+        """
+        return [item[1] for item in self.getLinkedItemWithRoles()]
+
     def hasAttachment(self):
         """
         Checks if the workitem has attachments
@@ -684,6 +717,17 @@ class Workitem(CustomFields, Comments):
             columns.append(col.id)
         return columns
 
+    def _testStepNoneCheck(self):
+        """
+        Sanity check on content of test steps when empty strings are use.
+        Sometimes they show up as None, which is not accepted by the API.
+        @return: None
+        """
+        for step_id, step in enumerate(self._polarion_test_steps.steps.TestStep):
+            for col_id, col in enumerate(self._polarion_test_steps.steps.TestStep[step_id].values.Text):
+                if self._polarion_test_steps.steps.TestStep[step_id].values.Text[col_id].content is None:
+                    self._polarion_test_steps.steps.TestStep[step_id].values.Text[col_id].content = ""
+
     def _hasTestStepField(self):
         """
         Checks if the testSteps custom field is available for this workitem. If so it allows test steps to be added.
@@ -699,6 +743,8 @@ class Workitem(CustomFields, Comments):
         """
         Update the workitem in polarion
         """
+        if self._postpone_save:
+            return
         updated_item = {}
 
         for attr, value in self._polarion_item.__dict__.items():
