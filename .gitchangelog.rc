@@ -111,7 +111,7 @@ section_regexps = [
 ##   - ReSub(pattern, replacement): will apply regexp substitution.
 ##
 ##   - Indent(chars="  "): will indent the text with the prefix
-##     Please memorize that template engines gets also to modify the text and
+##     Please remember that template engines gets also to modify the text and
 ##     will usually indent themselves the text if needed.
 ##
 ##   - Wrap(regexp=r"\n\n"): re-wrap text in separate paragraph to fill 80-Columns
