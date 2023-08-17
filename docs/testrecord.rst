@@ -31,6 +31,15 @@ Set the status of an individual test case step:
 
 Where step_index is a valid range for the current test case.
 
+It is possible to use the context manager with a record.
+This is useful, when updating all test steps in a record.
+Execution speed increases, because the record is only updated once, when exiting the context manager.
+
+.. code:: python
+
+    with test_run.records[0] as test_record:
+        for step_index in range(5):
+            _record.setTestStepResult(step_index, Record.ResultType.PASSED, 'See attachment')
 
 
 Attachments

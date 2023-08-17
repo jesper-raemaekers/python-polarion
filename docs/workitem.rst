@@ -176,6 +176,13 @@ Workitems can be linked together using :func:`~Workitem.addLinkedItem`. In this 
 
     new_workitem_2.addLinkedItem(new_workitem_1, 'relates_to')
 
+Links can be retrieved either with or without link roles:
+
+.. code:: python
+
+    print(workitem_1.getLinkedItem()) # [PYTH-540: None]
+    print(workitem_1.getLinkedItemWithRoles()) # [('follow_up', PYTH-540: None)]
+
 
 Custom fields
 ^^^^^^^^^^^^^
@@ -215,6 +222,20 @@ The workitem class implements the __eq__ method allowing it to be compared.
 
     if workitem1 == workitem2:
     #...
+
+Context Manager
+^^^^^^^^^^^^^^^
+
+It is possible to use the context manager with a workitem.
+This is useful, when updating many attributes of it.
+Execution speed increases, because the workitem is only updated / saved once, when exiting the context manager.
+
+.. code:: python
+
+    with workitem as wi:
+        wi.addAttachment(path_to_file, 'file title')
+        wi.addComment('comment')
+        # any many more
 
 
 List of available attributes
