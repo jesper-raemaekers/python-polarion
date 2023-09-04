@@ -20,3 +20,11 @@ class PolarionObject(object):
             return self._uri
         else:
             super().__getattribute__(name)
+
+    def beginTransaction(self):
+        session = self._polarion.getService('Session')
+        session.beginTransaction()
+
+    def endTransaction(self, rollback=False):
+        session = self._polarion.getService('Session')
+        session.endTransaction(rollback=rollback)
