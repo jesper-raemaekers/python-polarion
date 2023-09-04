@@ -125,6 +125,7 @@ class Workitem(CustomFields, Comments):
         except ValueError:
             return None
         return '/'.join(location_split[start+1:stop])
+
     def __enter__(self):
         self._postpone_save = True
         return self
@@ -377,6 +378,8 @@ class Workitem(CustomFields, Comments):
     def getTypeId(self):
         """Returns the type qualifier"""
         return self.type.id
+
+    # TODO: Implement a getTypeDescription that returns the User Interface name of the Type
 
     def getTitle(self):
         """
