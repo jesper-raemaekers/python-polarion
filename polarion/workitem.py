@@ -136,10 +136,11 @@ class Workitem(CustomFields, Comments):
 
     def _buildWorkitemFromPolarion(self):
         if self._polarion_item is not None and not self._polarion_item.unresolvable:
-            self._original_polarion = copy.deepcopy(self._polarion_item)
-            for attr, value in self._polarion_item.__dict__.items():
-                for key in value:
-                    setattr(self, key, value[key])
+            self._original_polarion = copy.deepcopy(self._polarion_item)  # Refreshes the cache
+            if self._postpone_save is False:  # This will avoid that the data set be lost.
+                for attr, value in self._polarion_item.__dict__.items():
+                    for key in value:
+                        setattr(self, key, value[key])
         else:
             raise PolarionAccessError(f'Workitem not retrieved from Polarion')
 
@@ -716,12 +717,17 @@ class Workitem(CustomFields, Comments):
     def getLastRevisionNumber(self) -> int:
         """
         Return the revision number of the work item.
+        It stores the number in the object for later use.
         @return: Integer with revision number
         """
+        if hasattr(self, 'revision_number'):
+            return self.revision_number
+
         service = self._polarion.getService('Tracker')
         try:
             history: list = service.getRevisions(self.uri)
-            return int(history[-1])
+            self.revision_number = int(history[-1])
+            return self.revision_number
         except:
             raise PolarionWorkitemAttributeError("Could not get Revision!")
 
@@ -791,9 +797,24 @@ class Workitem(CustomFields, Comments):
             service.updateWorkItem(updated_item)
             self._reloadFromPolarion()
 
+    @property
+    def postpone_save(self):
+        return self._postpone_save
+
+    @postpone_save.setter
+    def postpone_save(self, value):
+        self._postpone_save = value
+        if value is False:
+            self.save()
+
+    def revert_changes(self):
+        """Cancels the changes made to the workitem and reloads the data from Polarion"""
+        self._postpone_save = False
+        self._reloadFromPolarion()
+
     def getLastFinalized(self):
         if hasattr(self, 'lastFinalized'):
-            return getattr(self, 'lastFinalized')
+            return self.lastFinalized
 
         try:
             history = self._polarion.generateHistory(self.uri, ignored_fields=[f for f in dir(self._polarion_item) if f not in ['status']])
@@ -802,7 +823,7 @@ class Workitem(CustomFields, Comments):
                 if h.diffs:
                     for d in h.diffs.item:
                         if d.fieldName == 'status' and d.after.id == 'finalized':
-                            setattr(self, 'lastFinalized', h.date)
+                            self.lastFinalized = h.date
                             return h.date
         except:
             pass
@@ -871,7 +892,8 @@ class Workitem(CustomFields, Comments):
         service = self._polarion.getService('Tracker')
         self._polarion_item = service.getWorkItemByUri(self._polarion_item.uri)
         self._buildWorkitemFromPolarion()
-        self._original_polarion = copy.deepcopy(self._polarion_item)
+        # deepcopy was removed from here because it was already being done in
+        # _buildWorkitemFromPolarion() method
 
     def __eq__(self, other):
         try:
