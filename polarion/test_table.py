@@ -1,5 +1,30 @@
 # coding=utf-8
 
+class TestIterator:
+
+    def __init__(self, parent: 'TestTable', start=0, stop=None, increment=1):
+        self.parent = parent
+        self.counter = start
+        if stop is None:
+            self.stop = len(parent)
+        else:
+            self.stop = stop
+        self.increment = increment
+
+    def __iter__(self):
+        self.counter = 0
+        if self.stop is None:
+            self.stop = len(self.parent)
+        return self
+
+    def __next__(self):
+        if self.counter < self.stop:
+            value = self.parent[self.counter]
+            self.counter += self.increment
+            return value
+        else:
+            raise StopIteration
+
 
 class TestTable(object):
     """
@@ -38,6 +63,9 @@ class TestTable(object):
 
     def __getitem__(self, item):
         return self.steps.TestStep[item]
+
+    def __iter__(self):
+        return TestIterator(parent=self)
 
     def clear_teststeps(self):
         self.steps = self.array_of_test_step_type()
