@@ -3,6 +3,12 @@ Changelog
 
 V1.2.2 Nuno Brum
 ----------------
+- Adding order parameter to Workitem.moveToDocument() and Document.addHeading() methods
+- Improving debug messages in raised exceptions.
+- Adding type hints and improving docstrings.
+
+V1.2.2 Nuno Brum
+----------------
 - Fix on the TestTable initialization when receiving an empty Test Steps Table
 
 V1.2.1 Nuno Brum
