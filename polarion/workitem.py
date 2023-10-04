@@ -142,7 +142,8 @@ class Workitem(CustomFields, Comments):
                     for key in value:
                         setattr(self, key, value[key])
         else:
-            raise PolarionAccessError(f'Workitem not retrieved from Polarion')
+            raise PolarionAccessError(f'Workitem "{self._id}" not retrieved from Polarion'
+                                      f' {self._polarion.polarion_url}')
 
     def getAuthor(self):
         """
@@ -436,6 +437,12 @@ class Workitem(CustomFields, Comments):
         return TestTable(self, clear_table)
 
     def getRawTestSteps(self):
+        """
+        Get the raw test steps from the workitem. This is the TestStepArray object as returned by the Polarion API.
+
+        :return: The raw test steps
+        :rtype: TestStepArray or None
+        """
         if self._polarion_item is not None and not self._polarion_item.unresolvable:
             try:
                 # get the custom fields
@@ -448,7 +455,7 @@ class Workitem(CustomFields, Comments):
                 pass
         return None
 
-    def setTestSteps(self, test_steps):
+    def setTestSteps(self, test_steps: TestTable) -> None:
         """
 
         :param test_steps:
@@ -682,16 +689,18 @@ class Workitem(CustomFields, Comments):
         service = self._polarion.getService('Tracker')
         service.deleteWorkItem(self.uri)
 
-    def moveToDocument(self, document, parent):
+    def moveToDocument(self, document, parent, order=-1):
         """
         Move the work item into a document as a child of another workitem
 
         :param document: Target document
         :param parent: Parent workitem, None if it shall be placed as top item
+        :param order: Order of the workitem, -1 for last
+        :type order: int
         """
         service = self._polarion.getService('Tracker')
-        service.moveWorkItemToDocument(self.uri, document.uri, parent.uri if parent is not None else xsd.const.Nil, -1,
-                                       False)
+        service.moveWorkItemToDocument(self.uri, document.uri, parent.uri if parent is not None else xsd.const.Nil,
+                                       order, False)
 
     def getTestStepHeader(self):
         """

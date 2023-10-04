@@ -124,18 +124,19 @@ class Document(CustomFields):
             parent = createFromUri(self._polarion, self._project, parent_uri.workItemURI)
         return parent
 
-    def addHeading(self, title, parent_workitem=None):
+    def addHeading(self, title, parent_workitem=None, order=-1):
         """
         Adds a heading to a document
 
         :param title: Title of the heading
         :param parent_workitem: Parent workitem in the document hierarchy, set to None to create it on top level
+        :param order: Order of the heading in the document, set to -1 to add it at the end
         :return: Heading workitem
         """
         heading = self._project.createWorkitem('heading')
         heading.title = title
         heading.save()
-        heading.moveToDocument(self, parent_workitem)
+        heading.moveToDocument(self, parent_workitem, order)
         return heading
 
     def isCustomFieldAllowed(self, _):
