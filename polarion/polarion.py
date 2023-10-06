@@ -2,8 +2,13 @@ import atexit
 import re
 from urllib.parse import urljoin, urlparse
 import requests
+import tempfile
+import os
 from zeep import Client, Transport
 from zeep.plugins import HistoryPlugin
+from zeep import Client
+from zeep.cache import SqliteCache
+from zeep.transports import Transport
 
 from .project import Project
 import logging
@@ -27,7 +32,7 @@ class Polarion(object):
     """
 
     def __init__(self, polarion_url, user, password=None, token=None, static_service_list=False, verify_certificate=True,
-                 svn_repo_url=None, proxy=None, request_session=None):
+                 svn_repo_url=None, proxy=None, request_session=None, cache=False):
         self.user = user
         self.password = password
         self.token = token
@@ -36,6 +41,8 @@ class Polarion(object):
         self.svn_repo_url = svn_repo_url
         self.proxy = None
         self.request_session = request_session
+        self.cache = cache
+        self.transport = None
         if proxy is not None:
             self.proxy = {
                 'http': proxy,
@@ -177,9 +184,13 @@ class Polarion(object):
         """
         Gets the zeep transport object
         """
-        transport = Transport(session=self.request_session)
-        transport.session.verify = self.verify_certificate
-        return transport
+        if self.transport is None:
+            cache = None
+            if self.cache:
+                cache = SqliteCache(path=os.path.join(tempfile.gettempdir(),'sqlite.db'), timeout=60)
+            self.transport = Transport(session=self.request_session, cache=cache)
+            self.transport.session.verify = self.verify_certificate
+        return self.transport
 
     def hasService(self, name: str):
         """
