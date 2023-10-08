@@ -2,8 +2,47 @@ Changelog
 =========
 
 
-V1.2.1
+V1.3.0
 ------
+- PDF functionality optional #124 (#144) [Jesper Raemaekers]
+- Catch exceptions on deleted workitems when getting the document
+  content #137 (#143) [Jesper Raemaekers]
+- Add check for removed workitems #138 (#142) [Jesper Raemaekers]
+- Polarion_client.rst: skip_cert_verification is verify_certificate
+  (#132) [Florian Straub]
+- Update multiple parts of wi. (#129) [therealevahill]
+
+  * refactor: Rename _skip_save attribute to _post_pone.
+
+  This indicates better what is happening.
+
+  * feat: Implement contextmanager for Workitem.
+
+  * docs: Add tiny example how to use contextmanager with Workitem.
+- Feat: Implement contextmanager for Record. (#128) [therealevahill]
+
+  * feat: Implement contextmanager for Record.
+
+  Within the context manager it is possible to update multiple test steps
+  and only save it once at the end.
+
+  * doc: Add example for context manager use with record.
+- Add method to get linked items #124 (#127) [Jesper Raemaekers]
+- Allow test step 0 to be removed. #123 (#126) [Jesper Raemaekers]
+- Add document exporting functionality (#121) [fieschkon]
+- Update comments.py (#116) [fieschkon]
+
+  Allow user to select html or plain text for comments.
+- Added assert index is integer (#109) [Vinay Jacob-John, vjacobjo]
+
+  * Added assert index is integer for updateTestStep and added unit test
+
+  ---------
+
+
+V1.2.1 (2023-03-16)
+-------------------
+- Preparations for release 1.2.1. [jesper.raemaekers]
 - Update test steps with update function. Improved error message. #101.
   [jesper.raemaekers]
 - Added an example for retry mechanism from #104. [jesper.raemaekers]

@@ -158,7 +158,7 @@ tag_filter_regexp = r'^V[0-9]+\.[0-9]+(\.[0-9]+)?(_[0-9]+.[0-9]+)?'
 ##
 ## This label will be used as the changelog Title of the last set of changes
 ## between last valid tag and HEAD if any.
-unreleased_version_label = "V1.2.1"
+unreleased_version_label = "V1.3.0"
 
 
 ## ``output_engine`` is a callable

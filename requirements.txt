@@ -1,4 +1,4 @@
-requests~=2.25.1
-urllib3~=1.26.6
-zeep~=4.0.0
-texttable~=1.6.4
+requests~=2.31.0
+urllib3~=2.0.6
+zeep~=4.2.1
+texttable~=1.7.0
