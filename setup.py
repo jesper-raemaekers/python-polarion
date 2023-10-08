@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="polarion",
-    version="1.2.1",
+    version="1.3.0",
     author="Jesper Raemaekers",
     author_email="j.raemaekers@relek.nl",
     description="Polarion client for Python",
@@ -24,5 +24,5 @@ setuptools.setup(
     ],
     install_requires=["zeep", "lxml", "texttable"],
     packages=setuptools.find_packages(),
-    python_requires='>=3.6',
+    python_requires='>=3.7',
 )
