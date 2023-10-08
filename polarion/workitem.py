@@ -475,10 +475,12 @@ class Workitem(CustomFields, Comments):
         service = self._polarion.getService('Tracker')
         if self.linkedWorkItems is not None:
             for linked_item in self.linkedWorkItems.LinkedWorkItem:
-                linked_items.append((linked_item.role.id, Workitem(self._polarion, self._project, uri=linked_item.workItemURI)))
+                if linked_item.role is not None:
+                    linked_items.append((linked_item.role.id, Workitem(self._polarion, self._project, uri=linked_item.workItemURI)))
         if self.linkedWorkItemsDerived is not None:
             for linked_item in self.linkedWorkItemsDerived.LinkedWorkItem:
-                linked_items.append((linked_item.role.id, Workitem(self._polarion, self._project, uri=linked_item.workItemURI)))
+                if linked_item.role is not None:
+                    linked_items.append((linked_item.role.id, Workitem(self._polarion, self._project, uri=linked_item.workItemURI)))
         return linked_items
 
     def getLinkedItem(self):
