@@ -181,7 +181,7 @@ class Polarion(object):
     @property
     def PdfProperties(self):
         """
-        Get PDF properties object but only is it exist.
+        Get PDF properties object but only if it exist.
         If is was not able to get it from Polarion, fail with a exception only when using this feature
         @return: PdfProperties
         """

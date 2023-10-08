@@ -38,9 +38,7 @@ The workitem can be updated and saved. The example below loads a workitem, chang
     print(f'Status: {reload_workitem.status.id}')
     print(f'Type: {reload_workitem.type.id}')
 
-Prints:
-
-.. code:: python
+Prints::
 
     Title: title?
     Status: open
