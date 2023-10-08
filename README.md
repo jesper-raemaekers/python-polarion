@@ -83,4 +83,5 @@ It is tested for Python version 3.6 through 3.10.
 
 # Known issues or missing features
 - No way of knowing the test run possible statuses.
+- Deleting work items used in documents does not remove the reference from the document.
 
