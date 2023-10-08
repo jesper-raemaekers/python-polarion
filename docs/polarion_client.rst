@@ -64,8 +64,8 @@ A custom retry strategy can be set by using the request_session parameter of the
     # example of a retry strategy
     my_sess = requests.Session()
     retries = Retry(total=5,
-                backoff_factor=0.1,
-                status_forcelist=[ 500, 502, 503, 504 ])  # only retry those status codes
+        backoff_factor=0.1,
+        status_forcelist=[ 500, 502, 503, 504 ])  # only retry those status codes
 
     my_sess.mount('http://', HTTPAdapter(max_retries=retries)) # for all http connections
 
