@@ -24,5 +24,5 @@ setuptools.setup(
     ],
     install_requires=["zeep", "lxml", "texttable"],
     packages=setuptools.find_packages(),
-    python_requires='>=3.6',
+    python_requires='>=3.7',
 )
