@@ -565,6 +565,7 @@ class Workitem(CustomFields, Comments):
     def delete(self):
         """
         Delete the work item in polarion
+        This does not remove workitem references from documents
         """
         service = self._polarion.getService('Tracker')
         service.deleteWorkItem(self.uri)
