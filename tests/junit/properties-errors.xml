@@ -1,0 +1,27 @@
+<testsuites name="Test run" tests="8" failures="1" errors="1" skipped="1" 
+    assertions="20" time="16.082687" timestamp="2021-04-02T15:48:23">
+
+    <testsuite name="Tests.Registration" tests="8" failures="1" errors="1" skipped="1" 
+        assertions="20" time="16.082687" timestamp="2021-04-02T15:48:23" 
+        file="tests/registration.code">
+
+        <properties>
+            <!-- <property> Each property has a name and value. Some tools also support
+            properties with text values instead of value attributes. -->
+            <property name="version" value="1.774" />
+
+        </properties>
+
+        <!-- Example of a test case with properties -->
+        <testcase name="testCase8" classname="Tests.Registration" assertions="4"
+            time="1.625275" file="tests/registration.code" line="302">
+            <!-- <properties> Some tools also support properties for test cases. -->
+            <properties>
+                <property name="verifies" value="REQ-THAT-DOES-NOT-EXIST" />
+            </properties>
+            <failure message="Expected value did not match." type="AssertionError">
+                <!-- Failure description or stack trace -->
+            </failure>
+        </testcase>
+    </testsuite>
+</testsuites>

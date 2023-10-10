@@ -98,6 +98,8 @@ class XmlParser:
     TEST_SUITES='testsuites'
     TEST_SUITE='testsuite'
     TEST_CASE='testcase'
+    PROPERTIES='properties'
+    PROPERTY='property'
 
     @classmethod
     def parse_root(cls, xml_file):
@@ -152,7 +154,7 @@ class XmlParser:
             if 'time' in test_case.attrib.keys():
                 case.update({ 'time': test_case.attrib['time'] })
             
-            # error & failure
+            # error & failure & properties
             for elem in test_case:
                 if elem.tag in ['error', 'failure','skipped']:
                     text = []
@@ -161,6 +163,11 @@ class XmlParser:
                     if elem.text is not None:
                         text.append(elem.text)
                     case.update({ elem.tag: '\n'.join(text)})
+                elif elem.tag == XmlParser.PROPERTIES:
+                    case.update({'properties':{}})
+                    for property in elem:
+                        if XmlParser.PROPERTY == property.tag and 'name' in property.attrib.keys() and 'value' in property.attrib.keys():
+                            case['properties'].update({property.get('name') : property.get('value')})
             returned_cases.append(case)
         else:
             raise Exception(f'Unmanaged {XmlParser.TEST_CASE} {test_case.tag} in {parent["path"]}')
@@ -249,6 +256,7 @@ class Importer:
 
             if 'timestamp' in case.keys():
                 test_run.records[-1].executed=case['timestamp']
+
             if 'failure' in case.keys():
                 test_run.records[-1].setResult(Record.ResultType.FAILED, case['failure'])
             elif 'error' in case.keys():
@@ -257,6 +265,28 @@ class Importer:
                 test_run.records[-1].setResult(Record.ResultType.NOTTESTED, case['skipped'])
             else:
                 test_run.records[-1].setResult(Record.ResultType.PASSED)
+            
+            # handle traceability, because of API, traqceability must use default traceability role 
+            # and not the opposite one.
+            # traceability links are made using IDs or titles 
+            # this implementation does not allow traceability between test cases
+            if 'properties' in case.keys():
+                for key in case['properties'].keys():
+                    linked_item = None
+                    try:
+                        linked_item=project.getWorkitem(case['properties'].get(key))
+                    except Exception:
+                        title=case["properties"].get(key)
+                        linked_items=project.searchWorkitem(query=f'title:{title}', field_list=['id','title'])
+                        if len(linked_items) > 0 and linked_items[0]['title']==title:
+                            linked_item=linked_items[0]
+                            # work item is reload to avoid isues of class not correctly loaded by search work item
+                            linked_item=project.getWorkitem(linked_item['id'])
+                        else:
+                            logger.error(f'impossible to link{wi_case.id} to {title}')
+                    if linked_item is not None:
+                        wi_case.addLinkedItem(linked_item, key)
+
         logger.info(f'Results saved in {config.url}/#/project/{config.project_id}/testrun?id={config.testrun_id}')
 
         return test_run
