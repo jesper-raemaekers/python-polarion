@@ -5,6 +5,7 @@ from polarion.polarion import Polarion
 from polarion.xml import Config, Importer, ResultExporter
 from polarion.record import Record
 from keys import polarion_url, polarion_project_id, polarion_user, polarion_password, polarion_token
+#from keys import polarion_url, polarion_project_id, polarion_user, polarion_password
 
 from unittest import mock
 
@@ -14,26 +15,24 @@ ISSUE_TYPE = 'issue'
 class TestPolarionJunit(unittest.TestCase):
 
     def get_config (self, file):
-        if polarion_token is not None and len(polarion_token) > 0:
-            return Config.from_dict({
-                Config.XML_FILE: file,
-                Config.URL: polarion_url,
-                Config.USERNAME: polarion_user,
-                Config.TOKEN: polarion_token,
-                Config.PROJECT_ID: polarion_project_id,
-                Config.TESTRUN_COMMENT: '',
-                Config.USE_CACHE : True
-            })
-        else:
-            return Config.from_dict({
-                Config.XML_FILE: file,
-                Config.URL: polarion_url,
-                Config.USERNAME: polarion_user,
-                Config.PASSWORD: polarion_password,
-                Config.PROJECT_ID: polarion_project_id,
-                Config.TESTRUN_COMMENT: '',
-                Config.USE_CACHE : True
-            })
+        # return Config.from_dict({
+        #     Config.XML_FILE: file,
+        #     Config.URL: polarion_url,
+        #     Config.USERNAME: polarion_user,
+        #     Config.TOKEN: polarion_token,
+        #     Config.PROJECT_ID: polarion_project_id,
+        #     Config.TESTRUN_COMMENT: '',
+        #     Config.USE_CACHE : True
+        # })
+        return Config.from_dict({
+            Config.XML_FILE: file,
+            Config.URL: polarion_url,
+            Config.USERNAME: polarion_user,
+            Config.PASSWORD: polarion_password,
+            Config.PROJECT_ID: polarion_project_id,
+            Config.TESTRUN_COMMENT: '',
+            Config.USE_CACHE : True
+        })
 
     def import_xml (self, file):
         return Importer.from_xml(self.get_config(file))
