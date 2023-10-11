@@ -4,8 +4,8 @@ import zeep
 from polarion.polarion import Polarion
 from polarion.xml import Config, Importer, ResultExporter
 from polarion.record import Record
-from keys import polarion_url, polarion_project_id, polarion_user, polarion_password, polarion_token
-#from keys import polarion_url, polarion_project_id, polarion_user, polarion_password
+#from keys import polarion_url, polarion_project_id, polarion_user, polarion_password, polarion_token
+from keys import polarion_url, polarion_project_id, polarion_user, polarion_password
 
 from unittest import mock
 
