@@ -194,7 +194,7 @@ class Polarion(object):
 
     def getService(self, name: str):
         """
-        Get a WSDL service client. The name can be 'Trakcer' or 'Session'
+        Get a WSDL service client. The name can be 'Tracker' or 'Session'
         """
         # request user info to see if we're still logged in
         try:
