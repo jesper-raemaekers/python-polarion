@@ -4,11 +4,8 @@ from urllib.parse import urljoin, urlparse
 import requests
 import tempfile
 import os
-from zeep import Client, Transport
+from zeep import Client, CachingClient
 from zeep.plugins import HistoryPlugin
-from zeep import Client
-from zeep.cache import SqliteCache
-from zeep.transports import Transport
 
 from .project import Project
 import logging
@@ -97,10 +94,9 @@ class Polarion(object):
         """
         if 'Session' in self.services:
             self.history = HistoryPlugin()
-            self.services['Session']['client'] = Client(
-                self.services['Session']['url'] + '?wsdl', plugins=[self.history], transport=self._getTransport())
+            self.services['Session']['client'] = self.get_client('Session',[self.history])
             if self.proxy is not None:
-                self.services['Session']['client'] .transport.session.proxies = self.proxy
+                self.services['Session']['client'].transport.session.proxies = self.proxy
             try:
                 self.sessionHeaderElement = None
                 self.sessionCookieJar = None
@@ -123,6 +119,15 @@ class Polarion(object):
         else:
             raise Exception(
                 'Cannot login because WSDL has no SessionWebService')
+    
+    def get_client(self,service,plugins=[]):
+        client = None
+        if self.cache:
+            client = CachingClient(self.services[service]['url'] + '?wsdl', plugins=plugins)
+        else:
+            client = Client(self.services[service]['url'] + '?wsdl', plugins=plugins)
+        client.transport.session.verify = self.verify_certificate
+        return client
 
     def _updateServices(self):
         """
@@ -133,8 +138,7 @@ class Polarion(object):
         for service in self.services:
             if service != 'Session':
                 if 'client' not in service:
-                    self.services[service]['client'] = Client(
-                        self.services[service]['url'] + '?wsdl', transport=self._getTransport())
+                    self.services[service]['client'] = self.get_client(service)
                 self.services[service]['client'].set_default_soapheaders(
                     [self.sessionHeaderElement])
                 if self.proxy is not None:
@@ -179,18 +183,6 @@ class Polarion(object):
         self.ArrayOfEnumOptionIdType = self.getTypeFromService('Tracker', 'ns2:ArrayOfEnumOptionId')
         self.ArrayOfSubterraURIType = self.getTypeFromService('Tracker', 'ns1:ArrayOfSubterraURI')
         self.PdfProperties = self.getTypeFromService('Tracker', 'ns2:PdfProperties')
-
-    def _getTransport(self):
-        """
-        Gets the zeep transport object
-        """
-        if self.transport is None:
-            cache = None
-            if self.cache:
-                cache = SqliteCache(path=os.path.join(tempfile.gettempdir(),'sqlite.db'), timeout=60)
-            self.transport = Transport(session=self.request_session, cache=cache)
-            self.transport.session.verify = self.verify_certificate
-        return self.transport
 
     def hasService(self, name: str):
         """

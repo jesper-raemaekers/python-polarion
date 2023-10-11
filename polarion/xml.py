@@ -237,6 +237,9 @@ class Importer:
             test_run.setCustomField(Importer.TEST_RUN_COMMENT_CUSTOM_FIELD, test_run._polarion.TextType(
                     content=comment, type='text/html', contentLossy=False))
 
+        # cache for work items traced
+        cache_for_workitems = {}
+
         # Filling
         logger.info('Saving results')
         for case in cases:
@@ -273,17 +276,21 @@ class Importer:
             if 'properties' in case.keys():
                 for key in case['properties'].keys():
                     linked_item = None
-                    try:
-                        linked_item=project.getWorkitem(case['properties'].get(key))
-                    except Exception:
-                        title=case["properties"].get(key)
-                        linked_items=project.searchWorkitem(query=f'title:{title}', field_list=['id','title'])
-                        if len(linked_items) > 0 and linked_items[0]['title']==title:
-                            linked_item=linked_items[0]
-                            # work item is reload to avoid isues of class not correctly loaded by search work item
-                            linked_item=project.getWorkitem(linked_item['id'])
-                        else:
-                            logger.error(f'impossible to link{wi_case.id} to {title}')
+                    title=case["properties"].get(key)
+                    if title in cache_for_workitems:
+                        linked_item = cache_for_workitems[title]
+                    else:
+                        try:
+                            linked_item=project.getWorkitem(case['properties'].get(key))
+                        except Exception:
+                            linked_items=project.searchWorkitem(query=f'title:{title}', field_list=['id','title'])
+                            if len(linked_items) > 0 and linked_items[0]['title']==title:
+                                linked_item=linked_items[0]
+                                # work item is reload to avoid isues of class not correctly loaded by search work item
+                                linked_item=project.getWorkitem(linked_item['id'])
+                            else:
+                                logger.error(f'impossible to link{wi_case.id} to {title}')
+                            cache_for_workitems[title] = linked_item
                     if linked_item is not None:
                         wi_case.addLinkedItem(linked_item, key)
 
