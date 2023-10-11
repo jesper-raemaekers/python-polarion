@@ -69,7 +69,7 @@ class TestPolarionJunit(unittest.TestCase):
         return self.create_wi(project, ISSUE_TYPE, *crs)
 
     def test_import_xml_basic(self):
-        testrun=self.import_xml('./junit/no_properties.xml')
+        testrun=self.import_xml('junit/no_properties.xml')
         self.assertIsNotNone(testrun)
         self.assertEqual(len(testrun.records),4)
         # impossible with the current api to map (without server calls) in the test to ID in the file
@@ -97,7 +97,7 @@ class TestPolarionJunit(unittest.TestCase):
         self.create_reqs(project, "REQ-001","REQ-002")
         self.create_issue(project, "ISSUE-001")
 
-        testrun=self.import_xml('./junit/properties.xml')
+        testrun=self.import_xml('junit/properties.xml')
         self.assertIsNotNone(testrun)
         self.assertEqual(len(testrun.records),3)
 
@@ -126,7 +126,7 @@ class TestPolarionJunit(unittest.TestCase):
         self.assertEqual(links_issue[0][1].title, "Tests.Registration.testCase10")
 
     def test_import_xml_with_bad_link(self):
-        testrun=self.import_xml('./junit/properties-errors.xml')
+        testrun=self.import_xml('junit/properties-errors.xml')
         self.assertIsNotNone(testrun)
         self.assertEqual(len(testrun.records),1)
 
