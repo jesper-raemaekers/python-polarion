@@ -38,7 +38,8 @@ class TestPolarionJunit(unittest.TestCase):
         return Importer.from_xml(self.get_config(file))
 
     def get_project(self):
-        polarion=Polarion(polarion_url=polarion_url, user=polarion_user, token=polarion_token, cache=True)
+        polarion=Polarion(polarion_url=polarion_url, user=polarion_user, password=polarion_password, cache=True)
+        # polarion=Polarion(polarion_url=polarion_url, user=polarion_user, token=polarion_token, cache=True)
         project=polarion.getProject(polarion_project_id)
         return project
 
