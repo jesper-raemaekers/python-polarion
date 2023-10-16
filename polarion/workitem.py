@@ -124,9 +124,10 @@ class Workitem(CustomFields, Comments):
                     # now parse the rows
                     for row in self._polarion_test_steps.steps.TestStep:
                         current_row = {}
-                        for col_id in range(len(row.values.Text)):
-                            current_row[columns[col_id]] = row.values.Text[col_id].content
-                        self._parsed_test_steps.append(current_row)
+                        if row.values is not None:
+                            for col_id in range(len(row.values.Text)):
+                                current_row[columns[col_id]] = row.values.Text[col_id].content
+                            self._parsed_test_steps.append(current_row)
         else:
             raise Exception(f'Workitem not retrieved from Polarion')
 
