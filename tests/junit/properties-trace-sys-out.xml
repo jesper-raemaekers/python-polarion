@@ -1,0 +1,58 @@
+<testsuites name="Test run" tests="8" failures="1" errors="1" skipped="1" 
+    assertions="20" time="16.082687" timestamp="2021-04-02T15:48:23">
+
+    <testsuite name="Tests.Registration" tests="8" failures="1" errors="1" skipped="1" 
+        assertions="20" time="16.082687" timestamp="2021-04-02T15:48:23" 
+        file="tests/registration.code">
+
+        <properties>
+            <!-- <property> Each property has a name and value. Some tools also support
+            properties with text values instead of value attributes. -->
+            <property name="version" value="1.774" />
+
+        </properties>
+
+        <!-- Example of a test case with properties -->
+        <testcase name="testCase8" classname="Tests.Registration" assertions="4"
+            time="1.625275" file="tests/registration.code" line="302">
+            <!-- <properties> Some tools also support properties for test cases. -->
+            <failure message="Expected value did not match." type="AssertionError">
+                <!-- Failure description or stack trace -->
+            </failure>
+            <system-out>
+Output line #1
+Output line #2
+
+[[PROPERTY|verifies=REQ-011]]
+[[PROPERTY|verifies=REQ-012]]
+
+            </system-out>
+        </testcase>
+        <testcase name="testCase9" classname="Tests.Registration" assertions="4"
+            time="1.625275" file="tests/registration.code" line="302">
+            <!-- <properties> Some tools also support properties for test cases. -->
+             <error message="Division by zero." type="ArithmeticError">
+                <!-- Error description or stack trace -->
+            </error>
+            <system-out>
+Output line #1
+Output line #2
+
+[[PROPERTY|relates_to=REQ-012]]
+
+Output line #1
+Output line #3
+            </system-out>
+        </testcase>
+       <testcase name="testCase10" classname="Tests.Registration" assertions="4"
+            time="1.625275" file="tests/registration.code" line="302">
+            <!-- <properties> Some tools also support properties for test cases. -->
+            <properties>
+                <property name="verifies" value="ISSUE-012" />
+            </properties>
+            <system-out>
+[[PROPERTY|verifies=ISSUE-011]]
+            </system-out>
+        </testcase>
+    </testsuite>
+</testsuites>
