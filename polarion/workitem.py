@@ -49,9 +49,10 @@ class Workitem(CustomFields, Comments):
         if self._uri:
             try:
                 self._polarion_item = service.getWorkItemByUri(self._uri)
-            except Exception:
+            except Exception as err:
                 raise PolarionAccessError(
-                    f'Cannot find workitem {self._uri} within Polarion server {self._polarion.polarion_url}')
+                    f'Cannot load workitem {self._uri} within Polarion server {self._polarion.polarion_url}\n'
+                    f'This exception was raised: {err}')
 
             self._id = self._polarion_item.id
         elif id is not None:
@@ -597,7 +598,20 @@ class Workitem(CustomFields, Comments):
             return self.attachments.Attachment
         return []
 
-    def getAttachment(self, id):
+    def getAttachmentInfo(self, attachment_id: str):
+        """
+        Returns the attachment info for a given attachment_id
+        :param attachment_id: Returns the dictionary with the attachment info
+        :type attachment_id: str
+        :return: AttachmentInfo
+        :rtype:
+        """
+        if self.hasAttachment():
+            for attachment in self.getAttachments():
+                if attachment.id == attachment_id:
+                    return attachment
+
+    def getAttachment(self, id) -> bytes:
         """
         Get the attachment data
 
@@ -685,6 +699,8 @@ class Workitem(CustomFields, Comments):
     def delete(self):
         """
         Delete the work item in polarion
+        :return: Nothing
+        :rtype: None
         """
         service = self._polarion.getService('Tracker')
         service.deleteWorkItem(self.uri)
