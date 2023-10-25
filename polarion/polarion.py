@@ -2,7 +2,9 @@ import atexit
 import re
 from urllib.parse import urljoin, urlparse
 import requests
-from zeep import Client, Transport
+import tempfile
+import os
+from zeep import Client, CachingClient
 from zeep.plugins import HistoryPlugin
 
 from .project import Project
@@ -27,7 +29,7 @@ class Polarion(object):
     """
 
     def __init__(self, polarion_url, user, password=None, token=None, static_service_list=False, verify_certificate=True,
-                 svn_repo_url=None, proxy=None, request_session=None):
+                 svn_repo_url=None, proxy=None, request_session=None, cache=False):
         self.user = user
         self.password = password
         self.token = token
@@ -37,6 +39,8 @@ class Polarion(object):
         self.svn_repo_url = svn_repo_url
         self.proxy = None
         self.request_session = request_session
+        self.cache = cache
+        self.transport = None
         if proxy is not None:
             self.proxy = {
                 'http': proxy,
@@ -91,10 +95,9 @@ class Polarion(object):
         """
         if 'Session' in self.services:
             self.history = HistoryPlugin()
-            self.services['Session']['client'] = Client(
-                self.services['Session']['url'] + '?wsdl', plugins=[self.history], transport=self._getTransport())
+            self.services['Session']['client'] = self.get_client('Session',[self.history])
             if self.proxy is not None:
-                self.services['Session']['client'] .transport.session.proxies = self.proxy
+                self.services['Session']['client'].transport.session.proxies = self.proxy
             try:
                 self.sessionHeaderElement = None
                 self.sessionCookieJar = None
@@ -117,6 +120,15 @@ class Polarion(object):
         else:
             raise Exception(
                 'Cannot login because WSDL has no SessionWebService')
+    
+    def get_client(self,service,plugins=[]):
+        client = None
+        if self.cache:
+            client = CachingClient(self.services[service]['url'] + '?wsdl', plugins=plugins)
+        else:
+            client = Client(self.services[service]['url'] + '?wsdl', plugins=plugins)
+        client.transport.session.verify = self.verify_certificate
+        return client
 
     def _updateServices(self):
         """
@@ -127,8 +139,7 @@ class Polarion(object):
         for service in self.services:
             if service != 'Session':
                 if 'client' not in service:
-                    self.services[service]['client'] = Client(
-                        self.services[service]['url'] + '?wsdl', transport=self._getTransport())
+                    self.services[service]['client'] = self.get_client(service)
                 self.services[service]['client'].set_default_soapheaders(
                     [self.sessionHeaderElement])
                 if self.proxy is not None:
@@ -172,15 +183,23 @@ class Polarion(object):
         self.CustomType = self.getTypeFromService('Tracker', 'ns2:Custom')
         self.ArrayOfEnumOptionIdType = self.getTypeFromService('Tracker', 'ns2:ArrayOfEnumOptionId')
         self.ArrayOfSubterraURIType = self.getTypeFromService('Tracker', 'ns1:ArrayOfSubterraURI')
-        self.PdfProperties = self.getTypeFromService('Tracker', 'ns2:PdfProperties')
+        self._PdfProperties = None
+        try:
+            self._PdfProperties = self.getTypeFromService('Tracker', 'ns2:PdfProperties')
+        except:
+            # fail silently if current polarion version does not have PDF properties
+            pass
 
-    def _getTransport(self):
+    @property
+    def PdfProperties(self):
         """
-        Gets the zeep transport object
+        Get PDF properties object but only if it exist.
+        If is was not able to get it from Polarion, fail with a exception only when using this feature
+        @return: PdfProperties
         """
-        transport = Transport(session=self.request_session)
-        transport.session.verify = self.verify_certificate
-        return transport
+        if self._PdfProperties is None:
+            raise Exception(f'PDF not supported in this Polarion version')
+        return self._PdfProperties
 
     def hasService(self, name: str):
         """
@@ -190,12 +209,9 @@ class Polarion(object):
             return True
         return False
 
-    def getClient(self, name: str):
-        return self.services['Project']['client']
-
     def getService(self, name: str):
         """
-        Get a WSDL service client. The name can be 'Trakcer' or 'Session'
+        Get a WSDL service client. The name can be 'Tracker' or 'Session'
         """
         # request user info to see if we're still logged in
         try:
@@ -211,7 +227,6 @@ class Polarion(object):
 
     def getTypeFromService(self, name: str, type_name):
         """
-        Internal function to obtain object types from Polarion Services
         """
         if name in self.services:
             return self.services[name]['client'].get_type(type_name)

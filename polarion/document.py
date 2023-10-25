@@ -83,7 +83,11 @@ class Document(CustomFields):
         workitems = []
         workitem_uris = self.getWorkitemUris()
         for workitem_uri in workitem_uris:
-            workitems.append(createFromUri(self._polarion, self._project, workitem_uri))
+            try:
+                workitems.append(createFromUri(self._polarion, self._project, workitem_uri))
+            except Exception as e:
+                # This happens when a reference to a deleted workitem is not removed from a document.
+                pass
         return workitems
 
     def getTopLevelWorkitem(self):

@@ -18,14 +18,18 @@ LinkedWorkitem = namedtuple('LinkedWorkitem', ['role', 'uri'])
 
 class Workitem(CustomFields, Comments):
     """
-    Create a Polarion workitem object either from and id or from an Polarion uri.
+    Create a Polarion workitem object from the following parameters:
+        - polarion client and existing workitem uri
+        - polarion client, Project and existing workitem id
+        - polarion client, Project and new_workitem_type. This creates a new workitem. The new_workitem_fields must
+            contain all the required fields for the new workitem type. If required fields are missing, an exception will
+            be raised identifying the missing fields.
 
     :param polarion: Polarion client object
     :param project: Polarion Project object
     :param id: Workitem ID
     :param uri: Polarion uri
     :param polarion_workitem: Polarion workitem content
-
     """
 
     class HyperlinkRoles(Enum):
@@ -35,14 +39,17 @@ class Workitem(CustomFields, Comments):
         INTERNAL_REF = 'internal reference'
         EXTERNAL_REF = 'external reference'
 
-    def __init__(self, polarion, project=None, id=None, uri=None, new_workitem_type=None, new_workitem_fields=None, polarion_workitem=None):
+    def __init__(self, polarion, project=None, id=None, uri=None, new_workitem_type=None, new_workitem_fields=None,
+                 polarion_workitem=None):
 
         super().__init__(polarion, project, id, uri)
         self._polarion = polarion
         self._project = project
         # self._id = id  # This is already done by the super class
-        # self._uri = uri
+        # self._uri = uri  #  This is already done by the super class
         self._postpone_save = False
+        self._legacy_test_steps_table = None  # Kept to support legacy code : addTestStep, removeTestStep,
+        # updateTestStep, etc...
 
         service = self._polarion.getService('Tracker')
 
@@ -434,8 +441,22 @@ class Workitem(CustomFields, Comments):
         """
         return self._hasTestStepField()
 
-    def getTestSteps(self, clear_table=False) -> TestTable:
-        return TestTable(self, clear_table)
+    def getTestTable(self, clear_table=False) -> TestTable:
+        """
+        Returns an object containing the test steps. This object can be
+        used to add, remove, insert and append test steps. Then, the setTestSteps()
+        method can be used to commit the test steps back to Polarion.
+
+        :param clear_table: Clears all the test-steps after copying, only keeping the 
+            template. This is useful to rewrite a complete test sequence.
+        :return: An Object containing the test table
+        :rtype: TestTable
+        """
+        if self._hasTestStepField():
+            self._legacy_test_steps_table = TestTable(self, clear_table)
+            return self._legacy_test_steps_table
+        else:
+            raise PolarionWorkitemAttributeError('Work item does not have test step custom field')
 
     def getRawTestSteps(self):
         """
@@ -447,7 +468,7 @@ class Workitem(CustomFields, Comments):
         if self._polarion_item is not None and not self._polarion_item.unresolvable:
             try:
                 # get the custom fields
-                if self.hasTestSteps():
+                if self._hasTestStepField():
                     service_test = self._polarion.getService('TestManagement')
                     return service_test.getTestSteps(self.uri)
             except Exception as  e:
@@ -456,10 +477,11 @@ class Workitem(CustomFields, Comments):
                 pass
         return None
 
-    def setTestSteps(self, test_steps: TestTable) -> None:
+    def setTestSteps(self, test_steps) -> None:
         """
+        Sets the test steps and saves the workitem. The TestTable object can be obtained from getTestTable().
 
-        :param test_steps:
+        :param test_steps: The TestTable object
         :type test_steps: TestTable or the TestStepArray directly obtained from getRawTestSteps
         :return:
         :rtype:
@@ -470,21 +492,26 @@ class Workitem(CustomFields, Comments):
         assert hasattr(test_steps, 'TestStep')
         assert len(test_steps.TestStep) > 0
 
-        if self.hasTestSteps():
+        if self._hasTestStepField():
             columns = self.getTestStepHeaderID()
             # Sanity Checks here
             # 1. The format is as expected
-            assert len(test_steps.TestStep[0].values.Text) == len(columns)
-            for col in range(len(columns)):
-                assert test_steps.TestStep[0].values.Text[col].type == 'text/html' and \
-                       isinstance(test_steps.TestStep[0].values.Text[col].content, str) and \
-                       test_steps.TestStep[0].values.Text[col].contentLossy is False
-                           
+            for step in test_steps.TestStep:
+                assert len(step.values.Text) == len(columns)
+                for col in range(len(columns)):
+                    if step.values.Text[col].content is not None:
+                        assert step.values.Text[col].type == 'text/html' and \
+                               isinstance(step.values.Text[col].content, str) and \
+                               step.values.Text[col].contentLossy is False
+                    else:
+                        step.values.Text[col].content = ''  # Get rid of None values. They are not allowed in Polarion,
+                        # but polarion converts '' into None, so we need to convert it back
+
         service_test = self._polarion.getService('TestManagement')
         service_test.setTestSteps(self.uri, test_steps)
 
     def getTestRuns(self, limit=-1):
-        if not self.hasTestSteps():
+        if not self._hasTestStepField():
             return None
 
         client = self._polarion.getService('TestManagement')
@@ -562,10 +589,12 @@ class Workitem(CustomFields, Comments):
         service = self._polarion.getService('Tracker')
         if self.linkedWorkItems is not None:
             for linked_item in self.linkedWorkItems.LinkedWorkItem:
-                linked_items.append((linked_item.role.id, Workitem(self._polarion, self._project, uri=linked_item.workItemURI)))
+                if linked_item.role is not None:
+                    linked_items.append((linked_item.role.id, Workitem(self._polarion, self._project, uri=linked_item.workItemURI)))
         if self.linkedWorkItemsDerived is not None:
             for linked_item in self.linkedWorkItemsDerived.LinkedWorkItem:
-                linked_items.append((linked_item.role.id, Workitem(self._polarion, self._project, uri=linked_item.workItemURI)))
+                if linked_item.role is not None:
+                    linked_items.append((linked_item.role.id, Workitem(self._polarion, self._project, uri=linked_item.workItemURI)))
         return linked_items
 
     def getLinkedItem(self):
@@ -577,7 +606,7 @@ class Workitem(CustomFields, Comments):
         """
         return [item[1] for item in self.getLinkedItemWithRoles()]
 
-    def hasAttachment(self):
+    def hasAttachment(self) -> bool:
         """
         Checks if the workitem has attachments
 
@@ -588,11 +617,22 @@ class Workitem(CustomFields, Comments):
             return True
         return False
 
-    def getAttachments(self):
+    def getAttachment(self, id) -> bytes:
+        """
+        Get the attachment data
+
+        :param id: The attachment id
+        :return: list of bytes
+        :rtype: bytes
+        """
+        service = self._polarion.getService('Tracker')
+        return service.getAttachment(self.uri, id)
+
+    def getAttachments(self) -> list:
         """
         Returns a list of attachments
-        :return:
-        :rtype:
+        :return: list of attachments
+        :rtype: list
         """
         if self.attachments is not None:
             return self.attachments.Attachment
@@ -610,17 +650,6 @@ class Workitem(CustomFields, Comments):
             for attachment in self.getAttachments():
                 if attachment.id == attachment_id:
                     return attachment
-
-    def getAttachment(self, id) -> bytes:
-        """
-        Get the attachment data
-
-        :param id: The attachment id
-        :return: list of bytes
-        :rtype: bytes[]
-        """
-        service = self._polarion.getService('Tracker')
-        return service.getAttachment(self.uri, id)
 
     def saveAttachmentAsFile(self, id, file_path):
         """
@@ -683,14 +712,18 @@ class Workitem(CustomFields, Comments):
             service.updateAttachment(self.uri, id, file_name, title, file_content.read())
         self._reloadFromPolarion()
 
-    def updateAttachmentData(self, id, data, title, file_name):
+    def updateAttachmentData(self, id, data, title, file_name) -> None:
         """
         Upload an attachment
 
         :param id: The attachment id
+        :type id: str
         :param data: Data to upload
+        :type data: bytes
         :param file_name: The name of the file
+        :type file_name: str
         :param title: The title of the attachment
+        :type title: str
         """
         service = self._polarion.getService('Tracker')
         service.updateAttachment(self.uri, id, file_name, title, data)
@@ -699,6 +732,7 @@ class Workitem(CustomFields, Comments):
     def delete(self):
         """
         Delete the work item in polarion
+        This does not remove workitem references from documents
         :return: Nothing
         :rtype: None
         """
@@ -717,6 +751,46 @@ class Workitem(CustomFields, Comments):
         service = self._polarion.getService('Tracker')
         service.moveWorkItemToDocument(self.uri, document.uri, parent.uri if parent is not None else xsd.const.Nil,
                                        order, False)
+
+    def addTestStep(self, *args):
+        """
+        Add a new test step to a test case work item
+        @param args: list of strings, one for each column
+        @return: None
+        """
+        if self._hasTestStepField() is False:
+            raise PolarionWorkitemAttributeError('Cannot add test steps to work item that does not have the custom field')
+        if self._legacy_test_steps_table is None:
+            self._legacy_test_steps_table = TestTable(self)
+        self._legacy_test_steps_table.addTestStep(*args)
+        self.setTestSteps(self._legacy_test_steps_table)
+
+    def removeTestStep(self, index: int):
+        """
+        Remove a test step at the specified index.
+        @param index: zero based index
+        @return: None
+        """
+        if self._hasTestStepField() is False:
+            raise PolarionWorkitemAttributeError('Cannot remove test steps to work item that does not have the custom field')
+        if self._legacy_test_steps_table is None:
+            self._legacy_test_steps_table = TestTable(self)
+        self._legacy_test_steps_table.removeTestStep(index)
+        self.setTestSteps(self._legacy_test_steps_table)
+
+    def updateTestStep(self, index: int, *args):
+        """
+        Update a test step at the specified index.
+        @param index: zero based index
+        @param args: list of strings, one for each column
+        @return: None
+        """
+        if self._hasTestStepField() is False:
+            raise PolarionWorkitemAttributeError('Cannot update test steps to work item that does not have the custom field')
+        if self._legacy_test_steps_table is None:
+            self._legacy_test_steps_table = TestTable(self)
+        self._legacy_test_steps_table.updateTestStep(index, *args)
+        self.setTestSteps(self._legacy_test_steps_table)
 
     def getTestStepHeader(self):
         """
@@ -738,6 +812,17 @@ class Workitem(CustomFields, Comments):
             raise PolarionWorkitemAttributeError('Work item does not have test step custom field')
 
         return self._getConfiguredTestStepColumnIDs()
+
+    def getTestSteps(self):
+        """
+        Return a list of test steps.
+        @return: Array of test steps
+        """
+        if self._hasTestStepField() is False:
+            return []
+        if self._legacy_test_steps_table is None:
+            self._legacy_test_steps_table = TestTable(self)
+        return self._legacy_test_steps_table
 
     def getLastRevisionNumber(self) -> int:
         """
@@ -855,7 +940,6 @@ class Workitem(CustomFields, Comments):
 
         return None
 
-
     class WorkItemIterator:
         """Workitem iterator for linked and backlinked workitems"""
 
@@ -961,10 +1045,10 @@ class Workitem(CustomFields, Comments):
         return True
 
     def __repr__(self):
-        return f'{self.id}: {self._polarion_item.title}'
+        return f'{self._id}: {self._polarion_item.title}'
 
     def __str__(self):
-        return self.__repr__()
+        return f'{self._id}: {self.title}'
 
 
 class WorkitemCreator(Creator):
