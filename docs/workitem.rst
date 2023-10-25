@@ -38,9 +38,7 @@ The workitem can be updated and saved. The example below loads a workitem, chang
     print(f'Status: {reload_workitem.status.id}')
     print(f'Type: {reload_workitem.type.id}')
 
-Prints:
-
-.. code:: python
+Prints::
 
     Title: title?
     Status: open
@@ -139,12 +137,28 @@ A general example of working with test steps:
     wi = prj.getWorkitem('PYTH-515')
     print(wi.getTestStepHeader())
 
-    testSteps = wi.getTestSteps()
-
     for i in range(3):
-        testSteps.append_teststep(f'Step {i}', '', '')
+        wi.addTestStep(f'Step {i}', '', '')
 
-    wi.setTestSteps(testSteps)
+    print(wi.getTestSteps())
+
+    wi.removeTestStep(0)
+    testSteps = wi.getTestSteps()
+    
+    
+An alternative to the above, using the TestTable
+    
+.. code:: python    
+  
+    wi = prj.getWorkitem('PYTH-515')
+	test_table = wi.getTestTable()
+    for i in range(3):
+        test_table.addTestStep(f'Step {i}', '', '')
+        
+   print(test_table.steps)
+   test_table.removeTestStep(0)
+
+    wi.setTestSteps(test_table)
     print(wi.getTestSteps())
 
 
