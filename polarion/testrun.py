@@ -39,6 +39,7 @@ class Testrun(CustomFields, Comments):
 
     @property
     def url(self):
+        """Returns an URL for the Test Run"""
         # extract the project part from url
         s = self.uri
 
