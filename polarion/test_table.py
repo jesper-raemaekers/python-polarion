@@ -50,7 +50,7 @@ class TestTable(object):
             else:
                 self.columns = test_template._getConfiguredTestStepColumnIDs()
         else:
-            raise RuntimeError("This workitem doesn't have any Test Steps defined.")
+            raise RuntimeError(f"Workitem {test_template.id} doesn't have any Test Steps defined.")
 
         if clear_table or raw_teststeps.steps is None:
             self.steps = test_template._polarion.ArrayOfTestStepType()
