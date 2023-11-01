@@ -65,8 +65,13 @@ class TestTable(object):
         return len(self.steps.TestStep)
 
     def __getitem__(self, item) -> dict:
-        current_row = {col_name: self.steps.TestStep[item].values.Text[i].content for i, col_name in
-                       enumerate(self.columns)}
+        current_row = {}
+        for i, col_name in enumerate(self.columns):
+            content = self.steps.TestStep[item].values.Text[i].content
+            if content is None:
+                current_row[col_name] = ''
+            else:
+                current_row[col_name] = content
         return current_row
 
     def __iter__(self):
@@ -96,9 +101,16 @@ class TestTable(object):
         if len(args) != len(self.columns):
             raise PolarionWorkitemAttributeError(f"Incorrect number of argument. Test step requires {len(self.columns)} arguments.\n {self.columns}")
 
-        step_values = self.array_of_text_type([self.text_type('text/html', str(args[i]), False)
-                                               for i, col in enumerate(self.columns)])
-        new_step = self.step_type(step_values)
+        step_values = []
+        for i, col in enumerate(self.columns):
+            if args[i] is None:
+                col_text = self.text_type('text/html', '', False)
+            else:
+                col_text = self.text_type('text/html', str(args[i]), False)
+            step_values.append(col_text)
+
+        step_values_array = self.array_of_text_type(step_values)
+        new_step = self.step_type(step_values_array)
 
         if position == -1:  # Needed to support append_teststep
             self.steps.TestStep.append(new_step)
