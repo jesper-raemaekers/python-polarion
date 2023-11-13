@@ -4,10 +4,11 @@ from zeep import xsd
 from zeep.helpers import serialize_object
 
 from .base.custom_fields import CustomFields
+from .base.comments import Comments
 from .factory import createFromUri, Creator
 
 
-class Document(CustomFields):
+class Document(CustomFields, Comments):
     def __init__(self, polarion, project, uri=None, location=None):
         """
         Create a Document.
