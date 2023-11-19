@@ -3,12 +3,17 @@ from abc import ABC
 from polarion.base.polarion_object import PolarionObject
 
 
-class PolarionAccessError(Exception):
+class PolarionErrors(Exception):
+    """Used for exceptions related to Polarion"""
+    ...
+
+
+class PolarionAccessError(PolarionErrors):
     """Used for exceptions related to Polarion access"""
     ...
 
 
-class PolarionWorkitemAttributeError(Exception):
+class PolarionWorkitemAttributeError(PolarionErrors):
     """Used for exceptions related to Polarion workitem attributes"""
     ...
 
