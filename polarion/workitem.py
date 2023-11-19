@@ -70,8 +70,8 @@ class Workitem(CustomFields, Comments):
                     self._project.id, self.id)
             except Exception as e:
                 raise PolarionAccessError(
-                    f'Cannot find workitem "{self.id}" in project "{self._project.id}"'
-                    f' on server "{self._polarion.polarion_url}"')
+                    f'Error loading workitem "{self.id}" in project "{self._project.id}"'
+                    f' on server "{self._polarion.polarion_url}":\n{e}')
         elif new_workitem_type is not None:
             if self._project is None:
                 raise PolarionAccessError(f'Provide a project when creating a workitem from an id')
