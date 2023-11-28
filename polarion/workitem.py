@@ -644,7 +644,7 @@ class Workitem(CustomFields, Comments):
         :param attachment_id: Returns the dictionary with the attachment info
         :type attachment_id: str
         :return: AttachmentInfo
-        :rtype:
+        :rtype: AttachmentInfo or None
         """
         if self.hasAttachment():
             for attachment in self.getAttachments():
@@ -728,6 +728,27 @@ class Workitem(CustomFields, Comments):
         service = self._polarion.getService('Tracker')
         service.updateAttachment(self.uri, id, file_name, title, data)
         self._reloadFromPolarion()
+
+    def getProject(self):
+        """
+        Get the project object
+
+        :return: Project object
+        :rtype: Project
+        """
+        return self._polarion.getProject(self.project.id)
+
+    def getDocument(self):
+        """
+        Get the document object
+
+        :return: Document object
+        :rtype: Document
+        """
+        if self.document is not None:
+            proj = self.getProject()
+            return proj.getDocument(self.document)
+        return None
 
     def delete(self):
         """
