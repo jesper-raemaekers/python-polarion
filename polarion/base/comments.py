@@ -45,7 +45,8 @@ class Comment:
         :param resolved: - The new resolved state.
         :type resolved: bool
         """
-        self.tracker.setResolvedComment(self.uri, resolved)
+        tracker = self.parent._polarion.getService("Tracker")
+        tracker.setResolvedComment(self.uri, resolved)
 
     def isResolved(self) -> bool:
         """
