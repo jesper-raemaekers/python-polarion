@@ -214,7 +214,8 @@ class Workitem(CustomFields, Comments):
         assigned_users = []
         if self.assignee is not None:
             for user in self.assignee.User:
-                assigned_users.append(User(self._polarion, user))
+                if user is not None and user.unresolvable is False:
+                    assigned_users.append(User(self._polarion, user))
         return assigned_users
 
     def removeAssignee(self, user: User):

@@ -25,7 +25,7 @@ class User(object):
                 for key in value:
                     setattr(self, key, value[key])
         else:
-            raise Exception(f'User not retrieved from Polarion')
+            raise Exception(f'User "{uri or polarion_record.uri}" not retrieved from Polarion')
 
     def __eq__(self, other):
         if self.id == other.id:
