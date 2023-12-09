@@ -72,6 +72,26 @@ A custom retry strategy can be set by using the request_session parameter of the
     pol = polarion.Polarion('http://example.com/polarion', 'user', 'password', request_session=my_sess)
 
 
+Slow performance
+----------------
+
+Sometimes a bug in the soap client can cause poor performance. Disabling session validation can help in this case.
+
+.. code:: python
+    from requests import Session
+    from polarion import polarion
+    from requests.auth import HTTPBasicAuth
+    
+    
+    def login(user:str, pw:str) ->polarion.Polarion:
+        session = Session()
+        session.auth = HTTPBasicAuth(user, pw)
+        session.verify = False
+    
+        client = polarion.Polarion('url', user, pw,  proxy='url', request_session=session, verify_certificate=True)
+        return client
+
+
 Services
 --------
 Typically you would not use any service directly, but it is an option. Using it this way would ensure the session is still valid. 
