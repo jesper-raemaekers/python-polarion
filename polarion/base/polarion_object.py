@@ -10,3 +10,14 @@ class PolarionObject(object):
 
     def save(self):
         raise NotImplementedError
+
+    def __getattr__(self, name):
+        if name in self.__dict__:
+            return self.__dict__[name]
+        elif name == 'id':
+            return self._id
+        elif name == 'uri':
+            return self._uri
+        else:
+            super().__getattribute__(name)
+

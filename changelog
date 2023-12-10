@@ -2,6 +2,25 @@ Changelog
 =========
 
 
+V1.3.1 Nuno Brum
+----------------
+- Creating PolarionAccessError and PolarionWorkitemAttributeError Exception Classes
+- Adding order parameter to Workitem.moveToDocument() and Document.addHeading() methods
+- Improving debug messages in raised exceptions.
+- Adding type hints and improving docstrings.
+- Changed the Test Steps handling to be made through a dedicated TestTable object, 
+  which minimizes the number of commits to the server.
+- Added support to Folders and Spaces
+- Added iteration support linked and backlinked workitems
+- In the creation of an Workitem, the project can be skipped if an URI is provided.
+- Added method to upload and Attachment from a memory buffer.
+- Added getDocument() method to Workitem
+- Added getProject() method to Workitem
+
+  ---------
+  
+
+
 V1.3.0
 ------
 - PDF functionality optional #124 (#144) [Jesper Raemaekers]
@@ -75,7 +94,7 @@ V1.1.0 (2022-10-07)
 - Fix minor typo. [Adam J]
 
   ```py
-  new_task = project..createWorkitem('task', new_workitem_fields={'title': 'New title'})
+  new_task = project.createWorkitem('task', new_workitem_fields={'title': 'New title'})
   ```
 
   should read

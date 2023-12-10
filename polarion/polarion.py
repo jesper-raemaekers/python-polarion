@@ -33,6 +33,7 @@ class Polarion(object):
         self.user = user
         self.password = password
         self.token = token
+        self.polarion_url = polarion_url.rstrip('/')  # This will be needed to compose workitem URLs
         self.url = polarion_url
         self.verify_certificate = verify_certificate
         self.svn_repo_url = svn_repo_url
@@ -232,11 +233,11 @@ class Polarion(object):
         else:
             raise Exception('Service does not exsist')
 
-    def getProject(self, project_id):
+    def getProject(self, project_id) -> Project:
         """Get a Polarion project
 
         :param project_id: The ID of the project.
-        :return: The request project
+        :return: The request project.
         :rtype: Project
         """
         return Project(self, project_id)
@@ -267,6 +268,19 @@ class Polarion(object):
             # if that also fails, tough luck.
             raise Exception(f'Could not download attachment from {url}. Got error {resp.status_code}: {resp.reason}.\n'
                             f'Trying with the default polarion login details yielded {resp_default.status_code}: {resp_default.reason}')
+
+    def generateHistory(self, uri, ignored_fields=None, field_order=None):
+
+        if not ignored_fields:
+            ignored_fields = ['title']
+
+        if not field_order:
+            field_order = ['id']
+
+        client = self.getClient('Tracker')
+
+        with client.settings(strict=False):
+            return client.service.generateHistory(uri, ignored_fields, field_order)
 
     def __repr__(self):
         return f'Polarion client for {self.url} with user {self.user}'

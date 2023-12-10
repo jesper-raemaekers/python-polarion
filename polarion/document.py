@@ -4,10 +4,11 @@ from zeep import xsd
 from zeep.helpers import serialize_object
 
 from .base.custom_fields import CustomFields
+from .base.comments import Comments
 from .factory import createFromUri, Creator
 
 
-class Document(CustomFields):
+class Document(CustomFields, Comments):
     def __init__(self, polarion, project, uri=None, location=None):
         """
         Create a Document.
@@ -37,6 +38,10 @@ class Document(CustomFields):
             self._uri = self._polarion_document.uri
 
         self._buildFromPolarion()
+
+    @property
+    def url(self):
+        return f'{self._polarion.polarion_url}/#/project/{self._project.id}/wiki/{self.moduleFolder}/{self.id}'
 
     def _buildFromPolarion(self):
         if self._polarion_document is not None and self._polarion_document.unresolvable is False:
@@ -124,18 +129,19 @@ class Document(CustomFields):
             parent = createFromUri(self._polarion, self._project, parent_uri.workItemURI)
         return parent
 
-    def addHeading(self, title, parent_workitem=None):
+    def addHeading(self, title, parent_workitem=None, order=-1):
         """
         Adds a heading to a document
 
         :param title: Title of the heading
         :param parent_workitem: Parent workitem in the document hierarchy, set to None to create it on top level
+        :param order: Order of the heading in the document, set to -1 to add it at the end
         :return: Heading workitem
         """
         heading = self._project.createWorkitem('heading')
         heading.title = title
         heading.save()
-        heading.moveToDocument(self, parent_workitem)
+        heading.moveToDocument(self, parent_workitem, order)
         return heading
 
     def isCustomFieldAllowed(self, _):

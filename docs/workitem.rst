@@ -143,7 +143,23 @@ A general example of working with test steps:
     print(wi.getTestSteps())
 
     wi.removeTestStep(0)
+    testSteps = wi.getTestSteps()
+    
+    
+An alternative to the above, using the TestTable
+    
+.. code:: python    
+  
+    wi = prj.getWorkitem('PYTH-515')
+	test_table = wi.getTestTable()
+    for i in range(3):
+        test_table.addTestStep(f'Step {i}', '', '')
+        
+   print(test_table.steps)
+   test_table.removeTestStep(0)
 
+    wi.setTestSteps(test_table)
+    print(wi.getTestSteps())
 
 
 Attachments
