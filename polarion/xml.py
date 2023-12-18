@@ -69,6 +69,7 @@ class Config:
         """
         return Config(data)
 
+
     def __init__(self, data):
         """
         Init from existing data
