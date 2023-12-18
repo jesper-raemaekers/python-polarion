@@ -144,35 +144,11 @@ class Workitem(CustomFields, Comments):
 
     def _buildWorkitemFromPolarion(self):
         if self._polarion_item is not None and not self._polarion_item.unresolvable:
-            self._original_polarion = copy.deepcopy(self._polarion_item)
-            for attr, value in self._polarion_item.__dict__.items():
-                for key in value:
-                    setattr(self, key, value[key])
-            self._polarion_test_steps = None
-            try:
-                # check if any of the field has the test steps
-                if self._hasTestStepField() is True:
-                    service_test = self._polarion.getService('TestManagement')
-                    self._polarion_test_steps = service_test.getTestSteps(self.uri)
-            except Exception as  e:
-                # fail silently as there are probably not test steps for this workitem
-                # todo: logging support
-                pass
-            self._parsed_test_steps = None
-            if self._polarion_test_steps is not None:
-                if self._polarion_test_steps.keys is not None and self._polarion_test_steps.steps:
-                    # oh god, parse the test steps...
-                    columns = []
-                    self._parsed_test_steps = []
-                    for col in self._polarion_test_steps.keys.EnumOptionId:
-                        columns.append(col.id)
-                    # now parse the rows
-                    for row in self._polarion_test_steps.steps.TestStep:
-                        current_row = {}
-                        if row.values is not None:
-                            for col_id in range(len(row.values.Text)):
-                                current_row[columns[col_id]] = row.values.Text[col_id].content
-                            self._parsed_test_steps.append(current_row)
+            self._original_polarion = copy.deepcopy(self._polarion_item)  # Refreshes the cache
+            if self._postpone_save is False:  # This will avoid that the data set be lost.
+                for attr, value in self._polarion_item.__dict__.items():
+                    for key in value:
+                        setattr(self, key, value[key])
         else:
             raise PolarionAccessError(f'Workitem "{self._id}" not retrieved from Polarion'
                                       f' {self._polarion.polarion_url}')
