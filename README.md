@@ -29,7 +29,7 @@ pip install polarion
 ## From this repository
 
 ```
-git clone http://svn.dis.lan:3000/nuno.brum/python-polarion.git
+git clone https://github.com/nunobrum/python-polarion.git
 python3 -m pip install -e python-polarion
 ```
 
