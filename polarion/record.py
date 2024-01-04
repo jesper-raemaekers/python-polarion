@@ -87,6 +87,26 @@ class Record(object):
 
         self.save()
 
+    def clearTestStepResults(self):
+        """
+        Clears the test results structure before calling the appendTestStepResult method.
+        This is an alternative way to the setTestStepResult() method.
+        """
+        self.testStepResults = self._polarion.ArrayOfTestStepResultType()
+
+    def appendTestStepResult(self, step_result: ResultType, comment=None):
+        """This function is to be used to add all test steps in the same commit. Using the the setTestStepResult()
+         method will commit the step to server for each step.
+         Before calling these method, please make sure the clearTestStepResults() is called to clear the
+         test steps structure."""
+        new_step = self._polarion.TestStepResultType()
+        new_step.result =self._polarion.EnumOptionIdType(id=step_result.value)
+        if comment is not None:
+            new_step.comment = self._polarion.TextType(
+                    content=comment, type='text/html', contentLossy=False)
+        self.testStepResults.TestStepResult.append(new_step)
+
+
     def getResult(self):
         """
         Get the test result of this record
@@ -213,6 +233,18 @@ class Record(object):
         service.deleteAttachmentFromTestRecord(self._test_run.uri, self._index, file_name)
         self._reloadFromPolarion()
 
+    def addAttachmentData(self, filename, title, data):
+        """
+        Upload an attachment
+
+        :param filename: Source file name to assign to the attachment
+        :param title: The title of the attachment
+        :param data: The data of the attachment
+        """
+        service = self._polarion.getService('TestManagement')
+        service.addAttachmentToTestRecord(self._test_run.uri, self._index, filename, title, data)
+        self._reloadFromPolarion()
+
     def addAttachment(self, file_path, title):
         """
         Upload an attachment
@@ -220,11 +252,9 @@ class Record(object):
         :param file_path: Source file to upload
         :param title: The title of the attachment
         """
-        service = self._polarion.getService('TestManagement')
         file_name = os.path.split(file_path)[1]
         with open(file_path, "rb") as file_content:
-            service.addAttachmentToTestRecord(self._test_run.uri, self._index, file_name, title, file_content.read())
-        self._reloadFromPolarion()
+            self.addAttachmentDataToTestRecord(file_name, title, file_content.read())
 
     def testStepHasAttachment(self, step_index):
         """
@@ -283,6 +313,20 @@ class Record(object):
         service.deleteAttachmentFromTestStep(self._test_run.uri, self._index, step_index, file_name)
         self._reloadFromPolarion()
 
+    def addAttachmentDataToTestStep(self, step_index, file_name, title, data):
+        """
+        Upload an attachment to a test step
+
+        :param step_index: The test step index
+        :param file_name: file name to upload
+        :param title: The title of the attachment
+        """
+        service = self._polarion.getService('TestManagement')
+        if title is None:
+            title = ""
+        service.addAttachmentToTestStep(self._test_run.uri, self._index, step_index, file_name, title, data)
+        self._reloadFromPolarion()
+
     def addAttachmentToTestStep(self, step_index, file_path, title):
         """
         Upload an attachment to a test step
@@ -291,11 +335,10 @@ class Record(object):
         :param file_path: Source file to upload
         :param title: The title of the attachment
         """
-        service = self._polarion.getService('TestManagement')
+
         file_name = os.path.split(file_path)[1]
         with open(file_path, "rb") as file_content:
-            service.addAttachmentToTestStep(self._test_run.uri, self._index, step_index, file_name, title, file_content.read())
-        self._reloadFromPolarion()
+            self.addAttachmentDataToTestStep(step_index, file_name, title, file_content.read())
 
     def save(self):
         """

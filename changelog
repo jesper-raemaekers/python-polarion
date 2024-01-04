@@ -1,9 +1,16 @@
 Changelog
 =========
 
+v1.3.2
+------
+- Adding addAttachmentData() and addAttachmentDataToTestStep() to Record class
+- Adding alternative to the setTestStepResult() that requires a lot of interactions
+  with the server. Instead the clearTestStepResults() and appendTestStepResult() methods
+  can be used, and then issuing a save() at the end to commit all
+  the new steps to the server at one go.
 
-V1.3.1 Nuno Brum
-----------------
+V1.3.1
+------
 - Creating PolarionAccessError and PolarionWorkitemAttributeError Exception Classes
 - Adding order parameter to Workitem.moveToDocument() and Document.addHeading() methods
 - Improving debug messages in raised exceptions.
