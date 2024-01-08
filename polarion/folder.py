@@ -27,7 +27,7 @@ class FolderTree(Folder):
         self.parent = None
 
     def is_parent(self, subfolder: Folder):
-        return subfolder.name.startswith(self.name)
+        return subfolder.name.startswith(self.name + '-')
 
     def add_subfolder(self, subfolder):
         tree_element = FolderTree(self.project, subfolder)
