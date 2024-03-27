@@ -26,10 +26,11 @@ class Polarion(object):
     :param verify_certificate: Set to True/False to activate certification validation for TLS connection or provide string with link to certification chain (PEM & x264 encoded)
     :param svn_repo_url: Set to the correct url when the SVN repo is not accessible via <host>/repo. For example http://example/repo_extern
     :param proxy: Set to a proxy address to use a proxy, use the format: proxy='ip:port'
+    :param version: Set to the polarion version (af a float) to unlock specific functionality
     """
 
     def __init__(self, polarion_url, user, password=None, token=None, static_service_list=False, verify_certificate=True,
-                 svn_repo_url=None, proxy=None, request_session=None, cache=False):
+                 svn_repo_url=None, proxy=None, request_session=None, cache=False, version=None):
         self.user = user
         self.password = password
         self.token = token
@@ -40,6 +41,10 @@ class Polarion(object):
         self.request_session = request_session
         self.cache = cache
         self.transport = None
+        if type(version) == float:
+            self._version = version
+        else:
+            self._version = None
         if proxy is not None:
             self.proxy = {
                 'http': proxy,
@@ -267,6 +272,12 @@ class Polarion(object):
             # if that also fails, tough luck.
             raise Exception(f'Could not download attachment from {url}. Got error {resp.status_code}: {resp.reason}.\n'
                             f'Trying with the default polarion login details yielded {resp_default.status_code}: {resp_default.reason}')
+
+    @property
+    def version(self):
+        if self._version is not None:
+            return self._version
+        return 0.0
 
     def __repr__(self):
         return f'Polarion client for {self.url} with user {self.user}'
