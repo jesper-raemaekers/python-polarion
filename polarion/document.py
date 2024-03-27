@@ -56,7 +56,7 @@ class Document(CustomFields):
         :return: bytes
         """
         service = self._polarion.getService('Tracker')
-        pdf_props_obj = self._polarion.PdfProperties('A4', 'Portrait', True, True, True)
+        pdf_props_obj = self._polarion.PdfProperties('A4', 'Portrait', True, True, True, True)
         serialized_pdf_props = serialize_object(pdf_props_obj)
         pdf = service.exportDocumentToPDF(self._uri, serialized_pdf_props)
         return pdf
