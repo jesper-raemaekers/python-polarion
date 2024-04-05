@@ -544,10 +544,11 @@ class Workitem(CustomFields, Comments):
         service.moveWorkItemToDocument(self.uri, document.uri, parent.uri if parent is not None else xsd.const.Nil, -1,
                                        False)
 
-    def addTestStep(self, *args):
+    def addTestStep(self, *args, cache: bool = False):
         """
         Add a new test step to a test case work item
         @param args: list of strings, one for each column
+        @param cache: Only make changes locally (default is False)
         @return: None
         """
         # check test step custom field
@@ -582,16 +583,18 @@ class Workitem(CustomFields, Comments):
         # execute check for content being None after reload
         self._testStepNoneCheck()
 
-        # save it to the service
-        service = self._polarion.getService('TestManagement')
-        service.setTestSteps(self.uri, self._polarion_test_steps.steps.TestStep)
+        if not cache:
+            # save it to the service
+            service = self._polarion.getService('TestManagement')
+            service.setTestSteps(self.uri, self._polarion_test_steps.steps.TestStep)
 
-        self._reloadFromPolarion()
+            self._reloadFromPolarion()
 
-    def removeTestStep(self, index: int):
+    def removeTestStep(self, index: int, cache: bool = False):
         """
         Remove a test step at the specified index.
         @param index: zero based index
+        @param cache: Only make changes locally (default is False)
         @return: None
         """
         # check test step custom field
@@ -607,17 +610,19 @@ class Workitem(CustomFields, Comments):
         # execute check for content being None after reload
         self._testStepNoneCheck()
 
-        # save it to the service
-        service = self._polarion.getService('TestManagement')
-        service.setTestSteps(self.uri, self._polarion_test_steps.steps.TestStep)
+        if not cache:
+            # save it to the service
+            service = self._polarion.getService('TestManagement')
+            service.setTestSteps(self.uri, self._polarion_test_steps.steps.TestStep)
 
-        self._reloadFromPolarion()
+            self._reloadFromPolarion()
 
-    def updateTestStep(self, index: int, *args):
+    def updateTestStep(self, index: int, *args, cache: bool = False):
         """
         Update a test step at the specified index.
         @param index: zero based index
         @param args: list of strings, one for each column
+        @param cache: Only make changes locally (default is False)
         @return: None
         """
         # check test step custom field
@@ -641,6 +646,29 @@ class Workitem(CustomFields, Comments):
 
         # do update
         self._polarion_test_steps.steps.TestStep[index] = new_test_step
+
+        # execute check for content being None after reload
+        self._testStepNoneCheck()
+
+        if not cache:
+            # save it to the service
+            service = self._polarion.getService('TestManagement')
+            service.setTestSteps(self.uri, self._polarion_test_steps.steps.TestStep)
+
+            self._reloadFromPolarion()
+
+    def saveTestSteps(self):
+        """
+        Save all cached test steps to Polarion.
+        @return: None
+        """
+        # check test step custom field
+        if self._hasTestStepField() is False:
+            raise Exception('Cannot update test steps to work item that does not have the custom field')
+
+        # check steps exist
+        if self._polarion_test_steps.steps is None:
+            raise Exception('Workitem does not have cached test steps')
 
         # execute check for content being None after reload
         self._testStepNoneCheck()
