@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="polarion",
-    version="1.3.0",
+    version="1.4.0",
     author="Jesper Raemaekers",
     author_email="j.raemaekers@relek.nl",
     description="Polarion client for Python",

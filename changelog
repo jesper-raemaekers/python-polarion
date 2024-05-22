@@ -1,9 +1,16 @@
 Changelog
 =========
 
-
-V1.3.0
+V1.4.0
 ------
+- Add cache option to zeep (#141) [TristanFAURE]
+- Check row.values is not None (#147) [mg-diego]
+- Update polarion_client.rst with info form (#149) [Jesper Raemaekers]
+- Add argument for missing property repeatTableHeaders (#125) [ThijsSassen]
+
+V1.3.0 (2023-10-03)
+-------------------
+- Preparations for release 1.3.0. [jesper.raemaekers]
 - PDF functionality optional #124 (#144) [Jesper Raemaekers]
 - Catch exceptions on deleted workitems when getting the document
   content #137 (#143) [Jesper Raemaekers]
