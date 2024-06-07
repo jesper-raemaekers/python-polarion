@@ -6,6 +6,7 @@ import tempfile
 import os
 from zeep import Client, CachingClient
 from zeep.plugins import HistoryPlugin
+from zeep.transports import Transport
 
 from .project import Project
 import logging
@@ -122,11 +123,15 @@ class Polarion(object):
     
     def get_client(self,service,plugins=[]):
         client = None
+
+        session = requests.Session()
+        session.verify = self.verify_certificate
+        transport = Transport(session=session)
+
         if self.cache:
-            client = CachingClient(self.services[service]['url'] + '?wsdl', plugins=plugins)
+            client = CachingClient(self.services[service]['url'] + '?wsdl', plugins=plugins, transport=transport)
         else:
-            client = Client(self.services[service]['url'] + '?wsdl', plugins=plugins)
-        client.transport.session.verify = self.verify_certificate
+            client = Client(self.services[service]['url'] + '?wsdl', plugins=plugins, transport=transport)
         return client
 
     def _updateServices(self):
