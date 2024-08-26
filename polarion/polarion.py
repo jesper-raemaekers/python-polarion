@@ -1,14 +1,15 @@
 import atexit
+import logging
 import re
 from urllib.parse import urljoin, urlparse
+
 import requests
-import tempfile
-import os
 from zeep import Client, CachingClient
 from zeep.plugins import HistoryPlugin
 
 from .project import Project
-import logging
+from .project_groups import ProjectGroup
+
 logger = logging.getLogger(__name__)
 
 _baseServiceUrl = 'ws/services'
@@ -19,7 +20,7 @@ class Polarion(object):
     Create a Polarion client which communicates to the Polarion server.
 
     :param polarion_url: The base URL for the polarion instance. For example http://example/com/polarion
-    :param user: The user name to login
+    :param user: The username to log in
     :param password: The password for that user
     :param token: The token to log with token. In this case, no need to set password
     :param static_service_list: Set to True when this class may not use a request to get the services list
@@ -40,6 +41,7 @@ class Polarion(object):
         self.request_session = request_session
         self.cache = cache
         self.transport = None
+        self.default_project_group = None
         if proxy is not None:
             self.proxy = {
                 'http': proxy,
@@ -62,7 +64,7 @@ class Polarion(object):
 
     def _atexit_cleanup(self):
         """
-        Cleanup function to logout when Python is shutting down.
+        Cleanup function to log out when Python is shutting down.
         :return: None
         """
         self.services['Session']['client'].service.endSession()
@@ -120,8 +122,9 @@ class Polarion(object):
             raise Exception(
                 'Cannot login because WSDL has no SessionWebService')
     
-    def get_client(self,service,plugins=[]):
-        client = None
+    def get_client(self, service, plugins=None):
+        if plugins is None:
+            plugins = []
         if self.cache:
             client = CachingClient(self.services[service]['url'] + '?wsdl', plugins=plugins)
         else:
@@ -192,8 +195,8 @@ class Polarion(object):
     @property
     def PdfProperties(self):
         """
-        Get PDF properties object but only if it exist.
-        If is was not able to get it from Polarion, fail with a exception only when using this feature
+        Get PDF properties object but only if it exists.
+        If it was not able to get it from Polarion, fail with an exception only when using this feature
         @return: PdfProperties
         """
         if self._PdfProperties is None:
@@ -222,7 +225,7 @@ class Polarion(object):
         if name in self.services:
             return self.services[name]['client'].service
         else:
-            raise Exception('Service does not exsist')
+            raise Exception('Service does not exist')
 
     def getTypeFromService(self, name: str, type_name):
         """
@@ -230,7 +233,7 @@ class Polarion(object):
         if name in self.services:
             return self.services[name]['client'].get_type(type_name)
         else:
-            raise Exception('Service does not exsist')
+            raise Exception('Service does not exist')
 
     def getProject(self, project_id):
         """Get a Polarion project
@@ -240,6 +243,22 @@ class Polarion(object):
         :rtype: Project
         """
         return Project(self, project_id)
+
+    def getProjectGroup(self, group_name):
+        """
+        Get a Polarion project group
+
+        :param group_name: The name of the project group
+        :return: The request project group
+        :rtype: ProjectGroup
+        """
+        return ProjectGroup(self, group_name)
+
+    def getAllProjects(self):
+        service = self.getService('Project')
+        self.default_project_group = service.getProjectGroupAtLocation('default:/')
+        projects = service.getDeepContainedProjects(self.default_project_group.uri)
+        return [Project(self, project.id) for project in projects]
 
     def downloadFromSvn(self, url):
 
