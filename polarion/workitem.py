@@ -13,7 +13,7 @@ from .user import User
 
 class Workitem(CustomFields, Comments):
     """
-    Create a Polarion workitem object either from and id or from an Polarion uri.
+    Create a Polarion workitem object either from and id or from a Polarion uri.
 
     :param polarion: Polarion client object
     :param project: Polarion Project object
@@ -30,30 +30,56 @@ class Workitem(CustomFields, Comments):
         INTERNAL_REF = 'internal reference'
         EXTERNAL_REF = 'external reference'
 
-    def __init__(self, polarion, project, id=None, uri=None, new_workitem_type=None, new_workitem_fields=None, polarion_workitem=None):
+    def __init__(self, polarion, project, id=None, uri=None, new_workitem_type=None, new_workitem_fields=None, polarion_workitem=None, field_list=None):
         super().__init__(polarion, project, id, uri)
         self._polarion = polarion
         self._project = project
         self._id = id
         self._uri = uri
         self._postpone_save = False
+        self._field_list = None
 
         service = self._polarion.getService('Tracker')
 
+        if field_list is not None:
+            if not isinstance(field_list, list):
+                raise Exception('field_list should be a list of strings.')
+            else:
+                self._field_list = field_list
         if self._uri:
             try:
-                self._polarion_item = service.getWorkItemByUri(self._uri)
-                self._id = self._polarion_item.id
-            except Exception:
-                raise Exception(
-                    f'Cannot find workitem {self._id} in project {self._project.id}')
+                if self._field_list is not None:
+                    self._polarion_item = service.getWorkItemByUriWithFields(
+                        self._uri, self._field_list)
+                    self._id = self._polarion_item.id
+                else:
+                    self._polarion_item = service.getWorkItemByUri(self._uri)
+                    self._id = self._polarion_item.id
+            except Exception as e:
+                if 'com.polarion.alm.ws.WebserviceException' in str(e):
+                    raise Exception("One of the key passed in the field_list is not valid, "
+                                    "to know the available keys you can either: "
+                                    "\n- use the method workitem.getAllowedCustomKeys() on a Workitem object"
+                                    "\n- use the method service.getCustomFieldKeys(workitem.uri) on the Tracker service")
+                else:
+                    raise Exception(
+                        f'Cannot find workitem {self._id} in project {self._project.id}')
         elif id is not None:
             try:
-                self._polarion_item = service.getWorkItemById(
-                    self._project.id, self._id)
-            except Exception:
-                raise Exception(
-                    f'Cannot find workitem {self._id} in project {self._project.id}')
+                if self._field_list is not None:
+                    self._polarion_item = service.getWorkItemByIdsWithFields(
+                        self._project.id, self._id, field_list)
+                else:
+                    self._polarion_item = service.getWorkItemById(
+                        self._project.id, self._id)
+            except Exception as e:
+                if 'com.polarion.alm.ws.WebserviceException' in str(e):
+                    raise Exception("One of the key passed in the field_list is not valid, "
+                                    "to know the available keys you can either: "
+                                    "\n- use the method workitem.getAllowedCustomKeys() on a Workitem object"
+                                    "\n- use the method service.getCustomFieldKeys(workitem.uri) on the Tracker service")
+                else:
+                    raise Exception(f'Cannot find workitem {self._id} in project {self._project.id}')
         elif new_workitem_type is not None:
             # construct empty workitem
             self._polarion_item = self._polarion.WorkItemType(
@@ -227,7 +253,7 @@ class Workitem(CustomFields, Comments):
         tries to get the status enum of this workitem type
         When it fails to get it, the list will be empty
 
-        :return: An array of strings of the statusses
+        :return: An array of strings of the statuses
         :rtype: string[]
         """
         try:
@@ -290,7 +316,7 @@ class Workitem(CustomFields, Comments):
         """
         Get all available status option for this workitem
 
-        :return: An array of string of the statusses
+        :return: An array of string of the statuses
         :rtype: string[]
         """
         available_status = []
@@ -466,7 +492,7 @@ class Workitem(CustomFields, Comments):
         self._reloadFromPolarion()
         workitem._reloadFromPolarion()
 
-    def getLinkedItemWithRoles(self):
+    def getLinkedItemWithRoles(self, field_list=None):
         """
         Get linked workitems both linked and back linked item will show up. Will include link roles.
 
@@ -477,11 +503,11 @@ class Workitem(CustomFields, Comments):
         if self.linkedWorkItems is not None:
             for linked_item in self.linkedWorkItems.LinkedWorkItem:
                 if linked_item.role is not None:
-                    linked_items.append((linked_item.role.id, Workitem(self._polarion, self._project, uri=linked_item.workItemURI)))
+                    linked_items.append((linked_item.role.id, Workitem(self._polarion, self._project, uri=linked_item.workItemURI, field_list=field_list)))
         if self.linkedWorkItemsDerived is not None:
             for linked_item in self.linkedWorkItemsDerived.LinkedWorkItem:
                 if linked_item.role is not None:
-                    linked_items.append((linked_item.role.id, Workitem(self._polarion, self._project, uri=linked_item.workItemURI)))
+                    linked_items.append((linked_item.role.id, Workitem(self._polarion, self._project, uri=linked_item.workItemURI, field_list=field_list)))
         return linked_items
 
     def getLinkedItem(self):
@@ -492,6 +518,17 @@ class Workitem(CustomFields, Comments):
         @return:
         """
         return [item[1] for item in self.getLinkedItemWithRoles()]
+
+    def getLinkedItemWithFields(self, field_list=None):
+        """
+        Get linked workitems both linked and back linked item will show up.
+        Will include link roles.
+
+        @param field_list: List of fields to retrieve for the linked items
+        @return: Array of tuple (link_role, Workitem)
+        @return:
+        """
+        return [item for item in self.getLinkedItemWithRoles(field_list)]
 
     def hasAttachment(self):
         """
@@ -738,7 +775,7 @@ class Workitem(CustomFields, Comments):
 
     def _getConfiguredTestStepColumns(self):
         """
-        Return a list of coulmn headers
+        Return a list of column headers
         @return: [str]
         """
         columns = []

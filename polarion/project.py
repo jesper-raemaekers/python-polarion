@@ -159,7 +159,7 @@ class Project(object):
         :param baselineRevision: The revision number of the baseline to search in
         :param query: The query to use while searching
         :param sort: Sort by
-        :param fieldList: list of fields to retrieve for each search result
+        :param field_list: list of fields to retrieve for each search result
         :param limit: The limit of workitems, -1 for no limit
         :return: The search results
         :rtype: Workitem[] but only with the given fields set
@@ -172,7 +172,7 @@ class Project(object):
         return service.queryWorkItemsInBaselineLimited(
             query, sort, baselineRevision, field_list, limit)
 
-    def searchWorkitemFullItem(self, query='', order='Created', limit=-1):
+    def searchWorkitemFullItem(self, query='', order='Created', limit=-1, field_list=None):
         """Query for available workitems. This will query for the items and then fetch all result. May take a while for a big search with many results.
 
         :param query: The query to use while searching
@@ -181,12 +181,8 @@ class Project(object):
         :return: The search results
         :rtype: Workitem[]
         """
-        return_list = []
         workitems = self.searchWorkitem(query, order, ['id'], limit)
-        for workitem in workitems:
-            return_list.append(
-                Workitem(self.polarion, self, workitem.id))
-        return return_list
+        return [Workitem(self.polarion, self, workitem.id, field_list=field_list) for workitem in workitems]
     
     def searchWorkitemFullItemInBaseline(self, baselineRevision, query='', sort='uri', limit=-1):
         """Query for available workitems in baseline. This will query for the items and then fetch all result. May take a while for a big search with many results.
@@ -198,12 +194,8 @@ class Project(object):
         :return: The search results
         :rtype: Workitem[]
         """
-        return_list = []
         workitems = self.searchWorkitemInBaseline(baselineRevision, query, sort, ['id'], limit)
-        for workitem in workitems:
-            return_list.append(
-                Workitem(self.polarion, self, uri=workitem.uri))
-        return return_list
+        return [Workitem(self.polarion, self, uri=workitem.uri) for workitem in workitems]
 
     def getTestRun(self, id: str):
         """Get a testrun by string
