@@ -23,6 +23,6 @@ setuptools.setup(
         "Development Status :: 3 - Alpha"
     ],
     install_requires=["zeep", "lxml", "texttable"],
-    packages=setuptools.find_packages(include=["polarion"]),
+    packages=setuptools.find_packages(include=["polarion*"]),
     python_requires='>=3.7',
 )
