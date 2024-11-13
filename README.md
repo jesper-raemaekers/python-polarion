@@ -8,6 +8,9 @@
 
 This package allows the user to access many Polarion items like workitems, test run, plans and documents.
 
+# Maintainers needed!
+
+Hi All, I need some extra hands to keep this going. Please leave a comment here if you're interested [here](https://github.com/jesper-raemaekers/python-polarion/discussions/148)
 
 # Feature overview
 
